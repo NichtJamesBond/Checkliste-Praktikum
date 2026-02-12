@@ -1,95 +1,4 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meine Aufgaben</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <style>
-        :root {
-            --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
-            --bg: #f4f7f6; --text: #2d3436; --mail-color: #0984e3; --reset-color: #ff7675;
-            --info-bg: #fff3bf; --info-border: #fcc419;
-        }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .app-container { background: white; padding: 2rem; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 400px; min-height: 620px; display: flex; flex-direction: column; position: relative; }
-        
-        .header { text-align: center; margin-bottom: 25px; cursor: pointer; user-select: none; }
-        .score-board { background: var(--accent); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; color: #000; box-shadow: 0 4px 0 #e1b12c; }
-
-        .quest-list { list-style: none; padding: 0; flex-grow: 1; }
-        .quest-item { background: white; border: 2px solid #f0f0f0; margin: 10px 0; padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 10px; }
-        .quest-item.done { background: #e8fcf3; border-color: var(--success); }
-        .quest-content { flex-grow: 1; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-        .quest-text { font-size: 1rem; font-weight: 600; color: var(--text); }
-        .done .quest-text { text-decoration: line-through; color: #a0a0a0; }
-
-        .info-btn { background: var(--info-bg); border: 2px solid var(--info-border); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
-
-        .check-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-        .done .check-circle { background: var(--success); border-color: var(--success); color: white; }
-
-        /* Lehrer-Panel Styles */
-        #adminPanel { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; border-radius: 30px; overflow-y: auto; border: 2px solid var(--primary); }
-        .admin-task-item { background: #f9f9f9; padding: 10px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #ddd; }
-        .admin-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 5px; box-sizing: border-box; font-family: inherit; }
-        .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
-        
-        /* QR-Code Bereich */
-        #qr-container { display: none; margin-top: 20px; text-align: center; background: #eee; padding: 15px; border-radius: 15px; }
-        #qrcode { display: flex; justify-content: center; margin: 10px 0; }
-        #qrcode img { border: 10px solid white; border-radius: 10px; }
-
-        .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
-        .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; }
-        .btn-mail { background: var(--mail-color); color: white; }
-        .btn-reset { background: var(--reset-color); color: white; }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 3000; }
-        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
-    </style>
-</head>
-<body>
-
-<div id="adminPanel">
-    <h2 style="color: var(--primary); margin-top: 0;">Lehrer-Bereich 👨‍🏫</h2>
-    <div id="adminTaskList"></div>
-    <button class="admin-btn" onclick="addAdminTask()" style="background: #e0e0e0; color: #333;">+ Neue Aufgabe hinzufügen</button>
-    
-    <button class="admin-btn" onclick="showQRCode()" style="background: var(--success); color: white; margin-top: 15px;">📱 QR-Code für Klasse erzeugen</button>
-    
-    <div id="qr-container">
-        <p style="font-size: 0.8rem; margin: 0;">Schüler scannen diesen Code:</p>
-        <div id="qrcode"></div>
-        <button class="admin-btn" onclick="document.getElementById('qr-container').style.display='none'" style="background: #ccc; font-size: 0.7rem; padding: 5px;">Code schließen</button>
-    </div>
-
-    <button class="admin-btn" onclick="toggleAdmin()" style="background: #666; color: white; margin-top: 20px;">Zurück zur App</button>
-</div>
-
-<div id="infoModal" class="modal-overlay">
-    <div class="modal-content">
-        <div style="font-size: 3rem; margin-bottom: 10px;">💡</div>
-        <h3 id="modalTitle" style="color:var(--primary); margin-top:0;">Info</h3>
-        <p id="modalDescription" style="line-height:1.5; color: #444;"></p>
-        <button class="action-btn btn-mail" style="margin-top: 15px; height: 40px;" onclick="closeInfo()">Alles klar!</button>
-    </div>
-</div>
-
-<div class="app-container">
-    <div class="header" onclick="handleHeaderClick()">
-        <h1 style="margin:0 0 10px 0; color: var(--primary);">Meine Aufgaben 🎯</h1>
-        <div class="score-board"><span id="score">0</span> <span>⭐</span></div>
-    </div>
-    <div id="quest-list" class="quest-list"></div>
-    <div class="footer-actions">
-        <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail verschicken</a>
-        <button class="action-btn btn-reset" onclick="fullReset()">🔄 Alles zurücksetzen</button>
-    </div>
-</div>
-
-<script>
-    const DEFAULT_TASKS = [
+const DEFAULT_TASKS = [
         { title: "Erholung 🌿", info: "Pausen sind wichtig! Nimm dir 15 Min. Zeit." },
         { title: "Hospitation 👁️‍🗨️", info: "Beobachte genau: Wie arbeiten die Profis?" }
     ];
@@ -98,19 +7,24 @@
     let score = 0;
     let clickCount = 0;
 
-    // QR-Code Funktion
+    // --- 1. QR-Code Logik mit Update-Signal ---
+
     function showQRCode() {
+        // Wir nehmen die Aufgaben, wie sie GERADE im Lehrer-Menü stehen
         const jsonStr = JSON.stringify(questState.map(t => ({ title: t.title, info: t.info })));
+        // Sicherer Export mit Umlaut-Schutz
         const data = btoa(unescape(encodeURIComponent(jsonStr)));
+        
+        // Der Link enthält die Daten im "q"-Parameter
         const link = window.location.origin + window.location.pathname + "?q=" + data;
 
         const qrDiv = document.getElementById("qrcode");
-        qrDiv.innerHTML = ""; // Alten Code löschen
+        qrDiv.innerHTML = ""; 
         new QRCode(qrDiv, {
             text: link,
             width: 200,
             height: 200,
-            correctLevel : QRCode.CorrectLevel.L // Low, da URLs sehr lang sein können
+            correctLevel : QRCode.CorrectLevel.L
         });
         document.getElementById('qr-container').style.display = 'block';
     }
@@ -118,18 +32,34 @@
     function checkUrlParams() {
         const params = new URLSearchParams(window.location.search);
         const data = params.get('q');
+        
         if (data) {
             try {
+                // Dekodieren der neuen Aufgaben
                 const decoded = JSON.parse(decodeURIComponent(escape(atob(data))));
+                
+                // DAS UPDATE-SIGNAL: Wir überschreiben den alten Speicher sofort
                 questState = decoded.map(t => ({ ...t, completed: false }));
-                save();
+                score = 0;
+                
+                // Sofort im LocalStorage speichern, bevor die Seite "gesäubert" wird
+                localStorage.setItem('tasks_vfinal_qr', JSON.stringify(questState));
+                localStorage.setItem('score_vfinal_qr', "0");
+
+                // URL säubern (Parameter q entfernen)
                 window.history.replaceState({}, document.title, window.location.pathname);
-                alert("Neue Aufgaben geladen!");
-            } catch (e) { console.error("Fehler", e); }
+                
+                alert("✅ Update erfolgreich: Neue Aufgaben wurden geladen!");
+                render();
+            } catch (e) { 
+                console.error("Update-Fehler:", e); 
+                alert("Fehler beim Laden der neuen Aufgaben.");
+            }
         }
     }
 
-    // Admin-Funktionen
+    // --- 2. Admin / Lehrer-Bereich ---
+
     function handleHeaderClick() {
         clickCount++;
         if (clickCount >= 5) { toggleAdmin(); clickCount = 0; }
@@ -138,8 +68,9 @@
 
     function toggleAdmin() {
         const panel = document.getElementById('adminPanel');
-        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-        if (panel.style.display === 'block') renderAdmin();
+        const isOpening = panel.style.display !== 'block';
+        panel.style.display = isOpening ? 'block' : 'none';
+        if (isOpening) renderAdmin();
     }
 
     function renderAdmin() {
@@ -149,9 +80,9 @@
             const div = document.createElement('div');
             div.className = 'admin-task-item';
             div.innerHTML = `
-                <input type="text" class="admin-input" value="${task.title}" onchange="updateTask(${i}, 'title', this.value)">
-                <textarea class="admin-input" onchange="updateTask(${i}, 'info', this.value)">${task.info}</textarea>
-                <button onclick="removeTask(${i})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem; width:100%; text-align:right;">Entfernen</button>
+                <input type="text" class="admin-input" value="${task.title}" oninput="updateTask(${i}, 'title', this.value)">
+                <textarea class="admin-input" oninput="updateTask(${i}, 'info', this.value)">${task.info}</textarea>
+                <button onclick="removeTask(${i})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem; width:100%; text-align:right;">🗑 Entfernen</button>
             `;
             list.appendChild(div);
         });
@@ -161,7 +92,8 @@
     function removeTask(i) { questState.splice(i, 1); renderAdmin(); }
     function updateTask(i, key, val) { questState[i][key] = val; }
 
-    // App-Logik
+    // --- 3. Kern-Funktionen ---
+
     function toggleQuest(index) {
         questState[index].completed = !questState[index].completed;
         save();
@@ -178,35 +110,48 @@
     function save() {
         score = questState.filter(t => t.completed).length * 10;
         localStorage.setItem('tasks_vfinal_qr', JSON.stringify(questState));
+        localStorage.setItem('score_vfinal_qr', score.toString());
         render();
     }
 
     function render() {
         const list = document.getElementById('quest-list');
-        document.getElementById('score').innerText = score;
-        list.innerHTML = '';
-        questState.forEach((quest, i) => {
-            const item = document.createElement('div');
-            item.className = `quest-item ${quest.completed ? 'done' : ''}`;
-            item.innerHTML = `
-                <button class="info-btn" onclick="showInfo(${i})">💡</button>
-                <div class="quest-content" onclick="toggleQuest(${i})">
-                    <span class="quest-text">${quest.title}</span>
-                    <div class="check-circle">${quest.completed ? '✔' : ''}</div>
-                </div>`;
-            list.appendChild(item);
-        });
-        document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=Fortschritt&body=Ich habe ${score} Sterne erreicht!`;
+        const scoreEl = document.getElementById('score');
+        if (scoreEl) scoreEl.innerText = score;
+        
+        if (list) {
+            list.innerHTML = '';
+            questState.forEach((quest, i) => {
+                const item = document.createElement('div');
+                item.className = `quest-item ${quest.completed ? 'done' : ''}`;
+                item.innerHTML = `
+                    <button class="info-btn" onclick="showInfo(${i})">💡</button>
+                    <div class="quest-content" onclick="toggleQuest(${i})">
+                        <span class="quest-text">${quest.title}</span>
+                        <div class="check-circle">${quest.completed ? '✔' : ''}</div>
+                    </div>`;
+                list.appendChild(item);
+            });
+        }
+        
+        const mail = document.getElementById('mailLink');
+        if (mail) mail.href = `mailto:koenigstiger70@web.de?subject=Fortschritt&body=Ich habe ${score} Sterne erreicht!`;
     }
 
     function fullReset() {
-        questState.forEach(t => t.completed = false);
-        save();
+        if(confirm("Möchtest du wirklich alle Häkchen löschen?")) {
+            questState.forEach(t => t.completed = false);
+            save();
+        }
     }
 
+    // --- INITIALISIERUNG ---
+    // Erst prüfen wir auf einen neuen QR-Code Link
     checkUrlParams();
-    questState = JSON.parse(localStorage.getItem('tasks_vfinal_qr')) || DEFAULT_TASKS;
-    save();
-</script>
-</body>
-</html>
+    
+    // Dann laden wir den Rest (falls nichts via QR-Code kam)
+    if (questState.length === 0) {
+        questState = JSON.parse(localStorage.getItem('tasks_vfinal_qr')) || DEFAULT_TASKS;
+        score = parseInt(localStorage.getItem('score_vfinal_qr')) || 0;
+    }
+    render();
