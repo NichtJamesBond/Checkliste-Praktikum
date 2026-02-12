@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meine Aufgaben</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
             --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
@@ -34,6 +35,11 @@
         .admin-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 5px; box-sizing: border-box; font-family: inherit; }
         .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
         
+        /* QR-Code Bereich */
+        #qr-container { display: none; margin-top: 20px; text-align: center; background: #eee; padding: 15px; border-radius: 15px; }
+        #qrcode { display: flex; justify-content: center; margin: 10px 0; }
+        #qrcode img { border: 10px solid white; border-radius: 10px; }
+
         .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
         .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; }
         .btn-mail { background: var(--mail-color); color: white; }
@@ -41,24 +47,24 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 3000; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
-
-        #badge { position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 5rem; z-index: 100; pointer-events: none; transition: 0.5s; }
-        #badge.show { transform: translate(-50%, -50%) scale(1.2); }
     </style>
 </head>
 <body>
 
-<div id="badge"></div>
-
 <div id="adminPanel">
     <h2 style="color: var(--primary); margin-top: 0;">Lehrer-Bereich 👨‍🏫</h2>
-    <p style="font-size: 0.85rem; margin-bottom: 20px;">Hier Aufgaben für die Klasse festlegen:</p>
     <div id="adminTaskList"></div>
     <button class="admin-btn" onclick="addAdminTask()" style="background: #e0e0e0; color: #333;">+ Neue Aufgabe hinzufügen</button>
-    <div style="margin-top: 20px; border-top: 2px solid #eee; pt: 15px;">
-        <button class="admin-btn" onclick="generateClassLink()" style="background: var(--success); color: white;">🔗 Link für Klasse kopieren</button>
-        <button class="admin-btn" onclick="toggleAdmin()" style="background: #666; color: white; margin-top: 10px;">Zurück zur App</button>
+    
+    <button class="admin-btn" onclick="showQRCode()" style="background: var(--success); color: white; margin-top: 15px;">📱 QR-Code für Klasse erzeugen</button>
+    
+    <div id="qr-container">
+        <p style="font-size: 0.8rem; margin: 0;">Schüler scannen diesen Code:</p>
+        <div id="qrcode"></div>
+        <button class="admin-btn" onclick="document.getElementById('qr-container').style.display='none'" style="background: #ccc; font-size: 0.7rem; padding: 5px;">Code schließen</button>
     </div>
+
+    <button class="admin-btn" onclick="toggleAdmin()" style="background: #666; color: white; margin-top: 20px;">Zurück zur App</button>
 </div>
 
 <div id="infoModal" class="modal-overlay">
@@ -75,9 +81,7 @@
         <h1 style="margin:0 0 10px 0; color: var(--primary);">Meine Aufgaben 🎯</h1>
         <div class="score-board"><span id="score">0</span> <span>⭐</span></div>
     </div>
-
     <div id="quest-list" class="quest-list"></div>
-    
     <div class="footer-actions">
         <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail verschicken</a>
         <button class="action-btn btn-reset" onclick="fullReset()">🔄 Alles zurücksetzen</button>
@@ -94,56 +98,38 @@
     let score = 0;
     let clickCount = 0;
 
-    // --- 1. Link-Logik (Dekodieren & Kopieren) ---
+    // QR-Code Funktion
+    function showQRCode() {
+        const jsonStr = JSON.stringify(questState.map(t => ({ title: t.title, info: t.info })));
+        const data = btoa(unescape(encodeURIComponent(jsonStr)));
+        const link = window.location.origin + window.location.pathname + "?q=" + data;
+
+        const qrDiv = document.getElementById("qrcode");
+        qrDiv.innerHTML = ""; // Alten Code löschen
+        new QRCode(qrDiv, {
+            text: link,
+            width: 200,
+            height: 200,
+            correctLevel : QRCode.CorrectLevel.L // Low, da URLs sehr lang sein können
+        });
+        document.getElementById('qr-container').style.display = 'block';
+    }
 
     function checkUrlParams() {
         const params = new URLSearchParams(window.location.search);
         const data = params.get('q');
         if (data) {
             try {
-                // Dekodierung mit Umlaut-Sicherung
                 const decoded = JSON.parse(decodeURIComponent(escape(atob(data))));
                 questState = decoded.map(t => ({ ...t, completed: false }));
-                score = 0;
                 save();
                 window.history.replaceState({}, document.title, window.location.pathname);
-                alert("Erfolgreich: Aufgaben für die Klasse wurden geladen!");
-            } catch (e) { console.error("Fehler beim Laden der Aufgaben", e); }
+                alert("Neue Aufgaben geladen!");
+            } catch (e) { console.error("Fehler", e); }
         }
     }
 
-    function generateClassLink() {
-        try {
-            const jsonStr = JSON.stringify(questState.map(t => ({ title: t.title, info: t.info })));
-            const data = btoa(unescape(encodeURIComponent(jsonStr)));
-            const link = window.location.origin + window.location.pathname + "?q=" + data;
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(link).then(() => {
-                    alert("Link kopiert! Sende diesen Link an deine Schüler.");
-                }).catch(() => fallbackCopy(link));
-            } else {
-                fallbackCopy(link);
-            }
-        } catch (e) { alert("Fehler beim Erstellen des Links."); }
-    }
-
-    function fallbackCopy(text) {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-            document.execCommand('copy');
-            alert("Link kopiert! Sende diesen Link an deine Schüler.");
-        } catch (err) {
-            alert("Fehler beim Kopieren. Bitte manuell kopieren.");
-        }
-        document.body.removeChild(textArea);
-    }
-
-    // --- 2. Admin/Lehrer-Modus ---
-
+    // Admin-Funktionen
     function handleHeaderClick() {
         clickCount++;
         if (clickCount >= 5) { toggleAdmin(); clickCount = 0; }
@@ -152,9 +138,8 @@
 
     function toggleAdmin() {
         const panel = document.getElementById('adminPanel');
-        const isOpening = panel.style.display !== 'block';
-        panel.style.display = isOpening ? 'block' : 'none';
-        if (isOpening) renderAdmin();
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        if (panel.style.display === 'block') renderAdmin();
     }
 
     function renderAdmin() {
@@ -164,9 +149,9 @@
             const div = document.createElement('div');
             div.className = 'admin-task-item';
             div.innerHTML = `
-                <input type="text" class="admin-input" value="${task.title}" onchange="updateTask(${i}, 'title', this.value)" placeholder="Titel der Aufgabe">
-                <textarea class="admin-input" style="height: 60px;" onchange="updateTask(${i}, 'info', this.value)" placeholder="Tipp/Information für Schüler">${task.info}</textarea>
-                <button onclick="removeTask(${i})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.8rem; width:100%; text-align:right;">🗑 Aufgabe entfernen</button>
+                <input type="text" class="admin-input" value="${task.title}" onchange="updateTask(${i}, 'title', this.value)">
+                <textarea class="admin-input" onchange="updateTask(${i}, 'info', this.value)">${task.info}</textarea>
+                <button onclick="removeTask(${i})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem; width:100%; text-align:right;">Entfernen</button>
             `;
             list.appendChild(div);
         });
@@ -176,12 +161,10 @@
     function removeTask(i) { questState.splice(i, 1); renderAdmin(); }
     function updateTask(i, key, val) { questState[i][key] = val; }
 
-    // --- 3. App-Funktionen ---
-
+    // App-Logik
     function toggleQuest(index) {
         questState[index].completed = !questState[index].completed;
         save();
-        checkMilestones();
     }
 
     function showInfo(index) {
@@ -192,26 +175,9 @@
 
     function closeInfo() { document.getElementById('infoModal').style.display = 'none'; }
 
-    function checkMilestones() {
-        const badge = document.getElementById('badge');
-        const count = questState.filter(t => t.completed).length;
-        const total = questState.length;
-        if (total === 0) return;
-        
-        badge.classList.remove('show');
-        setTimeout(() => {
-            if (count === total) badge.innerText = "🏆";
-            else if (count >= total * 0.8) badge.innerText = "🥈";
-            else if (count >= total * 0.5) badge.innerText = "🥉";
-            else return;
-            badge.classList.add('show');
-            setTimeout(() => badge.classList.remove('show'), 2500);
-        }, 100);
-    }
-
     function save() {
         score = questState.filter(t => t.completed).length * 10;
-        localStorage.setItem('tasks_vfinal', JSON.stringify(questState));
+        localStorage.setItem('tasks_vfinal_qr', JSON.stringify(questState));
         render();
     }
 
@@ -230,7 +196,7 @@
                 </div>`;
             list.appendChild(item);
         });
-        document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=Fortschritt&body=Hallo! Ich habe aktuell ${score} Sterne bei 'Meine Aufgaben' erreicht.`;
+        document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=Fortschritt&body=Ich habe ${score} Sterne erreicht!`;
     }
 
     function fullReset() {
@@ -238,9 +204,8 @@
         save();
     }
 
-    // Start
     checkUrlParams();
-    questState = JSON.parse(localStorage.getItem('tasks_vfinal')) || DEFAULT_TASKS;
+    questState = JSON.parse(localStorage.getItem('tasks_vfinal_qr')) || DEFAULT_TASKS;
     save();
 </script>
 </body>
