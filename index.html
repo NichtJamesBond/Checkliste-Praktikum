@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meine Aufgaben</title>
+    <title>Aufgaben Planer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -25,18 +25,17 @@
         .done .quest-text { text-decoration: line-through; color: #a0a0a0; }
 
         .info-btn { background: var(--info-bg); border: 2px solid var(--info-border); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; border: none; }
-
-        .check-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .check-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; }
         .done .check-circle { background: var(--success); border-color: var(--success); color: white; }
 
         /* Lehrer-Panel */
         #adminPanel { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; border-radius: 30px; overflow-y: auto; border: 3px solid var(--primary); }
         .admin-task-item { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; position: relative; }
         .admin-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
-        .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; transition: 0.3s; }
         
-        /* Deaktivierter Button Style */
-        .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; opacity: 0.6; }
+        .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; transition: all 0.2s; }
+        .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; transform: none !important; }
+        .admin-btn:active { transform: scale(0.98); }
 
         #qr-container { display: none; margin-top: 20px; text-align: center; background: #f0f0f0; padding: 15px; border-radius: 15px; border: 2px dashed #ccc; }
         #qrcode { display: flex; justify-content: center; margin: 10px 0; }
@@ -46,11 +45,12 @@
         .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; color: white; }
         .btn-mail { background: var(--mail-color); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 3000; }
-        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
-
+        /* Badge in der Mitte */
         #badge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8rem; z-index: 4000; pointer-events: none; transition: transform 0.5s; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         #badge.show { transform: translate(-50%, -50%) scale(1.2); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 3000; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
     </style>
 </head>
 <body>
@@ -58,20 +58,23 @@
 <div id="badge"></div>
 
 <div id="adminPanel">
-    <h2 style="color: var(--primary); margin-top: 0;">Lehrer-Bereich 👨‍🏫</h2>
+    <h2 style="color: var(--primary); margin: 0 0 15px 0;">Lehrer-Bereich 👨‍🏫</h2>
     <div id="adminTaskList"></div>
-    <button class="admin-btn" onclick="addAdminTask()" style="background: #e0e0e0; color: #333;">+ Neue Aufgabe hinzufügen</button>
     
-    <button id="btnSaveAdmin" class="admin-btn" onclick="forceSaveFromAdmin()" style="background: var(--primary); color: white; margin-top: 20px; border: 2px solid #4834d4;">💾 Änderungen speichern</button>
+    <button class="admin-btn" onclick="addAdminTask()" style="background: #eee; color: #333;">+ Neue Aufgabe hinzufügen</button>
     
-    <button id="btnGenerateQR" class="admin-btn" onclick="generateAndShowQR()" style="background: var(--success); color: white; margin-top: 10px;" disabled>📱 QR-Code & Link erzeugen</button>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+    
+    <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white; font-size: 1.1rem; box-shadow: 0 4px 0 #4834d4;">💾 Änderungen speichern</button>
+    
+    <button id="qrBtn" class="admin-btn" onclick="generateQR()" style="background: var(--success); color: white; margin-top: 10px;" disabled>📱 QR-Code & Link erzeugen</button>
     
     <div id="qr-container">
-        <p style="font-weight: bold; margin: 0; font-size: 0.9rem; color: var(--success);">✔ Link kopiert & QR bereit!</p>
+        <p style="font-weight: bold; margin: 0; font-size: 0.9rem; color: var(--success);">✔ Kopiert & Bereit!</p>
         <div id="qrcode"></div>
     </div>
 
-    <button class="admin-btn" onclick="closeAdminPanel()" style="background: #666; color: white; margin-top: 20px;">Zurück zur App</button>
+    <button class="admin-btn" onclick="closeAdmin()" style="background: #666; color: white; margin-top: 20px;">Zurück zur App</button>
 </div>
 
 <div id="infoModal" class="modal-overlay">
@@ -79,7 +82,7 @@
         <div style="font-size: 3rem; margin-bottom: 10px;">💡</div>
         <h3 id="modalTitle" style="color:var(--primary); margin-top:0;">Info</h3>
         <p id="modalDescription" style="line-height:1.5; color: #444;"></p>
-        <button class="action-btn btn-mail" style="margin-top: 15px; height: 40px;" onclick="closeInfo()">Alles klar!</button>
+        <button class="action-btn btn-mail" style="margin-top: 15px; height: 40px;" onclick="document.getElementById('infoModal').style.display='none'">Alles klar!</button>
     </div>
 </div>
 
@@ -88,7 +91,9 @@
         <h1 style="margin:0 0 10px 0; color: var(--primary);">Meine Aufgaben 🎯</h1>
         <div class="score-board"><span id="score">0</span> <span>⭐</span></div>
     </div>
+
     <div id="quest-list" class="quest-list"></div>
+    
     <div class="footer-actions">
         <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail verschicken</a>
     </div>
@@ -98,15 +103,18 @@
     let questState = [];
     let score = 0;
     let clickCount = 0;
-    let isDataSaved = true;
+    let hasUnsavedChanges = false;
 
-    // --- 1. ADMIN LOGIK MIT SPERRE ---
+    // --- ADMIN LOGIK ---
 
-    function setUnsaved() {
-        isDataSaved = false;
-        document.getElementById('btnGenerateQR').disabled = true;
-        document.getElementById('btnSaveAdmin').style.boxShadow = "0 0 15px var(--primary)";
-        document.getElementById('qr-container').style.display = 'none';
+    function handleHeaderClick() {
+        clickCount++;
+        if (clickCount >= 5) {
+            document.getElementById('adminPanel').style.display = 'block';
+            renderAdmin();
+            clickCount = 0;
+        }
+        setTimeout(() => clickCount = 0, 3000);
     }
 
     function renderAdmin() {
@@ -116,109 +124,105 @@
             const div = document.createElement('div');
             div.className = 'admin-task-item';
             div.innerHTML = `
-                <input type="text" class="admin-input task-title-input" value="${task.title}" placeholder="Titel" oninput="setUnsaved()">
-                <textarea class="admin-input task-info-input" placeholder="Zusatzinfo" oninput="setUnsaved()">${task.info}</textarea>
-                <button onclick="removeTask(${i})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem; width:100%; text-align:right;">🗑 Entfernen</button>
+                <input type="text" class="admin-input task-title" value="${task.title}" placeholder="Titel" oninput="markAsUnsaved()">
+                <textarea class="admin-input task-info" placeholder="Zusatzinfos" oninput="markAsUnsaved()">${task.info}</textarea>
+                <button onclick="removeAdminTask(${i})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem; width:100%; text-align:right;">🗑 Entfernen</button>
             `;
             list.appendChild(div);
         });
+        updateButtonStates();
     }
 
-    function forceSaveFromAdmin() {
-        const taskElements = document.querySelectorAll('.admin-task-item');
-        const tasks = [];
-        taskElements.forEach(el => {
-            const t = el.querySelector('.task-title-input').value;
-            const i = el.querySelector('.task-info-input').value;
-            if (t.trim() !== "") {
-                tasks.push({ title: t, info: i, completed: false });
+    function markAsUnsaved() {
+        hasUnsavedChanges = true;
+        updateButtonStates();
+        document.getElementById('qr-container').style.display = 'none';
+    }
+
+    function updateButtonStates() {
+        const qrBtn = document.getElementById('qrBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        qrBtn.disabled = hasUnsavedChanges;
+        saveBtn.style.opacity = hasUnsavedChanges ? "1" : "0.6";
+    }
+
+    function syncCurrentInputs() {
+        const titles = document.querySelectorAll('.task-title');
+        const infos = document.querySelectorAll('.task-info');
+        const updatedTasks = [];
+        titles.forEach((input, i) => {
+            if (input.value.trim() !== "") {
+                updatedTasks.push({
+                    title: input.value,
+                    info: infos[i].value,
+                    completed: false
+                });
             }
         });
-        
-        questState = tasks;
-        isDataSaved = true;
-        document.getElementById('btnGenerateQR').disabled = false;
-        document.getElementById('btnSaveAdmin').style.boxShadow = "none";
-        save(); 
-        alert("Änderungen wurden übernommen. Du kannst jetzt den QR-Code erzeugen.");
+        return updatedTasks;
     }
 
     function addAdminTask() {
+        questState = syncCurrentInputs(); // WICHTIG: Erst alles einsammeln
         questState.push({ title: "", info: "", completed: false });
         renderAdmin();
-        setUnsaved();
+        markAsUnsaved();
     }
 
-    function removeTask(i) {
+    function removeAdminTask(i) {
+        questState = syncCurrentInputs();
         questState.splice(i, 1);
         renderAdmin();
-        setUnsaved();
+        markAsUnsaved();
     }
 
-    // --- 2. QR-GENERIERUNG (NUR WENN GESPEICHERT) ---
+    function saveAdminData() {
+        questState = syncCurrentInputs();
+        hasUnsavedChanges = false;
+        saveToLocalStorage();
+        updateButtonStates();
+        render(); 
+        alert("💾 Änderungen erfolgreich gespeichert!");
+    }
 
-    function generateAndShowQR() {
-        if (!isDataSaved) return;
-
+    function generateQR() {
+        if (hasUnsavedChanges) return;
+        
         try {
-            // Wir nehmen NUR die gespeicherten Daten aus questState
-            const exportData = questState.map(t => ({ title: t.title, info: t.info }));
-            const jsonStr = JSON.stringify(exportData);
-            const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
-            
-            // Absoluter Pfad für GitHub Pages
-            const fullLink = window.location.origin + window.location.pathname + "?q=" + encoded;
+            const dataToEncode = questState.map(t => ({ title: t.title, info: t.info }));
+            const jsonStr = JSON.stringify(dataToEncode);
+            const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+            const link = window.location.origin + window.location.pathname + "?q=" + base64;
 
             const qrDiv = document.getElementById("qrcode");
-            qrDiv.innerHTML = ""; 
-            new QRCode(qrDiv, { text: fullLink, width: 200, height: 200 });
+            qrDiv.innerHTML = "";
+            new QRCode(qrDiv, { text: link, width: 200, height: 200 });
             document.getElementById('qr-container').style.display = 'block';
 
             const dummy = document.createElement("textarea");
             document.body.appendChild(dummy);
-            dummy.value = fullLink;
+            dummy.value = link;
             dummy.select();
             document.execCommand("copy");
             document.body.removeChild(dummy);
-        } catch (e) { alert("Fehler beim Erzeugen."); }
-    }
-
-    // --- 3. ALLGEMEINE APP FUNKTIONEN ---
-
-    function handleHeaderClick() {
-        clickCount++;
-        if (clickCount >= 5) { 
-            document.getElementById('adminPanel').style.display = 'block';
-            renderAdmin();
-            clickCount = 0; 
+        } catch (e) {
+            alert("Fehler beim Erstellen des QR-Codes.");
         }
-        setTimeout(() => clickCount = 0, 3000);
     }
 
-    function closeAdminPanel() {
+    function closeAdmin() {
+        if (hasUnsavedChanges) {
+            if (!confirm("Du hast ungespeicherte Änderungen. Wirklich schließen?")) return;
+        }
         document.getElementById('adminPanel').style.display = 'none';
-        render();
     }
 
-    function checkUrlParams() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const data = urlParams.get('q');
-        if (data) {
-            try {
-                const decoded = JSON.parse(decodeURIComponent(escape(atob(data))));
-                questState = decoded.map(t => ({ ...t, completed: false }));
-                save(); 
-                window.history.replaceState({}, document.title, window.location.pathname);
-                alert("✅ Neue Aufgabenliste geladen!");
-            } catch (e) { console.error(e); }
-        }
-    }
+    // --- APP LOGIK ---
 
-    function save() {
+    function saveToLocalStorage() {
         score = questState.filter(t => t.completed).length * 10;
-        localStorage.setItem('tasks_v3', JSON.stringify(questState));
-        localStorage.setItem('score_v3', score.toString());
-        render();
+        localStorage.setItem('tasks_v4', JSON.stringify(questState));
+        localStorage.setItem('score_v4', score.toString());
     }
 
     function render() {
@@ -239,22 +243,28 @@
         document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=Fortschritt&body=Ich habe ${score} Sterne erreicht!`;
     }
 
-    function toggleQuest(i) { questState[i].completed = !questState[i].completed; save(); checkMilestones(); }
-    function showInfo(i) { 
+    function toggleQuest(i) {
+        questState[i].completed = !questState[i].completed;
+        saveToLocalStorage();
+        render();
+        checkMilestones();
+    }
+
+    function showInfo(i) {
         document.getElementById('modalTitle').innerText = questState[i].title;
         document.getElementById('modalDescription').innerText = questState[i].info;
         document.getElementById('infoModal').style.display = 'flex';
     }
-    function closeInfo() { document.getElementById('infoModal').style.display = 'none'; }
 
     function checkMilestones() {
         const badge = document.getElementById('badge');
         const count = questState.filter(t => t.completed).length;
         const total = questState.length;
         if (total === 0) return;
+        
         badge.classList.remove('show');
         setTimeout(() => {
-            if (count === total) badge.innerText = "🏆";
+            if (count === total && total > 0) badge.innerText = "🏆";
             else if (count >= total * 0.8) badge.innerText = "🥈";
             else if (count >= total * 0.5) badge.innerText = "🥉";
             else return;
@@ -263,10 +273,26 @@
         }, 100);
     }
 
-    checkUrlParams(); 
+    function loadFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const data = params.get('q');
+        if (data) {
+            try {
+                const decoded = JSON.parse(decodeURIComponent(escape(atob(data))));
+                questState = decoded.map(t => ({ ...t, completed: false }));
+                saveToLocalStorage();
+                window.history.replaceState({}, document.title, window.location.pathname);
+                alert("✅ Neue Aufgaben geladen!");
+            } catch (e) { console.error("URL Error", e); }
+        }
+    }
+
+    // Start
+    loadFromUrl();
     if (questState.length === 0) {
-        const saved = localStorage.getItem('tasks_v3');
-        questState = saved ? JSON.parse(saved) : [{title: "Beispiel", info: "Klick 5x oben!"}];
+        const saved = localStorage.getItem('tasks_v4');
+        questState = saved ? JSON.parse(saved) : [{title: "Beispielaufgabe", info: "Willkommen!", completed: false}];
+        score = parseInt(localStorage.getItem('score_v4')) || 0;
     }
     render();
 </script>
