@@ -12,8 +12,31 @@
             --info-bg: #fff3bf; --info-border: #fcc419;
             --danger: #ff7675;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .app-container { background: white; padding: 2rem; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 400px; min-height: 620px; display: flex; flex-direction: column; position: relative; }
+        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start;
+            padding: 20px; 
+            margin: 0; 
+            min-height: 100vh;
+        }
+
+        /* APP-CONTAINER (Immer schmal) */
+        .app-container { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            width: 100%; 
+            max-width: 400px; 
+            min-height: 620px; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+        }
         
         .header { text-align: center; margin-bottom: 45px; cursor: pointer; user-select: none; }
         .score-board { background: var(--accent); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; color: #000; box-shadow: 0 4px 0 #e1b12c; margin-top: 20px; }
@@ -25,35 +48,46 @@
         .quest-text { font-size: 1rem; font-weight: 600; color: var(--text); }
         .done .quest-text { text-decoration: line-through; color: #a0a0a0; }
 
-        .info-btn { background: var(--info-bg); border: 2px solid var(--info-border); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; border: none; }
+        .info-btn { background: var(--info-bg); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; border: none; }
         .check-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; }
         .done .check-circle { background: var(--success); border-color: var(--success); color: white; }
 
-        #adminPanel { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; border-radius: 30px; overflow-y: auto; border: 3px solid var(--primary); }
-        .admin-task-item { background: #f9f9f9; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; }
+        /* BACK-END PANEL (Vollbild am PC) */
+        #adminPanel { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: white; 
+            z-index: 5000; 
+            padding: 40px; 
+            box-sizing: border-box; 
+            overflow-y: auto; 
+        }
+
+        .admin-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .admin-task-item { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .admin-input.task-title { flex: 1; min-width: 200px; font-weight: bold; }
+        .admin-input.task-info { flex: 2; min-width: 200px; }
         
-        .central-icon-picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; background: #f0f0f0; padding: 12px; border-radius: 15px; border: 1px solid #ccc; }
-        .icon-choice { cursor: pointer; font-size: 1.4rem; padding: 5px; transition: transform 0.1s; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .icon-choice:hover { transform: scale(1.2); background: var(--accent); }
+        .central-icon-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; background: #f0f0f0; padding: 15px; border-radius: 15px; }
+        .icon-choice { cursor: pointer; font-size: 1.8rem; padding: 8px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        .admin-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
-        .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .admin-input { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1rem; }
+        .admin-btn { padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; }
+        
+        #qr-container { display: none; margin-top: 30px; text-align: center; background: #fff; padding: 20px; border-radius: 20px; border: 3px dashed var(--success); max-width: 400px; margin: 20px auto; }
+        #qr-canvas { margin: 10px auto; display: block; }
 
-        .export-group { display: flex; gap: 10px; margin-top: 10px; }
-        .export-group .admin-btn { flex: 1; font-size: 0.8rem; }
-
-        #qr-container { display: none; margin-top: 20px; text-align: center; background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed var(--success); }
-        #qr-canvas { margin: 10px auto; display: block; max-width: 100%; }
-
-        .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
+        .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
         .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; color: white; }
         .btn-mail { background: var(--mail-color); }
 
-        #badge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8rem; z-index: 4000; pointer-events: none; transition: transform 0.5s; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        #badge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8rem; z-index: 6000; pointer-events: none; transition: transform 0.5s; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         #badge.show { transform: translate(-50%, -50%) scale(1.2); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 3000; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 4000; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
     </style>
 </head>
@@ -62,27 +96,33 @@
 <div id="badge"></div>
 
 <div id="adminPanel">
-    <h2 style="color: var(--primary); margin: 0 0 15px 0;">Back-End ⚙️</h2>
+    <div class="admin-header-row">
+        <h2 style="color: var(--primary); margin: 0; font-size: 2rem;">Flex-O-Mat Back-End ⚙️</h2>
+        <button class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white;">App Modus 📱</button>
+    </div>
+
     <div id="adminTaskList"></div>
-    <button class="admin-btn" onclick="addAdminTask()" style="background: #eee; color: #333;">+ Neue Aufgabe hinzufügen</button>
+    
+    <button class="admin-btn" onclick="addAdminTask()" style="background: #eee; color: #333; width: 100%; margin-bottom: 20px;">+ Neue Aufgabe hinzufügen</button>
     
     <div class="central-icon-picker" id="centralPicker"></div>
     
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-    <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white; font-size: 1.1rem; box-shadow: 0 4px 0 #4834d4;">💾 Änderungen speichern</button>
-    <button id="qrBtn" class="admin-btn" onclick="generateQR()" style="background: var(--success); color: white; margin-top:15px;" disabled>📱 QR-Code anzeigen</button>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
     
-    <div class="export-group">
-        <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background: var(--mail-color); color: white;" disabled>📧 Link per Mail</button>
-        <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background: #636e72; color: white;" disabled>📋 Link kopieren</button>
+    <div style="display: flex; gap: 15px;">
+        <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white; flex: 1;">💾 Änderungen speichern</button>
+        <button id="qrBtn" class="admin-btn" onclick="generateQR()" style="background: var(--success); color: white; flex: 1;" disabled>📱 QR-Code anzeigen</button>
+    </div>
+    
+    <div style="display: flex; gap: 15px; margin-top: 15px;">
+        <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background: var(--mail-color); color: white; flex: 1;" disabled>📧 Konfig senden</button>
+        <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background: #636e72; color: white; flex: 1;" disabled>📋 Link kopieren</button>
     </div>
 
     <div id="qr-container">
         <p style="color: var(--success); font-weight: bold; margin-bottom: 5px;">Scan bereit! ✅</p>
         <canvas id="qr-canvas"></canvas>
     </div>
-    
-    <button class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white; margin-top: 25px;">Zurück zur App</button>
 </div>
 
 <div id="infoModal" class="modal-overlay">
@@ -109,21 +149,12 @@
     let score = 0;
     let clickCount = 0;
     let hasUnsavedChanges = false;
-    // Gedächtnis für Meilensteine
     let achievedMilestones = { m50: false, m80: false, m100: false };
 
     const iconData = [
-        {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
-        {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
-        {i: "📄", t: "Deckblatt"}, {i: "🏠", t: "Einrichtung"}, {i: "📊", t: "Bericht"}, {i: "⚖️", t: "Regeln"}, 
-        {i: "📜", t: "Paragrafen"}, {i: "📁", t: "Doku"}, {i: "📅", t: "Wochenbericht"}, {i: "👋", t: "Vorstellung"}, 
-        {i: "🏢", t: "Betrieb"}, {i: "🛠️", t: "Arbeiten"}, {i: "📐", t: "Zeichnung"}, {i: "✍️", t: "Skizze"}, 
-        {i: "💼", t: "Beruf"}, {i: "📱", t: "Handy"}, {i: "⚡", t: "Blitz"}, {i: "💡", t: "Licht"}, 
-        {i: "❗", t: "Achtung"}, {i: "❓", t: "Frage"}, {i: "🤔", t: "Reflexion"}, {i: "🎓", t: "Zertifikat"}, 
-        {i: "🦆", t: "Ente"}, {i: "📖", t: "Seite"}, {i: "💻", t: "Computer"}, {i: "😂", t: "Lachen"}, 
-        {i: "😴", t: "Schlafen"}, {i: "☀️", t: "Tag"}, {i: "🌙", t: "Nacht"}, {i: "📸", t: "Foto"},
-        {i: "🚗", t: "Auto"}, {i: "🚆", t: "Bahn"}, {i: "🔥", t: "Feuer"}, {i: "☄️", t: "Flamme"},
-        {i: "🐿️", t: "Eichhörnchen"}, {i: "🐘", t: "Elefant"}, {i: "🐱", t: "Katze"}, {i: "🐟", t: "Fisch"}
+        {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "📄", t: "Doku"}, {i: "🏠", t: "Home"}, 
+        {i: "🏢", t: "Job"}, {i: "🛠️", t: "Werkzeug"}, {i: "📐", t: "Mathe"}, {i: "💡", t: "Idee"},
+        {i: "🦆", t: "Ente"}, {i: "🔥", t: "Feuer"}, {i: "🚀", t: "Start"}, {i: "🏆", t: "Win"}
     ];
 
     function initIconPicker() {
@@ -133,18 +164,15 @@
             const span = document.createElement('span');
             span.className = 'icon-choice';
             span.innerText = item.i;
-            span.onclick = () => addIconToLastTask(item.i);
+            span.onclick = () => {
+                const titles = document.querySelectorAll('.task-title');
+                if (titles.length > 0) {
+                    titles[titles.length - 1].value += " " + item.i;
+                    markAsUnsaved();
+                }
+            };
             picker.appendChild(span);
         });
-    }
-
-    function addIconToLastTask(icon) {
-        const titles = document.querySelectorAll('.task-title');
-        if (titles.length > 0) {
-            const lastInput = titles[titles.length - 1];
-            lastInput.value = lastInput.value + " " + icon;
-            markAsUnsaved();
-        }
     }
 
     function handleHeaderClick() {
@@ -165,8 +193,8 @@
             div.className = 'admin-task-item';
             div.innerHTML = `
                 <input type="text" class="admin-input task-title" value="${task.title}" placeholder="Aufgabe..." oninput="markAsUnsaved()">
-                <textarea class="admin-input task-info" placeholder="Infos..." oninput="markAsUnsaved()">${task.info}</textarea>
-                <button onclick="removeAdminTask(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-size:0.8rem; width:100%; text-align:right;">🗑 Löschen</button>
+                <textarea class="admin-input task-info" placeholder="Infos..." oninput="markAsUnsaved()" rows="1">${task.info}</textarea>
+                <button onclick="removeAdminTask(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; width:100%; text-align:right;">🗑 Löschen</button>
             `;
             list.appendChild(div);
         });
@@ -185,18 +213,6 @@
         document.getElementById('saveBtn').innerText = hasUnsavedChanges ? "💾 Änderungen speichern" : "✔ Gespeichert";
     }
 
-    function syncCurrentInputs() {
-        const titles = document.querySelectorAll('.task-title');
-        const infos = document.querySelectorAll('.task-info');
-        const updatedTasks = [];
-        titles.forEach((input, i) => {
-            if (input.value.trim() !== "") {
-                updatedTasks.push({ title: input.value, info: infos[i].value, completed: false });
-            }
-        });
-        return updatedTasks;
-    }
-
     function addAdminTask() {
         questState = syncCurrentInputs();
         questState.push({ title: "", info: "", completed: false });
@@ -211,18 +227,29 @@
         markAsUnsaved();
     }
 
+    function syncCurrentInputs() {
+        const titles = document.querySelectorAll('.task-title');
+        const infos = document.querySelectorAll('.task-info');
+        return Array.from(titles).map((t, i) => ({
+            title: t.value,
+            info: infos[i].value,
+            completed: false
+        })).filter(t => t.title.trim() !== "");
+    }
+
     function saveAdminData() {
         questState = syncCurrentInputs();
         hasUnsavedChanges = false;
-        saveToLocalStorage();
+        localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
         updateButtonStates();
         render(); 
     }
 
+    // VERBESSERTE KODIERUNG FÜR DEN LINK
     function getShareLink() {
-        const dataToEncode = questState.map(t => ({ title: t.title, info: t.info }));
-        const jsonStr = JSON.stringify(dataToEncode);
-        const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+        const dataStr = JSON.stringify(questState.map(t => ({ title: t.title, info: t.info })));
+        // Sicherer Weg für Sonderzeichen & Emojis
+        const base64 = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
         return window.location.origin + window.location.pathname + "?q=" + base64;
     }
 
@@ -230,47 +257,32 @@
         if (hasUnsavedChanges) return;
         const qrContainer = document.getElementById('qr-container');
         qrContainer.style.display = 'block';
-        setTimeout(() => {
-            new QRious({
-                element: document.getElementById('qr-canvas'),
-                value: getShareLink(),
-                size: 280,
-                level: 'H',
-                background: 'white',
-                foreground: 'black'
-            });
-            qrContainer.scrollIntoView({ behavior: 'smooth' });
-        }, 50);
+        new QRious({
+            element: document.getElementById('qr-canvas'),
+            value: getShareLink(),
+            size: 280,
+            level: 'H'
+        });
+        qrContainer.scrollIntoView({ behavior: 'smooth' });
     }
 
     function sendConfigMail() {
-        const subject = encodeURIComponent("Flex-O-Mat Konfiguration");
-        window.location.href = `mailto:?subject=${subject}&body=${encodeURIComponent(getShareLink())}`;
+        window.location.href = `mailto:?subject=Flex-O-Mat&body=${encodeURIComponent(getShareLink())}`;
     }
 
     function copyConfigLink() {
-        const dummy = document.createElement("textarea");
-        document.body.appendChild(dummy);
-        dummy.value = getShareLink();
-        dummy.select();
-        document.execCommand("copy");
-        document.body.removeChild(dummy);
-        alert("Konfiguration in Zwischenablage kopiert! 📋");
+        navigator.clipboard.writeText(getShareLink()).then(() => alert("Kopiert! 📋"));
     }
 
     function closeAdmin() {
-        if (hasUnsavedChanges && !confirm("Schließen ohne speichern?")) return;
+        if (hasUnsavedChanges && !confirm("Nicht gespeichert! Schließen?")) return;
         document.getElementById('adminPanel').style.display = 'none';
-    }
-
-    function saveToLocalStorage() {
-        score = questState.filter(t => t.completed).length * 10;
-        localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
-        localStorage.setItem('flex_score_v5', score.toString());
     }
 
     function render() {
         const list = document.getElementById('quest-list');
+        const completedCount = questState.filter(t => t.completed).length;
+        score = completedCount * 10;
         document.getElementById('score').innerText = score;
         list.innerHTML = '';
         questState.forEach((quest, i) => {
@@ -285,19 +297,13 @@
             list.appendChild(item);
         });
         
-        const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Score im Flex-O-Mat ist am Beamen 🚀");
-        const mailBody = encodeURIComponent(`Hey!
-
-Yo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. Mein Grind war heute richtig krass und ich hab die Aufgaben einfach weggemeddelt. ⚡️
-Hab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥
-
-Beste Grüße und bis bald!`);
-        document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
+        const mailBody = `Score: ${score} Sterne! 🌟`;
+        document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=Flex-O-Mat&body=${encodeURIComponent(mailBody)}`;
     }
 
     function toggleQuest(i) {
         questState[i].completed = !questState[i].completed;
-        saveToLocalStorage();
+        localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
         render();
         checkMilestones();
     }
@@ -308,39 +314,17 @@ Beste Grüße und bis bald!`);
         document.getElementById('infoModal').style.display = 'flex';
     }
 
-    // Die verbesserte Meilenstein-Funktion
     function checkMilestones() {
         const badge = document.getElementById('badge');
-        const count = questState.filter(t => t.completed).length;
-        const total = questState.length;
-        if (total === 0) return;
-
-        let currentProgress = count / total;
+        const progress = questState.filter(t => t.completed).length / questState.length;
         let emoji = "";
 
-        // Triggert nur beim ÜBERSCHREITEN der Schwelle und wenn noch nicht gefeiert
-        if (currentProgress === 1 && !achievedMilestones.m100) {
-            emoji = "🏆";
-            achievedMilestones.m100 = true;
-        } 
-        else if (currentProgress >= 0.8 && currentProgress < 1 && !achievedMilestones.m80) {
-            emoji = "🚀";
-            achievedMilestones.m80 = true;
-        } 
-        else if (currentProgress >= 0.5 && currentProgress < 0.8 && !achievedMilestones.m50) {
-            emoji = "👍";
-            achievedMilestones.m50 = true;
-        }
+        if (progress === 1 && !achievedMilestones.m100) { emoji = "🏆"; achievedMilestones.m100 = true; } 
+        else if (progress >= 0.8 && !achievedMilestones.m80) { emoji = "🚀"; achievedMilestones.m80 = true; }
+        else if (progress >= 0.5 && !achievedMilestones.m50) { emoji = "👍"; achievedMilestones.m50 = true; }
 
-        // Reset der Schwellen, falls Aufgaben wieder abgewählt werden
-        if (currentProgress < 1) achievedMilestones.m100 = false;
-        if (currentProgress < 0.8) achievedMilestones.m80 = false;
-        if (currentProgress < 0.5) achievedMilestones.m50 = false;
-
-        if (emoji !== "") {
+        if (emoji) {
             badge.innerText = emoji;
-            badge.classList.remove('show');
-            void badge.offsetWidth; // Force Reflow für Animation
             badge.classList.add('show');
             setTimeout(() => badge.classList.remove('show'), 1200);
         }
@@ -351,14 +335,15 @@ Beste Grüße und bis bald!`);
         const data = params.get('q');
         if (data) {
             try {
-                questState = JSON.parse(decodeURIComponent(escape(atob(data)))).map(t => ({ ...t, completed: false }));
-                saveToLocalStorage();
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (e) { console.error("URL-Data Error"); }
+                // Sicherer Import
+                const decoded = decodeURIComponent(atob(data).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                questState = JSON.parse(decoded).map(t => ({ ...t, completed: false }));
+                localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
+                window.history.replaceState({}, "", window.location.pathname);
+            } catch (e) { console.error("Import fehlgeschlagen"); }
         } else {
             const saved = localStorage.getItem('flex_tasks_v5');
             questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg!", completed: false}];
-            score = parseInt(localStorage.getItem('flex_score_v5')) || 0;
         }
         initIconPicker();
         render();
@@ -366,5 +351,3 @@ Beste Grüße und bis bald!`);
 </script>
 </body>
 </html>
-
-
