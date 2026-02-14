@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aufgaben Planer</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
         :root {
             --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
@@ -38,18 +38,17 @@
         .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
         .admin-btn:active { transform: scale(0.98); }
 
-        /* Export Button Gruppe */
         .export-group { display: flex; gap: 10px; margin-top: 10px; }
         .export-group .admin-btn { flex: 1; font-size: 0.8rem; }
 
         #qr-container { display: none; margin-top: 20px; text-align: center; background: #f0f0f0; padding: 15px; border-radius: 15px; border: 2px dashed #ccc; }
-        #qrcode { display: flex; justify-content: center; margin: 10px 0; }
+        /* Canvas für die neue Bibliothek */
+        #qr-canvas { margin: 10px auto; display: block; max-width: 100%; height: auto; }
 
         .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
         .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; color: white; }
         .btn-mail { background: var(--mail-color); }
 
-        /* Badge Mitte */
         #badge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8rem; z-index: 4000; pointer-events: none; transition: transform 0.5s; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         #badge.show { transform: translate(-50%, -50%) scale(1.2); }
 
@@ -84,7 +83,7 @@
 
     <div id="qr-container">
         <p style="font-weight: bold; margin: 0; font-size: 0.9rem; color: var(--success);">Link ist bereit!</p>
-        <div id="qrcode"></div>
+        <canvas id="qr-canvas"></canvas>
     </div>
 
     <button class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white; margin-top: 25px;">Zurück zur App</button>
@@ -182,7 +181,7 @@
     }
 
     function addAdminTask() {
-        questState = syncCurrentInputs(); 
+        questState = syncCurrentInputs();
         questState.push({ title: "", info: "", completed: false });
         renderAdmin();
         markAsUnsaved();
@@ -211,14 +210,28 @@
         return window.location.origin + window.location.pathname + "?q=" + base64;
     }
 
-    // 1. QR Code
+    // 1. QR Code (MIT NEUER BIBLIOTHEK QRIOUS)
     function generateQR() {
         if (hasUnsavedChanges) return;
-        const link = getShareLink();
-        const qrDiv = document.getElementById("qrcode");
-        qrDiv.innerHTML = "";
-        new QRCode(qrDiv, { text: link, width: 180, height: 180 });
-        document.getElementById('qr-container').style.display = 'block';
+        
+        try {
+            const link = getShareLink();
+            
+            // Erst anzeigen, dann zeichnen!
+            document.getElementById('qr-container').style.display = 'block';
+
+            // Neue Bibliothek QRious verwenden
+            new QRious({
+                element: document.getElementById('qr-canvas'),
+                value: link,
+                size: 200,
+                level: 'L' // Low Error Correction = Mehr Platz für Daten!
+            });
+
+        } catch(e) {
+            console.error(e);
+            alert("Fehler: " + e.message);
+        }
     }
 
     // 2. Mail Konfiguration
@@ -235,7 +248,6 @@
         if (hasUnsavedChanges) return;
         const link = getShareLink();
         
-        // Trick für Mobile Copy
         const dummy = document.createElement("textarea");
         document.body.appendChild(dummy);
         dummy.value = link;
@@ -243,7 +255,7 @@
         document.execCommand("copy");
         document.body.removeChild(dummy);
         
-        alert("✅ Link in die Zwischenablage kopiert! Du kannst ihn jetzt als Backup speichern oder verschicken.");
+        alert("✅ Link kopiert!");
     }
 
     function closeAdmin() {
@@ -257,8 +269,8 @@
 
     function saveToLocalStorage() {
         score = questState.filter(t => t.completed).length * 10;
-        localStorage.setItem('tasks_v5', JSON.stringify(questState));
-        localStorage.setItem('score_v5', score.toString());
+        localStorage.setItem('tasks_v6', JSON.stringify(questState));
+        localStorage.setItem('score_v6', score.toString());
     }
 
     function render() {
@@ -326,9 +338,9 @@
     // Start
     loadFromUrl();
     if (questState.length === 0) {
-        const saved = localStorage.getItem('tasks_v5');
+        const saved = localStorage.getItem('tasks_v6');
         questState = saved ? JSON.parse(saved) : [{title: "Beispiel", info: "Klicke 5x oben!"}];
-        score = parseInt(localStorage.getItem('score_v5')) || 0;
+        score = parseInt(localStorage.getItem('score_v6')) || 0;
     }
     render();
 </script>
