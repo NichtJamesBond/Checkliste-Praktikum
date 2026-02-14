@@ -15,8 +15,9 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
         .app-container { background: white; padding: 2rem; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 400px; min-height: 620px; display: flex; flex-direction: column; position: relative; }
         
-        .header { text-align: center; margin-bottom: 25px; cursor: pointer; user-select: none; }
-        .score-board { background: var(--accent); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; color: #000; box-shadow: 0 4px 0 #e1b12c; }
+        /* Optimierter Header-Abstand */
+        .header { text-align: center; margin-bottom: 35px; cursor: pointer; user-select: none; }
+        .score-board { background: var(--accent); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; color: #000; box-shadow: 0 4px 0 #e1b12c; margin-top: 15px; }
 
         .quest-list { list-style: none; padding: 0; flex-grow: 1; }
         .quest-item { background: white; border: 2px solid #f0f0f0; margin: 10px 0; padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 10px; }
@@ -114,7 +115,9 @@
         {i: "💼", t: "Beruf"}, {i: "📱", t: "Handy"}, {i: "⚡", t: "Blitz"}, {i: "💡", t: "Licht"}, 
         {i: "❗", t: "Achtung"}, {i: "❓", t: "Frage"}, {i: "🤔", t: "Reflexion"}, {i: "🎓", t: "Zertifikat"}, 
         {i: "🦆", t: "Ente"}, {i: "📖", t: "Seite"}, {i: "💻", t: "Computer"}, {i: "😂", t: "Lachen"}, 
-        {i: "😴", t: "Schlafen"}, {i: "☀️", t: "Tag"}, {i: "🌙", t: "Nacht"}, {i: "📸", t: "Foto"}
+        {i: "😴", t: "Schlafen"}, {i: "☀️", t: "Tag"}, {i: "🌙", t: "Nacht"}, {i: "📸", t: "Foto"},
+        {i: "🚗", t: "Auto"}, {i: "🚆", t: "Bahn"}, {i: "🔥", t: "Feuer"}, {i: "☄️", t: "Flamme"},
+        {i: "🐿️", t: "Eichhörnchen"}, {i: "🐘", t: "Elefant"}, {i: "🐱", t: "Katze"}, {i: "🐟", t: "Fisch"}
     ];
 
     function initIconPicker() {
@@ -245,8 +248,8 @@
 
     function saveToLocalStorage() {
         score = questState.filter(t => t.completed).length * 10;
-        localStorage.setItem('flex_tasks_v1', JSON.stringify(questState));
-        localStorage.setItem('flex_score_v1', score.toString());
+        localStorage.setItem('flex_tasks_v2', JSON.stringify(questState));
+        localStorage.setItem('flex_score_v2', score.toString());
     }
 
     function render() {
@@ -265,12 +268,17 @@
             list.appendChild(item);
         });
         
+        // NEUES MAIL FORMAT MIT ABSTAND
         const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Score im Flex-O-Mat ist am Beamen 🚀");
-        const mailBody = encodeURIComponent(`Yo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. Mein Grind war heute richtig krass und ich hab die Aufgaben einfach weggemeddelt. ⚡️
+        const mailBody = encodeURIComponent(`Hey!
+
+Yo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. Mein Grind war heute richtig krass und ich hab die Aufgaben einfach weggemeddelt. ⚡️
 
 Ich hab heute richtig krass ge-GLIMPFT und die Aufgaben ganz entspannt weg-GESCHLONZT. Schau dir meinen Score an, ich bin heute der absolute FLEX-O-MAT! 🔥
 
-Hab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥`);
+Hab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥
+
+Beste Grüße und bis bald!`);
         
         document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
     }
@@ -318,9 +326,9 @@ Hab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gech
     initIconPicker();
     loadFromUrl();
     if (questState.length === 0) {
-        const saved = localStorage.getItem('flex_tasks_v1');
+        const saved = localStorage.getItem('flex_tasks_v2');
         questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg beim Flexen!"}];
-        score = parseInt(localStorage.getItem('flex_score_v1')) || 0;
+        score = parseInt(localStorage.getItem('flex_score_v2')) || 0;
     }
     render();
 </script>
