@@ -305,8 +305,9 @@
             list.appendChild(item);
         });
         
-        const mailBody = `Score: ${score} Sterne! 🌟`;
-        document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=Flex-O-Mat&body=${encodeURIComponent(mailBody)}`;
+        const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Score im Flex-O-Mat ist am Beamen 🚀");
+        const mailBody = encodeURIComponent(`Hey!\n\nYo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. Mein Grind war heute richtig krass und ich hab die Aufgaben einfach weggemeddelt. ⚡️\n\nIch hab heute richtig krass ge-GLIMPFT und die Aufgaben ganz entspannt weg-GESCHLONZT. Schau dir meinen Score an, ich bin heute der absolute FLEX-O-MAT! 🔥\n\nHab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥\n\nBeste Grüße und bis bald!`);
+        document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
     }
 
     function toggleQuest(i) {
@@ -359,4 +360,5 @@
 </script>
 </body>
 </html>
+
 
