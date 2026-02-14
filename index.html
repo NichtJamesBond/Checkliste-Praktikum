@@ -13,7 +13,6 @@
             --danger: #ff7675;
         }
         
-        /* Grundlayout fixiert */
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background: var(--bg); 
@@ -25,6 +24,7 @@
             min-height: 100vh;
         }
 
+        /* APP-CONTAINER (Handy-Look) */
         .app-container { 
             background: white; 
             padding: 2rem; 
@@ -35,15 +35,12 @@
             min-height: 620px; 
             display: flex; 
             flex-direction: column; 
-            position: relative; /* Wichtig für absolutes Admin-Panel */
-            overflow: hidden;
+            position: relative; 
         }
         
-        /* HEADER & SCORE */
         .header { text-align: center; margin-bottom: 45px; cursor: pointer; user-select: none; }
         .score-board { background: var(--accent); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; color: #000; box-shadow: 0 4px 0 #e1b12c; margin-top: 20px; }
 
-        /* LISTEN & ITEMS */
         .quest-list { list-style: none; padding: 0; flex-grow: 1; }
         .quest-item { background: white; border: 2px solid #f0f0f0; margin: 10px 0; padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 10px; }
         .quest-item.done { background: #e8fcf3; border-color: var(--success); }
@@ -55,35 +52,40 @@
         .check-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; }
         .done .check-circle { background: var(--success); border-color: var(--success); color: white; }
 
-        /* BACK-END PANEL (Absolute Überlagerung) */
+        /* BACK-END PANEL (Vollbild) */
         #adminPanel { 
             display: none; 
-            position: absolute; 
+            position: fixed; 
             top: 0; 
             left: 0; 
             width: 100%; 
             height: 100%; 
             background: white; 
-            z-index: 2000; 
-            padding: 20px; 
+            z-index: 5000; 
+            padding: 40px; 
             box-sizing: border-box; 
             overflow-y: auto; 
-            border: 3px solid var(--primary);
-            border-radius: 30px;
         }
 
-        .admin-task-item { background: #f9f9f9; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; }
-        .central-icon-picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; background: #f0f0f0; padding: 12px; border-radius: 15px; }
-        .icon-choice { cursor: pointer; font-size: 1.4rem; padding: 5px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .admin-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .admin-task-item { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .admin-input.task-title { flex: 1; min-width: 200px; font-weight: bold; }
+        .admin-input.task-info { flex: 2; min-width: 200px; }
+        
+        .central-icon-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; background: #f0f0f0; padding: 15px; border-radius: 15px; }
+        .icon-choice { cursor: pointer; font-size: 1.8rem; padding: 8px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.1s; }
+        .icon-choice:hover { transform: scale(1.2); background: var(--accent); }
 
-        .admin-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; font-family: inherit; }
-        .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .admin-btn:disabled { background: #ccc !important; color: #888 !important; }
+        .admin-input { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1rem; }
+        .admin-btn { padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; font-size: 1rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .admin-btn:hover { opacity: 0.9; }
+        .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; }
+        
+        .delete-btn { color: white; background: var(--danger); border: none; cursor: pointer; padding: 10px; border-radius: 8px; }
 
-        .export-group { display: flex; gap: 10px; margin-top: 10px; }
-        .export-group .admin-btn { flex: 1; font-size: 0.8rem; }
-
-        #qr-container { display: none; margin-top: 20px; text-align: center; background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed var(--success); }
+        .export-group { display: flex; gap: 15px; margin-top: 20px; }
+        
+        #qr-container { display: none; margin-top: 30px; text-align: center; background: #fff; padding: 20px; border-radius: 20px; border: 3px dashed var(--success); max-width: 400px; margin-left: auto; margin-right: auto; }
         #qr-canvas { margin: 10px auto; display: block; max-width: 100%; }
 
         .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
@@ -91,10 +93,10 @@
         .btn-mail { background: var(--mail-color); }
 
         /* BADGE ANIMATION */
-        #badge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8rem; z-index: 4000; pointer-events: none; transition: transform 0.5s; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        #badge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8rem; z-index: 6000; pointer-events: none; transition: transform 0.5s; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         #badge.show { transform: translate(-50%, -50%) scale(1.2); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 3000; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 4000; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
     </style>
 </head>
@@ -110,39 +112,36 @@
     </div>
 </div>
 
-<div class="app-container">
-    
-    <div id="adminPanel">
-        <h2 style="color: var(--primary); margin: 0 0 15px 0;">Back-End ⚙️</h2>
-        <div id="adminTaskList"></div>
-        <button class="admin-btn" onclick="addAdminTask()" style="background: #eee; color: #333;">+ Neue Aufgabe hinzufügen</button>
-        
-        <div class="central-icon-picker" id="centralPicker"></div>
-        
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-        <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white; font-size: 1.1rem; box-shadow: 0 4px 0 #4834d4;">💾 Änderungen speichern</button>
-        <button id="qrBtn" class="admin-btn" onclick="generateQR()" style="background: var(--success); color: white; margin-top:15px;" disabled>📱 QR-Code anzeigen</button>
-        
-        <div class="export-group">
-            <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background: var(--mail-color); color: white;" disabled>📧 Konfig Mail</button>
-            <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background: #636e72; color: white;" disabled>📋 Link kopieren</button>
-        </div>
-
-        <div id="qr-container">
-            <p style="color: var(--success); font-weight: bold; margin-bottom: 5px;">Scan bereit! ✅</p>
-            <canvas id="qr-canvas"></canvas>
-        </div>
-        
-        <button class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white; margin-top: 25px;">Zurück zur App</button>
+<div id="adminPanel">
+    <div class="admin-header-row">
+        <h2 style="color: var(--primary); margin: 0; font-size: 2rem;">Flex-O-Mat Back-End ⚙️</h2>
+        <button class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white;">App Modus 📱</button>
     </div>
+    <div id="adminTaskList"></div>
+    <button class="admin-btn" onclick="addAdminTask()" style="background: #eee; color: #333; width: 100%; margin-bottom: 20px;">+ Neue Aufgabe hinzufügen</button>
+    <h3 style="margin-bottom: 5px;">Icons</h3>
+    <div class="central-icon-picker" id="centralPicker"></div>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white; flex: 1;">💾 Änderungen speichern</button>
+        <button id="qrBtn" class="admin-btn" onclick="generateQR()" style="background: var(--success); color: white; flex: 1;" disabled>📱 QR-Code anzeigen</button>
+    </div>
+    <div class="export-group">
+        <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background: var(--mail-color); color: white;" disabled>📧 Konfig senden</button>
+        <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background: #636e72; color: white;" disabled>📋 Link kopieren</button>
+    </div>
+    <div id="qr-container">
+        <p style="color: var(--success); font-weight: bold; margin-bottom: 5px;">Scan bereit! ✅</p>
+        <canvas id="qr-canvas"></canvas>
+    </div>
+</div>
 
+<div class="app-container">
     <div class="header" onclick="handleHeaderClick()">
         <h1 style="margin:0; color: var(--primary);">Flex-O-Mat 🎯</h1>
         <div class="score-board"><span id="score">0</span> <span>⭐</span></div>
     </div>
-
     <div id="quest-list" class="quest-list"></div>
-
     <div class="footer-actions">
         <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail verschicken</a>
     </div>
@@ -207,9 +206,10 @@
             const div = document.createElement('div');
             div.className = 'admin-task-item';
             div.innerHTML = `
+                <span style="font-weight:bold; color:#888; width:30px;">${i+1}.</span>
                 <input type="text" class="admin-input task-title" value="${task.title}" placeholder="Aufgabe..." oninput="markAsUnsaved()">
-                <textarea class="admin-input task-info" placeholder="Infos..." oninput="markAsUnsaved()">${task.info}</textarea>
-                <button onclick="removeAdminTask(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-size:0.8rem; width:100%; text-align:right;">🗑 Löschen</button>
+                <textarea class="admin-input task-info" placeholder="Infos..." oninput="markAsUnsaved()" rows="1">${task.info}</textarea>
+                <button class="delete-btn" onclick="removeAdminTask(${i})">🗑</button>
             `;
             list.appendChild(div);
         });
@@ -329,15 +329,7 @@
         });
         
         const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Score im Flex-O-Mat ist am Beamen 🚀");
-        const mailBody = encodeURIComponent(`Hey!
-
-Yo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. Mein Grind war heute richtig krass und ich hab die Aufgaben einfach weggemeddelt. ⚡️
-
-Ich hab heute richtig krass ge-GLIMPFT und die Aufgaben ganz entspannt weg-GESCHLONZT. Schau dir meinen Score an, ich bin heute der absolute FLEX-O-MAT! 🔥
-
-Hab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥
-
-Beste Grüße und bis bald!`);
+        const mailBody = encodeURIComponent(`Hey!\n\nYo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. Mein Grind war heute richtig krass und ich hab die Aufgaben einfach weggemeddelt. ⚡️\n\nIch hab heute richtig krass ge-GLIMPFT und die Aufgaben ganz entspannt weg-GESCHLONZT. Schau dir meinen Score an, ich bin heute der absolute FLEX-O-MAT! 🔥\n\nHab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥\n\nBeste Grüße und bis bald!`);
         document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
     }
 
@@ -385,7 +377,7 @@ Beste Grüße und bis bald!`);
             badge.classList.remove('show');
             void badge.offsetWidth; 
             badge.classList.add('show');
-            setTimeout(() => badge.classList.remove('show'), 1500);
+            setTimeout(() => badge.classList.remove('show'), 1200);
         }
     }
 
