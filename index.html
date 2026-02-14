@@ -40,11 +40,8 @@
         .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; }
 
-        .export-group { display: flex; gap: 10px; margin-top: 10px; }
-        .export-group .admin-btn { flex: 1; font-size: 0.8rem; }
-
         #qr-container { display: none; margin-top: 20px; text-align: center; background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed var(--success); }
-        #qr-canvas { margin: 10px auto; display: block; max-width: 100%; }
+        #qr-canvas { margin: 10px auto; display: block; max-width: 100%; width: 200px !important; height: 200px !important; }
 
         .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
         .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; color: white; }
@@ -65,18 +62,12 @@
     <h2 style="color: var(--primary); margin: 0 0 15px 0;">Lehrer-Bereich 👨‍🏫</h2>
     <div id="adminTaskList"></div>
     <button class="admin-btn" onclick="addAdminTask()" style="background: #eee; color: #333;">+ Neue Aufgabe hinzufügen</button>
-    
     <div class="central-icon-picker" id="centralPicker"></div>
-    
     <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-    <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white; font-size: 1.1rem; box-shadow: 0 4px 0 #4834d4;">💾 Änderungen speichern</button>
+    <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white;">💾 Änderungen speichern</button>
     <button id="qrBtn" class="admin-btn" onclick="generateQR()" style="background: var(--success); color: white; margin-top:15px;" disabled>📱 QR-Code anzeigen</button>
-    <div class="export-group">
-        <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background: var(--mail-color); color: white;" disabled>📧 Per Mail senden</button>
-        <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background: #636e72; color: white;" disabled>📋 Link kopieren</button>
-    </div>
     <div id="qr-container">
-        <p style="color: var(--success); font-weight: bold; margin-bottom: 5px;">Link erfolgreich generiert! ✅</p>
+        <p style="color: var(--success); font-weight: bold; margin-bottom: 5px;">QR-Code ist am Start! ✅</p>
         <canvas id="qr-canvas"></canvas>
     </div>
     <button class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white; margin-top: 25px;">Zurück zur App</button>
@@ -84,7 +75,7 @@
 
 <div id="infoModal" class="modal-overlay">
     <div class="modal-content">
-        <h3 id="modalTitle" style="color:var(--primary);"></h3>
+        <h3 id="modalTitle"></h3>
         <p id="modalDescription"></p>
         <button class="action-btn btn-mail" onclick="document.getElementById('infoModal').style.display='none'">Check ich!</button>
     </div>
@@ -107,7 +98,6 @@
     let clickCount = 0;
     let hasUnsavedChanges = false;
 
-    // Erweiterte Icon-Liste inklusive Zahlen
     const iconData = [
         {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
         {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
@@ -129,19 +119,15 @@
             const span = document.createElement('span');
             span.className = 'icon-choice';
             span.innerText = item.i;
-            span.title = item.t;
-            span.onclick = () => addIconToLastTask(item.i);
+            span.onclick = () => {
+                const titles = document.querySelectorAll('.task-title');
+                if (titles.length > 0) {
+                    titles[titles.length - 1].value += " " + item.i;
+                    markAsUnsaved();
+                }
+            };
             picker.appendChild(span);
         });
-    }
-
-    function addIconToLastTask(icon) {
-        const titles = document.querySelectorAll('.task-title');
-        if (titles.length > 0) {
-            const lastInput = titles[titles.length - 1];
-            lastInput.value = lastInput.value + " " + icon;
-            markAsUnsaved();
-        }
     }
 
     function handleHeaderClick() {
@@ -163,7 +149,7 @@
             div.innerHTML = `
                 <input type="text" class="admin-input task-title" value="${task.title}" placeholder="Aufgabe..." oninput="markAsUnsaved()">
                 <textarea class="admin-input task-info" placeholder="Infos..." oninput="markAsUnsaved()">${task.info}</textarea>
-                <button onclick="removeAdminTask(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-size:0.8rem; width:100%; text-align:right;">🗑 Löschen</button>
+                <button onclick="removeAdminTask(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; width:100%; text-align:right;">🗑 Löschen</button>
             `;
             list.appendChild(div);
         });
@@ -177,95 +163,65 @@
     }
 
     function updateButtonStates() {
-        const btns = [document.getElementById('qrBtn'), document.getElementById('mailConfigBtn'), document.getElementById('copyConfigBtn')];
-        const saveBtn = document.getElementById('saveBtn');
-        btns.forEach(btn => btn.disabled = hasUnsavedChanges);
-        saveBtn.innerText = hasUnsavedChanges ? "💾 Änderungen speichern" : "✔ Gespeichert";
-    }
-
-    function syncCurrentInputs() {
-        const titles = document.querySelectorAll('.task-title');
-        const infos = document.querySelectorAll('.task-info');
-        const updatedTasks = [];
-        titles.forEach((input, i) => {
-            if (input.value.trim() !== "") {
-                updatedTasks.push({ title: input.value, info: infos[i].value, completed: false });
-            }
-        });
-        return updatedTasks;
+        document.getElementById('qrBtn').disabled = hasUnsavedChanges;
+        document.getElementById('saveBtn').innerText = hasUnsavedChanges ? "💾 Jetzt speichern" : "✔ Gespeichert";
     }
 
     function addAdminTask() {
-        questState = syncCurrentInputs();
         questState.push({ title: "", info: "", completed: false });
         renderAdmin();
         markAsUnsaved();
     }
 
     function removeAdminTask(i) {
-        questState = syncCurrentInputs();
         questState.splice(i, 1);
         renderAdmin();
         markAsUnsaved();
     }
 
     function saveAdminData() {
-        questState = syncCurrentInputs();
+        const titles = document.querySelectorAll('.task-title');
+        const infos = document.querySelectorAll('.task-info');
+        questState = [];
+        titles.forEach((input, i) => {
+            if (input.value.trim() !== "") {
+                questState.push({ title: input.value, info: infos[i].value, completed: false });
+            }
+        });
         hasUnsavedChanges = false;
         saveToLocalStorage();
         updateButtonStates();
         render(); 
     }
 
-    function getShareLink() {
-        const dataToEncode = questState.map(t => ({ title: t.title, info: t.info }));
-        const jsonStr = JSON.stringify(dataToEncode);
-        const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
-        return window.location.origin + window.location.pathname + "?q=" + base64;
-    }
-
     function generateQR() {
         if (hasUnsavedChanges) return;
-        const qrContainer = document.getElementById('qr-container');
-        qrContainer.style.display = 'block';
-        new QRious({
-            element: document.getElementById('qr-canvas'),
-            value: getShareLink(),
-            size: 250,
-            level: 'M',
-            background: 'white',
-            foreground: 'black'
-        });
-    }
-
-    function sendConfigMail() {
-        const subject = encodeURIComponent("Flex-O-Mat Konfiguration");
-        window.location.href = `mailto:?subject=${subject}&body=${encodeURIComponent(getShareLink())}`;
-    }
-
-    function copyConfigLink() {
-        const dummy = document.createElement("textarea");
-        document.body.appendChild(dummy);
-        dummy.value = getShareLink();
-        dummy.select();
-        document.execCommand("copy");
-        document.body.removeChild(dummy);
-        alert("Konfiguration kopiert!");
-    }
-
-    function closeAdmin() {
-        if (hasUnsavedChanges && !confirm("Schließen ohne speichern?")) return;
-        document.getElementById('adminPanel').style.display = 'none';
+        const container = document.getElementById('qr-container');
+        container.style.display = 'block';
+        
+        // Timeout fix für Rendering
+        setTimeout(() => {
+            const data = questState.map(t => ({ title: t.title, info: t.info }));
+            const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+            const url = window.location.origin + window.location.pathname + "?q=" + base64;
+            
+            new QRious({
+                element: document.getElementById('qr-canvas'),
+                value: url,
+                size: 300,
+                level: 'H'
+            });
+        }, 50);
     }
 
     function saveToLocalStorage() {
-        score = questState.filter(t => t.completed).length * 10;
-        localStorage.setItem('flex_tasks_v4', JSON.stringify(questState));
-        localStorage.setItem('flex_score_v4', score.toString());
+        localStorage.setItem('flex_v_FINAL_tasks', JSON.stringify(questState));
+        localStorage.setItem('flex_v_FINAL_score', score.toString());
     }
 
     function render() {
         const list = document.getElementById('quest-list');
+        score = questState.filter(t => t.completed).length * 10;
         document.getElementById('score').innerText = score;
         list.innerHTML = '';
         questState.forEach((quest, i) => {
@@ -290,7 +246,6 @@ Ich hab heute richtig krass ge-GLIMPFT und die Aufgaben ganz entspannt weg-GESCH
 Hab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥
 
 Beste Grüße und bis bald!`);
-        
         document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
     }
 
@@ -298,7 +253,6 @@ Beste Grüße und bis bald!`);
         questState[i].completed = !questState[i].completed;
         saveToLocalStorage();
         render();
-        checkMilestones();
     }
 
     function showInfo(i) {
@@ -307,41 +261,24 @@ Beste Grüße und bis bald!`);
         document.getElementById('infoModal').style.display = 'flex';
     }
 
-    function checkMilestones() {
-        const badge = document.getElementById('badge');
-        const count = questState.filter(t => t.completed).length;
-        const total = questState.length;
-        if (total === 0) return;
-        badge.classList.remove('show');
-        setTimeout(() => {
-            if (count === total) badge.innerText = "🏆";
-            else if (count >= total * 0.5) badge.innerText = "🥈";
-            else return;
-            badge.classList.add('show');
-            setTimeout(() => badge.classList.remove('show'), 2500);
-        }, 100);
+    function closeAdmin() {
+        document.getElementById('adminPanel').style.display = 'none';
     }
 
-    function loadFromUrl() {
+    window.onload = () => {
         const params = new URLSearchParams(window.location.search);
         const data = params.get('q');
         if (data) {
-            try {
-                questState = JSON.parse(decodeURIComponent(escape(atob(data)))).map(t => ({ ...t, completed: false }));
-                saveToLocalStorage();
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (e) {}
+            questState = JSON.parse(decodeURIComponent(escape(atob(data)))).map(t => ({ ...t, completed: false }));
+            saveToLocalStorage();
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } else {
+            const saved = localStorage.getItem('flex_v_FINAL_tasks');
+            questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg beim Flexen!", completed: false}];
         }
-    }
-
-    initIconPicker();
-    loadFromUrl();
-    if (questState.length === 0) {
-        const saved = localStorage.getItem('flex_tasks_v4');
-        questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg beim Flexen!"}];
-        score = parseInt(localStorage.getItem('flex_score_v4')) || 0;
-    }
-    render();
+        initIconPicker();
+        render();
+    };
 </script>
 </body>
 </html>
