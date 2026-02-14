@@ -15,8 +15,9 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
         .app-container { background: white; padding: 2rem; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 400px; min-height: 620px; display: flex; flex-direction: column; position: relative; }
         
-        .header { text-align: center; margin-bottom: 35px; cursor: pointer; user-select: none; }
-        .score-board { background: var(--accent); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; color: #000; box-shadow: 0 4px 0 #e1b12c; margin-top: 15px; }
+        /* Vergrößerter Abstand zwischen Titel und Score */
+        .header { text-align: center; margin-bottom: 45px; cursor: pointer; user-select: none; }
+        .score-board { background: var(--accent); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; color: #000; box-shadow: 0 4px 0 #e1b12c; margin-top: 20px; }
 
         .quest-list { list-style: none; padding: 0; flex-grow: 1; }
         .quest-item { background: white; border: 2px solid #f0f0f0; margin: 10px 0; padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 10px; }
@@ -41,7 +42,7 @@
         .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; }
 
         #qr-container { display: none; margin-top: 20px; text-align: center; background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed var(--success); }
-        #qr-canvas { margin: 10px auto; display: block; max-width: 100%; width: 200px !important; height: 200px !important; }
+        #qr-canvas { margin: 10px auto; display: block; max-width: 100%; }
 
         .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
         .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; color: white; }
@@ -62,20 +63,24 @@
     <h2 style="color: var(--primary); margin: 0 0 15px 0;">Lehrer-Bereich 👨‍🏫</h2>
     <div id="adminTaskList"></div>
     <button class="admin-btn" onclick="addAdminTask()" style="background: #eee; color: #333;">+ Neue Aufgabe hinzufügen</button>
+    
     <div class="central-icon-picker" id="centralPicker"></div>
+    
     <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-    <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white;">💾 Änderungen speichern</button>
+    <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white; font-size: 1.1rem; box-shadow: 0 4px 0 #4834d4;">💾 Änderungen speichern</button>
     <button id="qrBtn" class="admin-btn" onclick="generateQR()" style="background: var(--success); color: white; margin-top:15px;" disabled>📱 QR-Code anzeigen</button>
+    
     <div id="qr-container">
-        <p style="color: var(--success); font-weight: bold; margin-bottom: 5px;">QR-Code ist am Start! ✅</p>
+        <p style="color: var(--success); font-weight: bold; margin-bottom: 5px;">Scan bereit! ✅</p>
         <canvas id="qr-canvas"></canvas>
     </div>
+    
     <button class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white; margin-top: 25px;">Zurück zur App</button>
 </div>
 
 <div id="infoModal" class="modal-overlay">
     <div class="modal-content">
-        <h3 id="modalTitle"></h3>
+        <h3 id="modalTitle" style="color:var(--primary);"></h3>
         <p id="modalDescription"></p>
         <button class="action-btn btn-mail" onclick="document.getElementById('infoModal').style.display='none'">Check ich!</button>
     </div>
@@ -101,15 +106,10 @@
     const iconData = [
         {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
         {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
-        {i: "📄", t: "Deckblatt"}, {i: "🏠", t: "Einrichtung"}, {i: "📊", t: "Bericht"}, {i: "⚖️", t: "Regeln"}, 
-        {i: "📜", t: "Paragrafen"}, {i: "📁", t: "Doku"}, {i: "📅", t: "Wochenbericht"}, {i: "👋", t: "Vorstellung"}, 
-        {i: "🏢", t: "Betrieb"}, {i: "🛠️", t: "Arbeiten"}, {i: "📐", t: "Zeichnung"}, {i: "✍️", t: "Skizze"}, 
-        {i: "💼", t: "Beruf"}, {i: "📱", t: "Handy"}, {i: "⚡", t: "Blitz"}, {i: "💡", t: "Licht"}, 
-        {i: "❗", t: "Achtung"}, {i: "❓", t: "Frage"}, {i: "🤔", t: "Reflexion"}, {i: "🎓", t: "Zertifikat"}, 
-        {i: "🦆", t: "Ente"}, {i: "📖", t: "Seite"}, {i: "💻", t: "Computer"}, {i: "😂", t: "Lachen"}, 
-        {i: "😴", t: "Schlafen"}, {i: "☀️", t: "Tag"}, {i: "🌙", t: "Nacht"}, {i: "📸", t: "Foto"},
         {i: "🚗", t: "Auto"}, {i: "🚆", t: "Bahn"}, {i: "🔥", t: "Feuer"}, {i: "☄️", t: "Flamme"},
-        {i: "🐿️", t: "Eichhörnchen"}, {i: "🐘", t: "Elefant"}, {i: "🐱", t: "Katze"}, {i: "🐟", t: "Fisch"}
+        {i: "🐿️", t: "Eichhörnchen"}, {i: "🐘", t: "Elefant"}, {i: "🐱", t: "Katze"}, {i: "🐟", t: "Fisch"},
+        {i: "📄", t: "Deckblatt"}, {i: "🏠", t: "Einrichtung"}, {i: "📊", t: "Bericht"}, {i: "👋", t: "Vorstellung"}, 
+        {i: "🏢", t: "Betrieb"}, {i: "🛠️", t: "Arbeiten"}, {i: "💼", t: "Beruf"}, {i: "🤔", t: "Reflexion"}
     ];
 
     function initIconPicker() {
@@ -119,15 +119,18 @@
             const span = document.createElement('span');
             span.className = 'icon-choice';
             span.innerText = item.i;
-            span.onclick = () => {
-                const titles = document.querySelectorAll('.task-title');
-                if (titles.length > 0) {
-                    titles[titles.length - 1].value += " " + item.i;
-                    markAsUnsaved();
-                }
-            };
+            span.onclick = () => addIconToLastTask(item.i);
             picker.appendChild(span);
         });
+    }
+
+    function addIconToLastTask(icon) {
+        const titles = document.querySelectorAll('.task-title');
+        if (titles.length > 0) {
+            const lastInput = titles[titles.length - 1];
+            lastInput.value = lastInput.value + " " + icon;
+            markAsUnsaved();
+        }
     }
 
     function handleHeaderClick() {
@@ -149,7 +152,7 @@
             div.innerHTML = `
                 <input type="text" class="admin-input task-title" value="${task.title}" placeholder="Aufgabe..." oninput="markAsUnsaved()">
                 <textarea class="admin-input task-info" placeholder="Infos..." oninput="markAsUnsaved()">${task.info}</textarea>
-                <button onclick="removeAdminTask(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; width:100%; text-align:right;">🗑 Löschen</button>
+                <button onclick="removeAdminTask(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-size:0.8rem; width:100%; text-align:right;">🗑 Löschen</button>
             `;
             list.appendChild(div);
         });
@@ -164,64 +167,82 @@
 
     function updateButtonStates() {
         document.getElementById('qrBtn').disabled = hasUnsavedChanges;
-        document.getElementById('saveBtn').innerText = hasUnsavedChanges ? "💾 Jetzt speichern" : "✔ Gespeichert";
+        document.getElementById('saveBtn').innerText = hasUnsavedChanges ? "💾 Änderungen speichern" : "✔ Gespeichert";
+    }
+
+    function syncCurrentInputs() {
+        const titles = document.querySelectorAll('.task-title');
+        const infos = document.querySelectorAll('.task-info');
+        const updatedTasks = [];
+        titles.forEach((input, i) => {
+            if (input.value.trim() !== "") {
+                updatedTasks.push({ title: input.value, info: infos[i].value, completed: false });
+            }
+        });
+        return updatedTasks;
     }
 
     function addAdminTask() {
+        questState = syncCurrentInputs();
         questState.push({ title: "", info: "", completed: false });
         renderAdmin();
         markAsUnsaved();
     }
 
     function removeAdminTask(i) {
+        questState = syncCurrentInputs();
         questState.splice(i, 1);
         renderAdmin();
         markAsUnsaved();
     }
 
     function saveAdminData() {
-        const titles = document.querySelectorAll('.task-title');
-        const infos = document.querySelectorAll('.task-info');
-        questState = [];
-        titles.forEach((input, i) => {
-            if (input.value.trim() !== "") {
-                questState.push({ title: input.value, info: infos[i].value, completed: false });
-            }
-        });
+        questState = syncCurrentInputs();
         hasUnsavedChanges = false;
         saveToLocalStorage();
         updateButtonStates();
         render(); 
     }
 
+    function getShareLink() {
+        const dataToEncode = questState.map(t => ({ title: t.title, info: t.info }));
+        const jsonStr = JSON.stringify(dataToEncode);
+        const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+        return window.location.origin + window.location.pathname + "?q=" + base64;
+    }
+
+    // FIX: QR-CODE GENERIERUNG MIT TIMEOUT
     function generateQR() {
         if (hasUnsavedChanges) return;
-        const container = document.getElementById('qr-container');
-        container.style.display = 'block';
+        const qrContainer = document.getElementById('qr-container');
+        qrContainer.style.display = 'block';
         
-        // Timeout fix für Rendering
         setTimeout(() => {
-            const data = questState.map(t => ({ title: t.title, info: t.info }));
-            const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-            const url = window.location.origin + window.location.pathname + "?q=" + base64;
-            
             new QRious({
                 element: document.getElementById('qr-canvas'),
-                value: url,
-                size: 300,
-                level: 'H'
+                value: getShareLink(),
+                size: 280,
+                level: 'H',
+                background: 'white',
+                foreground: 'black'
             });
+            qrContainer.scrollIntoView({ behavior: 'smooth' });
         }, 50);
     }
 
+    function closeAdmin() {
+        if (hasUnsavedChanges && !confirm("Schließen ohne speichern?")) return;
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
     function saveToLocalStorage() {
-        localStorage.setItem('flex_v_FINAL_tasks', JSON.stringify(questState));
-        localStorage.setItem('flex_v_FINAL_score', score.toString());
+        score = questState.filter(t => t.completed).length * 10;
+        localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
+        localStorage.setItem('flex_score_v5', score.toString());
     }
 
     function render() {
         const list = document.getElementById('quest-list');
-        score = questState.filter(t => t.completed).length * 10;
         document.getElementById('score').innerText = score;
         list.innerHTML = '';
         questState.forEach((quest, i) => {
@@ -236,6 +257,7 @@
             list.appendChild(item);
         });
         
+        // E-MAIL FORMATIERUNG (Hallo/Hey + Leerzeile + Text + Abschluss)
         const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Score im Flex-O-Mat ist am Beamen 🚀");
         const mailBody = encodeURIComponent(`Hey!
 
@@ -246,6 +268,7 @@ Ich hab heute richtig krass ge-GLIMPFT und die Aufgaben ganz entspannt weg-GESCH
 Hab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥
 
 Beste Grüße und bis bald!`);
+        
         document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
     }
 
@@ -253,6 +276,7 @@ Beste Grüße und bis bald!`);
         questState[i].completed = !questState[i].completed;
         saveToLocalStorage();
         render();
+        checkMilestones();
     }
 
     function showInfo(i) {
@@ -261,20 +285,34 @@ Beste Grüße und bis bald!`);
         document.getElementById('infoModal').style.display = 'flex';
     }
 
-    function closeAdmin() {
-        document.getElementById('adminPanel').style.display = 'none';
+    function checkMilestones() {
+        const badge = document.getElementById('badge');
+        const count = questState.filter(t => t.completed).length;
+        const total = questState.length;
+        if (total === 0) return;
+        badge.classList.remove('show');
+        setTimeout(() => {
+            if (count === total && total > 0) badge.innerText = "🏆";
+            else if (count >= total * 0.5) badge.innerText = "🥈";
+            else return;
+            badge.classList.add('show');
+            setTimeout(() => badge.classList.remove('show'), 2500);
+        }, 100);
     }
 
     window.onload = () => {
         const params = new URLSearchParams(window.location.search);
         const data = params.get('q');
         if (data) {
-            questState = JSON.parse(decodeURIComponent(escape(atob(data)))).map(t => ({ ...t, completed: false }));
-            saveToLocalStorage();
-            window.history.replaceState({}, document.title, window.location.pathname);
+            try {
+                questState = JSON.parse(decodeURIComponent(escape(atob(data)))).map(t => ({ ...t, completed: false }));
+                saveToLocalStorage();
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (e) { console.error("URL-Data Error"); }
         } else {
-            const saved = localStorage.getItem('flex_v_FINAL_tasks');
-            questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg beim Flexen!", completed: false}];
+            const saved = localStorage.getItem('flex_tasks_v5');
+            questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg!", completed: false}];
+            score = parseInt(localStorage.getItem('flex_score_v5')) || 0;
         }
         initIconPicker();
         render();
