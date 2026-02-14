@@ -15,7 +15,6 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
         .app-container { background: white; padding: 2rem; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 400px; min-height: 620px; display: flex; flex-direction: column; position: relative; }
         
-        /* Vergrößerter Abstand zwischen Titel und Score */
         .header { text-align: center; margin-bottom: 45px; cursor: pointer; user-select: none; }
         .score-board { background: var(--accent); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; color: #000; box-shadow: 0 4px 0 #e1b12c; margin-top: 20px; }
 
@@ -41,6 +40,9 @@
         .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; }
 
+        .export-group { display: flex; gap: 10px; margin-top: 10px; }
+        .export-group .admin-btn { flex: 1; font-size: 0.8rem; }
+
         #qr-container { display: none; margin-top: 20px; text-align: center; background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed var(--success); }
         #qr-canvas { margin: 10px auto; display: block; max-width: 100%; }
 
@@ -60,7 +62,7 @@
 <div id="badge"></div>
 
 <div id="adminPanel">
-    <h2 style="color: var(--primary); margin: 0 0 15px 0;">Lehrer-Bereich 👨‍🏫</h2>
+    <h2 style="color: var(--primary); margin: 0 0 15px 0;">Back-End ⚙️</h2>
     <div id="adminTaskList"></div>
     <button class="admin-btn" onclick="addAdminTask()" style="background: #eee; color: #333;">+ Neue Aufgabe hinzufügen</button>
     
@@ -68,8 +70,14 @@
     
     <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
     <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white; font-size: 1.1rem; box-shadow: 0 4px 0 #4834d4;">💾 Änderungen speichern</button>
+    
     <button id="qrBtn" class="admin-btn" onclick="generateQR()" style="background: var(--success); color: white; margin-top:15px;" disabled>📱 QR-Code anzeigen</button>
     
+    <div class="export-group">
+        <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background: var(--mail-color); color: white;" disabled>📧 Link per Mail</button>
+        <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background: #636e72; color: white;" disabled>📋 Link kopieren</button>
+    </div>
+
     <div id="qr-container">
         <p style="color: var(--success); font-weight: bold; margin-bottom: 5px;">Scan bereit! ✅</p>
         <canvas id="qr-canvas"></canvas>
@@ -103,6 +111,7 @@
     let clickCount = 0;
     let hasUnsavedChanges = false;
 
+    // Vollständige Icon-Liste wiederhergestellt
     const iconData = [
         {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
         {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
@@ -171,7 +180,12 @@
     }
 
     function updateButtonStates() {
-        document.getElementById('qrBtn').disabled = hasUnsavedChanges;
+        const btns = [
+            document.getElementById('qrBtn'), 
+            document.getElementById('mailConfigBtn'), 
+            document.getElementById('copyConfigBtn')
+        ];
+        btns.forEach(btn => btn.disabled = hasUnsavedChanges);
         document.getElementById('saveBtn').innerText = hasUnsavedChanges ? "💾 Änderungen speichern" : "✔ Gespeichert";
     }
 
@@ -216,12 +230,10 @@
         return window.location.origin + window.location.pathname + "?q=" + base64;
     }
 
-    // FIX: QR-CODE GENERIERUNG MIT TIMEOUT
     function generateQR() {
         if (hasUnsavedChanges) return;
         const qrContainer = document.getElementById('qr-container');
         qrContainer.style.display = 'block';
-        
         setTimeout(() => {
             new QRious({
                 element: document.getElementById('qr-canvas'),
@@ -233,6 +245,21 @@
             });
             qrContainer.scrollIntoView({ behavior: 'smooth' });
         }, 50);
+    }
+
+    function sendConfigMail() {
+        const subject = encodeURIComponent("Flex-O-Mat Konfiguration");
+        window.location.href = `mailto:?subject=${subject}&body=${encodeURIComponent(getShareLink())}`;
+    }
+
+    function copyConfigLink() {
+        const dummy = document.createElement("textarea");
+        document.body.appendChild(dummy);
+        dummy.value = getShareLink();
+        dummy.select();
+        document.execCommand("copy");
+        document.body.removeChild(dummy);
+        alert("Konfiguration in Zwischenablage kopiert! 📋");
     }
 
     function closeAdmin() {
@@ -262,7 +289,6 @@
             list.appendChild(item);
         });
         
-        // E-MAIL FORMATIERUNG (Hallo/Hey + Leerzeile + Text + Abschluss)
         const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Score im Flex-O-Mat ist am Beamen 🚀");
         const mailBody = encodeURIComponent(`Hey!
 
