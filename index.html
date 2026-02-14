@@ -70,7 +70,6 @@
     
     <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
     <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white; font-size: 1.1rem; box-shadow: 0 4px 0 #4834d4;">💾 Änderungen speichern</button>
-    
     <button id="qrBtn" class="admin-btn" onclick="generateQR()" style="background: var(--success); color: white; margin-top:15px;" disabled>📱 QR-Code anzeigen</button>
     
     <div class="export-group">
@@ -110,8 +109,9 @@
     let score = 0;
     let clickCount = 0;
     let hasUnsavedChanges = false;
+    // Gedächtnis für Meilensteine
+    let achievedMilestones = { m50: false, m80: false, m100: false };
 
-    // Vollständige Icon-Liste wiederhergestellt
     const iconData = [
         {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
         {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
@@ -180,11 +180,7 @@
     }
 
     function updateButtonStates() {
-        const btns = [
-            document.getElementById('qrBtn'), 
-            document.getElementById('mailConfigBtn'), 
-            document.getElementById('copyConfigBtn')
-        ];
+        const btns = [document.getElementById('qrBtn'), document.getElementById('mailConfigBtn'), document.getElementById('copyConfigBtn')];
         btns.forEach(btn => btn.disabled = hasUnsavedChanges);
         document.getElementById('saveBtn').innerText = hasUnsavedChanges ? "💾 Änderungen speichern" : "✔ Gespeichert";
     }
@@ -294,12 +290,9 @@
 
 Yo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. Mein Grind war heute richtig krass und ich hab die Aufgaben einfach weggemeddelt. ⚡️
 
-Ich hab heute richtig krass ge-GLIMPFT und die Aufgaben ganz entspannt weg-GESCHLONZT. Schau dir meinen Score an, ich bin heute der absolute FLEX-O-MAT! 🔥
-
 Hab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥
 
 Beste Grüße und bis bald!`);
-        
         document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
     }
 
@@ -316,40 +309,43 @@ Beste Grüße und bis bald!`);
         document.getElementById('infoModal').style.display = 'flex';
     }
 
+    // Die verbesserte Meilenstein-Funktion
     function checkMilestones() {
-    const badge = document.getElementById('badge');
-    const count = questState.filter(t => t.completed).length;
-    const total = questState.length;
-    if (total === 0) return;
+        const badge = document.getElementById('badge');
+        const count = questState.filter(t => t.completed).length;
+        const total = questState.length;
+        if (total === 0) return;
 
-    let currentProgress = count / total;
-    let emoji = "";
+        let currentProgress = count / total;
+        let emoji = "";
 
-    // Logik: Nur triggern, wenn Schwelle erreicht UND noch nicht gefeiert
-    if (currentProgress === 1 && !achievedMilestones.m100) {
-        emoji = "🏆";
-        achievedMilestones.m100 = true;
-    } 
-    else if (currentProgress >= 0.8 && currentProgress < 1 && !achievedMilestones.m80) {
-        emoji = "🥇";
-        achievedMilestones.m80 = true;
-    } 
-    else if (currentProgress >= 0.5 && currentProgress < 0.8 && !achievedMilestones.m50) {
-        emoji = "🥈";
-        achievedMilestones.m50 = true;
+        // Triggert nur beim ÜBERSCHREITEN der Schwelle und wenn noch nicht gefeiert
+        if (currentProgress === 1 && !achievedMilestones.m100) {
+            emoji = "🏆";
+            achievedMilestones.m100 = true;
+        } 
+        else if (currentProgress >= 0.8 && currentProgress < 1 && !achievedMilestones.m80) {
+            emoji = "🥇";
+            achievedMilestones.m80 = true;
+        } 
+        else if (currentProgress >= 0.5 && currentProgress < 0.8 && !achievedMilestones.m50) {
+            emoji = "🥈";
+            achievedMilestones.m50 = true;
+        }
+
+        // Reset der Schwellen, falls Aufgaben wieder abgewählt werden
+        if (currentProgress < 1) achievedMilestones.m100 = false;
+        if (currentProgress < 0.8) achievedMilestones.m80 = false;
+        if (currentProgress < 0.5) achievedMilestones.m50 = false;
+
+        if (emoji !== "") {
+            badge.innerText = emoji;
+            badge.classList.remove('show');
+            void badge.offsetWidth; // Force Reflow für Animation
+            badge.classList.add('show');
+            setTimeout(() => badge.classList.remove('show'), 2500);
+        }
     }
-
-    // Wenn eine Aufgabe wieder abgewählt wird, Meilenstein zurücksetzen
-    if (currentProgress < 1) achievedMilestones.m100 = false;
-    if (currentProgress < 0.8) achievedMilestones.m80 = false;
-    if (currentProgress < 0.5) achievedMilestones.m50 = false;
-
-    if (emoji !== "") {
-        badge.innerText = emoji;
-        badge.classList.add('show');
-        setTimeout(() => badge.classList.remove('show'), 2500);
-    }
-}
 
     window.onload = () => {
         const params = new URLSearchParams(window.location.search);
