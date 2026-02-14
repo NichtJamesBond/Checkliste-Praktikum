@@ -31,7 +31,7 @@
 
         /* Lehrer-Panel */
         #adminPanel { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; border-radius: 30px; overflow-y: auto; border: 3px solid var(--primary); }
-        .admin-task-item { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; }
+        .admin-task-item { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; position: relative; }
         .admin-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
         .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
         
@@ -47,7 +47,18 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 3000; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
 
-        #badge { position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 5rem; z-index: 100; pointer-events: none; transition: 0.5s; }
+        /* Korrigierte Badge Position (Mitte des Screens) */
+        #badge { 
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%) scale(0); 
+            font-size: 8rem; 
+            z-index: 4000; 
+            pointer-events: none; 
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
         #badge.show { transform: translate(-50%, -50%) scale(1.2); }
     </style>
 </head>
@@ -104,47 +115,84 @@
     let score = 0;
     let clickCount = 0;
 
-    // --- 1. QR-LOGIK (DIREKTES AUSLESEN DER FELDER) ---
+    // --- 1. ADMIN LOGIK (MIT SYNC) ---
+
+    function syncAdminState() {
+        const taskElements = document.querySelectorAll('.admin-task-item');
+        const currentData = [];
+        taskElements.forEach(el => {
+            currentData.push({
+                title: el.querySelector('.task-title-input').value,
+                info: el.querySelector('.task-info-input').value,
+                completed: false
+            });
+        });
+        questState = currentData;
+    }
+
+    function renderAdmin() {
+        const list = document.getElementById('adminTaskList');
+        list.innerHTML = '';
+        questState.forEach((task, i) => {
+            const div = document.createElement('div');
+            div.className = 'admin-task-item';
+            div.innerHTML = `
+                <input type="text" class="admin-input task-title-input" value="${task.title}" placeholder="Titel der Aufgabe" oninput="syncAdminState()">
+                <textarea class="admin-input task-info-input" placeholder="Zusatzinfos / Tipps" oninput="syncAdminState()">${task.info}</textarea>
+                <button onclick="removeTask(${i})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem; width:100%; text-align:right;">🗑 Entfernen</button>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function addAdminTask() {
+        syncAdminState(); // Erst aktuellen Stand sichern
+        questState.push({ title: "", info: "", completed: false }); // Dann neuen hinzufügen
+        renderAdmin(); // Neu zeichnen
+    }
+
+    function removeTask(i) {
+        syncAdminState();
+        questState.splice(i, 1);
+        renderAdmin();
+    }
+
+    function toggleAdmin() {
+        const panel = document.getElementById('adminPanel');
+        const isOpening = (panel.style.display !== 'block');
+        panel.style.display = isOpening ? 'block' : 'none';
+        if (isOpening) renderAdmin();
+    }
+
+    function handleHeaderClick() {
+        clickCount++;
+        if (clickCount >= 5) { toggleAdmin(); clickCount = 0; }
+        setTimeout(() => clickCount = 0, 3000);
+    }
+
+    // --- 2. QR & LINK LOGIK ---
 
     function generateAndShowQR() {
+        syncAdminState(); // Aktuellen Stand aus den Feldern holen
+        
+        const tasksToExport = questState.filter(t => t.title.trim() !== "").map(t => ({ title: t.title, info: t.info }));
+        
+        if(tasksToExport.length === 0) {
+            alert("Bitte gib mindestens einen Aufgabentitel ein.");
+            return;
+        }
+
         try {
-            // WICHTIG: Wir lesen hier die Werte DIREKT aus den Eingabefeldern der Seite
-            const taskElements = document.querySelectorAll('.admin-task-item');
-            const tasksToExport = [];
-            
-            taskElements.forEach(el => {
-                const titleInput = el.querySelector('.task-title-input').value;
-                const infoInput = el.querySelector('.task-info-input').value;
-                if(titleInput.trim() !== "") {
-                    tasksToExport.push({ title: titleInput, info: infoInput });
-                }
-            });
-
-            if(tasksToExport.length === 0) {
-                alert("Bitte füge mindestens eine Aufgabe hinzu.");
-                return;
-            }
-
-            // In String umwandeln und kodieren
             const jsonStr = JSON.stringify(tasksToExport);
             const data = btoa(unescape(encodeURIComponent(jsonStr)));
-            
-            // Link zusammenbauen
             const baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
             const fullLink = baseUrl + "?q=" + data;
 
-            // QR-Code anzeigen
             const qrDiv = document.getElementById("qrcode");
             qrDiv.innerHTML = ""; 
-            new QRCode(qrDiv, {
-                text: fullLink,
-                width: 200,
-                height: 200,
-                correctLevel : QRCode.CorrectLevel.M
-            });
+            new QRCode(qrDiv, { text: fullLink, width: 200, height: 200, correctLevel : QRCode.CorrectLevel.M });
             document.getElementById('qr-container').style.display = 'block';
 
-            // Link in Zwischenablage kopieren
             const dummy = document.createElement("textarea");
             document.body.appendChild(dummy);
             dummy.value = fullLink;
@@ -152,16 +200,9 @@
             document.execCommand("copy");
             document.body.removeChild(dummy);
             
-            alert("Erfolg! Der QR-Code wurde erstellt und der Link kopiert.");
-            
-            // questState aktualisieren, damit die App im Hintergrund mitzieht
-            questState = tasksToExport.map(t => ({ ...t, completed: false }));
-            save();
-
-        } catch (e) {
-            console.error(e);
-            alert("Fehler beim Erstellen des Links.");
-        }
+            alert("Link kopiert & QR-Code erstellt!");
+            save(); // App im Hintergrund aktualisieren
+        } catch (e) { alert("Fehler beim Erstellen."); }
     }
 
     function checkUrlParams() {
@@ -174,63 +215,13 @@
                 save(); 
                 const baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
                 window.history.replaceState({}, document.title, baseUrl);
-                alert("✅ Neue Aufgaben geladen!");
+                alert("✅ Aufgaben geladen!");
                 render();
-            } catch (e) { console.error("Ladefehler", e); }
+            } catch (e) { console.error(e); }
         }
     }
 
-    // --- 2. ADMIN MODUS ---
-
-    function handleHeaderClick() {
-        clickCount++;
-        if (clickCount >= 5) { toggleAdmin(); clickCount = 0; }
-        setTimeout(() => clickCount = 0, 3000);
-    }
-
-    function toggleAdmin() {
-        const panel = document.getElementById('adminPanel');
-        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-        if (panel.style.display === 'block') renderAdmin();
-    }
-
-    function renderAdmin() {
-        const list = document.getElementById('adminTaskList');
-        list.innerHTML = '';
-        questState.forEach((task, i) => {
-            const div = document.createElement('div');
-            div.className = 'admin-task-item';
-            div.innerHTML = `
-                <input type="text" class="admin-input task-title-input" value="${task.title}" placeholder="Titel der Aufgabe">
-                <textarea class="admin-input task-info-input" placeholder="Zusatzinfos / Tipps">${task.info}</textarea>
-                <button onclick="removeTask(${i})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem; width:100%; text-align:right;">🗑 Entfernen</button>
-            `;
-            list.appendChild(div);
-        });
-    }
-
-    function addAdminTask() {
-        // Wir fügen eine leere Aufgabe hinzu und rendern neu
-        questState.push({ title: "", info: "", completed: false });
-        renderAdmin();
-    }
-
-    function removeTask(i) {
-        // Wir lesen die aktuellen Werte aus den Feldern, bevor wir eines löschen
-        const taskElements = document.querySelectorAll('.admin-task-item');
-        questState = [];
-        taskElements.forEach(el => {
-            questState.push({
-                title: el.querySelector('.task-title-input').value,
-                info: el.querySelector('.task-info-input').value,
-                completed: false
-            });
-        });
-        questState.splice(i, 1);
-        renderAdmin();
-    }
-
-    // --- 3. APP FUNKTIONEN ---
+    // --- 3. KERN LOGIK ---
 
     function toggleQuest(index) {
         questState[index].completed = !questState[index].completed;
@@ -276,18 +267,19 @@
         const count = questState.filter(t => t.completed).length;
         const total = questState.length;
         if (total === 0) return;
+        
         badge.classList.remove('show');
         setTimeout(() => {
             if (count === total) badge.innerText = "🏆";
             else if (count >= total * 0.8) badge.innerText = "🥈";
             else if (count >= total * 0.5) badge.innerText = "🥉";
             else return;
+            
             badge.classList.add('show');
-            setTimeout(() => badge.classList.remove('show'), 2500);
+            setTimeout(() => badge.classList.remove('show'), 2000);
         }, 100);
     }
 
-    // Start
     checkUrlParams();
     if (questState.length === 0) {
         const saved = localStorage.getItem('tasks_v_final_qr');
