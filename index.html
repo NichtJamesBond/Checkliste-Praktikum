@@ -33,9 +33,11 @@
         #adminPanel { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; border-radius: 30px; overflow-y: auto; border: 3px solid var(--primary); }
         .admin-task-item { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; position: relative; }
         .admin-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
-        .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
+        .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; transition: 0.3s; }
         
-        /* QR-Code Bereich */
+        /* Deaktivierter Button Style */
+        .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; opacity: 0.6; }
+
         #qr-container { display: none; margin-top: 20px; text-align: center; background: #f0f0f0; padding: 15px; border-radius: 15px; border: 2px dashed #ccc; }
         #qrcode { display: flex; justify-content: center; margin: 10px 0; }
         #qrcode img { border: 8px solid white; border-radius: 5px; }
@@ -47,18 +49,7 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 3000; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
 
-        /* Belohnungs-Badge in der Mitte */
-        #badge { 
-            position: fixed; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%) scale(0); 
-            font-size: 8rem; 
-            z-index: 4000; 
-            pointer-events: none; 
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
+        #badge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8rem; z-index: 4000; pointer-events: none; transition: transform 0.5s; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         #badge.show { transform: translate(-50%, -50%) scale(1.2); }
     </style>
 </head>
@@ -71,15 +62,16 @@
     <div id="adminTaskList"></div>
     <button class="admin-btn" onclick="addAdminTask()" style="background: #e0e0e0; color: #333;">+ Neue Aufgabe hinzufügen</button>
     
-    <button class="admin-btn" onclick="generateAndShowQR()" style="background: var(--success); color: white; margin-top: 15px;">📱 QR-Code & Link erzeugen</button>
+    <button id="btnSaveAdmin" class="admin-btn" onclick="forceSaveFromAdmin()" style="background: var(--primary); color: white; margin-top: 20px; border: 2px solid #4834d4;">💾 Änderungen speichern</button>
+    
+    <button id="btnGenerateQR" class="admin-btn" onclick="generateAndShowQR()" style="background: var(--success); color: white; margin-top: 10px;" disabled>📱 QR-Code & Link erzeugen</button>
     
     <div id="qr-container">
-        <p style="font-weight: bold; margin: 0; font-size: 0.9rem;">QR-Code & Link bereit!</p>
+        <p style="font-weight: bold; margin: 0; font-size: 0.9rem; color: var(--success);">✔ Link kopiert & QR bereit!</p>
         <div id="qrcode"></div>
-        <button class="admin-btn" onclick="document.getElementById('qr-container').style.display='none'" style="background: #ccc; font-size: 0.7rem; padding: 5px; width: auto;">Fenster schließen</button>
     </div>
 
-    <button class="admin-btn" onclick="closeAdminAndSave()" style="background: #666; color: white; margin-top: 20px;">💾 Speichern & Zurück zur App</button>
+    <button class="admin-btn" onclick="closeAdminPanel()" style="background: #666; color: white; margin-top: 20px;">Zurück zur App</button>
 </div>
 
 <div id="infoModal" class="modal-overlay">
@@ -96,57 +88,25 @@
         <h1 style="margin:0 0 10px 0; color: var(--primary);">Meine Aufgaben 🎯</h1>
         <div class="score-board"><span id="score">0</span> <span>⭐</span></div>
     </div>
-
     <div id="quest-list" class="quest-list"></div>
-    
     <div class="footer-actions">
         <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail verschicken</a>
     </div>
 </div>
 
 <script>
-    // Standard-Aufgaben für den allerersten Start
-    const DEFAULT_TASKS = [
-        { title: "Willkommen! 🌿", info: "Das ist eine Beispielaufgabe. Klicke 5x auf die Überschrift oben, um den Lehrer-Modus zu öffnen." }
-    ];
-
     let questState = [];
     let score = 0;
     let clickCount = 0;
+    let isDataSaved = true;
 
-    // --- 1. DATEN-SYNCHRONISATION (DAS HERZSTÜCK) ---
+    // --- 1. ADMIN LOGIK MIT SPERRE ---
 
-    // Diese Funktion liest IMMER die aktuellen Texte aus den Lehrer-Eingabefeldern
-    function getTasksFromAdminInputs() {
-        const taskElements = document.querySelectorAll('.admin-task-item');
-        const tasks = [];
-        taskElements.forEach(el => {
-            const t = el.querySelector('.task-title-input').value;
-            const i = el.querySelector('.task-info-input').value;
-            if (t.trim() !== "") {
-                tasks.push({ title: t, info: i, completed: false });
-            }
-        });
-        return tasks;
-    }
-
-    // Speichert den aktuellen Stand aus den Admin-Feldern in den Browser-Speicher
-    function forceSaveFromAdmin() {
-        questState = getTasksFromAdminInputs();
-        save(); // Aktualisiert Score und LocalStorage
-    }
-
-    // --- 2. LEHRER-FUNKTIONEN ---
-
-    function handleHeaderClick() {
-        clickCount++;
-        if (clickCount >= 5) { 
-            const panel = document.getElementById('adminPanel');
-            panel.style.display = 'block';
-            renderAdmin();
-            clickCount = 0; 
-        }
-        setTimeout(() => clickCount = 0, 3000);
+    function setUnsaved() {
+        isDataSaved = false;
+        document.getElementById('btnGenerateQR').disabled = true;
+        document.getElementById('btnSaveAdmin').style.boxShadow = "0 0 15px var(--primary)";
+        document.getElementById('qr-container').style.display = 'none';
     }
 
     function renderAdmin() {
@@ -156,70 +116,89 @@
             const div = document.createElement('div');
             div.className = 'admin-task-item';
             div.innerHTML = `
-                <input type="text" class="admin-input task-title-input" value="${task.title}" placeholder="Titel der Aufgabe">
-                <textarea class="admin-input task-info-input" placeholder="Zusatzinfos / Tipps">${task.info}</textarea>
+                <input type="text" class="admin-input task-title-input" value="${task.title}" placeholder="Titel" oninput="setUnsaved()">
+                <textarea class="admin-input task-info-input" placeholder="Zusatzinfo" oninput="setUnsaved()">${task.info}</textarea>
                 <button onclick="removeTask(${i})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem; width:100%; text-align:right;">🗑 Entfernen</button>
             `;
             list.appendChild(div);
         });
     }
 
+    function forceSaveFromAdmin() {
+        const taskElements = document.querySelectorAll('.admin-task-item');
+        const tasks = [];
+        taskElements.forEach(el => {
+            const t = el.querySelector('.task-title-input').value;
+            const i = el.querySelector('.task-info-input').value;
+            if (t.trim() !== "") {
+                tasks.push({ title: t, info: i, completed: false });
+            }
+        });
+        
+        questState = tasks;
+        isDataSaved = true;
+        document.getElementById('btnGenerateQR').disabled = false;
+        document.getElementById('btnSaveAdmin').style.boxShadow = "none";
+        save(); 
+        alert("Änderungen wurden übernommen. Du kannst jetzt den QR-Code erzeugen.");
+    }
+
     function addAdminTask() {
-        // Erst das sichern, was schon getippt wurde
-        questState = getTasksFromAdminInputs();
         questState.push({ title: "", info: "", completed: false });
         renderAdmin();
+        setUnsaved();
     }
 
     function removeTask(i) {
-        questState = getTasksFromAdminInputs();
         questState.splice(i, 1);
         renderAdmin();
+        setUnsaved();
     }
 
-    function closeAdminAndSave() {
-        forceSaveFromAdmin(); // Alles einsammeln und speichern
-        document.getElementById('adminPanel').style.display = 'none';
-        render(); // Schüler-Ansicht aktualisieren
-    }
-
-    // --- 3. QR-CODE & LINK (SYNCHRONISIERT) ---
+    // --- 2. QR-GENERIERUNG (NUR WENN GESPEICHERT) ---
 
     function generateAndShowQR() {
-        // Zwinge die App, die aktuellen Texte aus den Feldern zu nehmen
-        const currentTasks = getTasksFromAdminInputs();
-        if(currentTasks.length === 0) { alert("Bitte gib Aufgaben ein!"); return; }
+        if (!isDataSaved) return;
 
         try {
-            const jsonStr = JSON.stringify(currentTasks.map(t => ({title: t.title, info: t.info})));
-            const data = btoa(unescape(encodeURIComponent(jsonStr)));
-            const baseUrl = window.location.origin + window.location.pathname;
-            const fullLink = baseUrl + "?q=" + data;
+            // Wir nehmen NUR die gespeicherten Daten aus questState
+            const exportData = questState.map(t => ({ title: t.title, info: t.info }));
+            const jsonStr = JSON.stringify(exportData);
+            const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+            
+            // Absoluter Pfad für GitHub Pages
+            const fullLink = window.location.origin + window.location.pathname + "?q=" + encoded;
 
-            // QR-Code erzeugen
             const qrDiv = document.getElementById("qrcode");
             qrDiv.innerHTML = ""; 
-            new QRCode(qrDiv, { text: fullLink, width: 200, height: 200, correctLevel : QRCode.CorrectLevel.M });
+            new QRCode(qrDiv, { text: fullLink, width: 200, height: 200 });
             document.getElementById('qr-container').style.display = 'block';
 
-            // Link kopieren
             const dummy = document.createElement("textarea");
             document.body.appendChild(dummy);
             dummy.value = fullLink;
             dummy.select();
             document.execCommand("copy");
             document.body.removeChild(dummy);
-            
-            alert("Klasse! Der QR-Code führt jetzt exakt zu diesen Aufgaben. Der Link wurde kopiert.");
-            
-            // Auch lokal speichern
-            questState = currentTasks;
-            save();
-
         } catch (e) { alert("Fehler beim Erzeugen."); }
     }
 
-    // --- 4. APP-LOGIK ---
+    // --- 3. ALLGEMEINE APP FUNKTIONEN ---
+
+    function handleHeaderClick() {
+        clickCount++;
+        if (clickCount >= 5) { 
+            document.getElementById('adminPanel').style.display = 'block';
+            renderAdmin();
+            clickCount = 0; 
+        }
+        setTimeout(() => clickCount = 0, 3000);
+    }
+
+    function closeAdminPanel() {
+        document.getElementById('adminPanel').style.display = 'none';
+        render();
+    }
 
     function checkUrlParams() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -229,23 +208,16 @@
                 const decoded = JSON.parse(decodeURIComponent(escape(atob(data))));
                 questState = decoded.map(t => ({ ...t, completed: false }));
                 save(); 
-                // URL säubern
                 window.history.replaceState({}, document.title, window.location.pathname);
-                alert("✅ Neue Aufgabenliste wurde geladen!");
-            } catch (e) { console.error("URL-Ladefehler", e); }
+                alert("✅ Neue Aufgabenliste geladen!");
+            } catch (e) { console.error(e); }
         }
-    }
-
-    function toggleQuest(index) {
-        questState[index].completed = !questState[index].completed;
-        save();
-        checkMilestones();
     }
 
     function save() {
         score = questState.filter(t => t.completed).length * 10;
-        localStorage.setItem('tasks_final_version', JSON.stringify(questState));
-        localStorage.setItem('score_final_version', score.toString());
+        localStorage.setItem('tasks_v3', JSON.stringify(questState));
+        localStorage.setItem('score_v3', score.toString());
         render();
     }
 
@@ -267,12 +239,12 @@
         document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=Fortschritt&body=Ich habe ${score} Sterne erreicht!`;
     }
 
-    function showInfo(index) {
-        document.getElementById('modalTitle').innerText = questState[index].title;
-        document.getElementById('modalDescription').innerText = questState[index].info;
+    function toggleQuest(i) { questState[i].completed = !questState[i].completed; save(); checkMilestones(); }
+    function showInfo(i) { 
+        document.getElementById('modalTitle').innerText = questState[i].title;
+        document.getElementById('modalDescription').innerText = questState[i].info;
         document.getElementById('infoModal').style.display = 'flex';
     }
-
     function closeInfo() { document.getElementById('infoModal').style.display = 'none'; }
 
     function checkMilestones() {
@@ -280,25 +252,21 @@
         const count = questState.filter(t => t.completed).length;
         const total = questState.length;
         if (total === 0) return;
-        
         badge.classList.remove('show');
         setTimeout(() => {
             if (count === total) badge.innerText = "🏆";
             else if (count >= total * 0.8) badge.innerText = "🥈";
             else if (count >= total * 0.5) badge.innerText = "🥉";
             else return;
-            
             badge.classList.add('show');
             setTimeout(() => badge.classList.remove('show'), 2500);
         }, 100);
     }
 
-    // --- INITIALISIERUNG ---
     checkUrlParams(); 
     if (questState.length === 0) {
-        const saved = localStorage.getItem('tasks_final_version');
-        questState = saved ? JSON.parse(saved) : DEFAULT_TASKS;
-        score = parseInt(localStorage.getItem('score_final_version')) || 0;
+        const saved = localStorage.getItem('tasks_v3');
+        questState = saved ? JSON.parse(saved) : [{title: "Beispiel", info: "Klick 5x oben!"}];
     }
     render();
 </script>
