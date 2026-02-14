@@ -31,8 +31,8 @@
 
         /* Lehrer-Panel */
         #adminPanel { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; border-radius: 30px; overflow-y: auto; border: 3px solid var(--primary); }
-        .admin-task-item { background: #f9f9f9; padding: 10px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #ddd; }
-        .admin-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 5px; box-sizing: border-box; font-family: inherit; }
+        .admin-task-item { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; }
+        .admin-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; font-family: inherit; font-size: 0.9rem; }
         .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
         
         /* QR-Code Bereich */
@@ -104,14 +104,36 @@
     let score = 0;
     let clickCount = 0;
 
+    // --- 1. QR-LOGIK (DIREKTES AUSLESEN DER FELDER) ---
+
     function generateAndShowQR() {
         try {
-            const tasksToExport = questState.map(t => ({ title: t.title, info: t.info }));
+            // WICHTIG: Wir lesen hier die Werte DIREKT aus den Eingabefeldern der Seite
+            const taskElements = document.querySelectorAll('.admin-task-item');
+            const tasksToExport = [];
+            
+            taskElements.forEach(el => {
+                const titleInput = el.querySelector('.task-title-input').value;
+                const infoInput = el.querySelector('.task-info-input').value;
+                if(titleInput.trim() !== "") {
+                    tasksToExport.push({ title: titleInput, info: infoInput });
+                }
+            });
+
+            if(tasksToExport.length === 0) {
+                alert("Bitte füge mindestens eine Aufgabe hinzu.");
+                return;
+            }
+
+            // In String umwandeln und kodieren
             const jsonStr = JSON.stringify(tasksToExport);
             const data = btoa(unescape(encodeURIComponent(jsonStr)));
+            
+            // Link zusammenbauen
             const baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
             const fullLink = baseUrl + "?q=" + data;
 
+            // QR-Code anzeigen
             const qrDiv = document.getElementById("qrcode");
             qrDiv.innerHTML = ""; 
             new QRCode(qrDiv, {
@@ -122,6 +144,7 @@
             });
             document.getElementById('qr-container').style.display = 'block';
 
+            // Link in Zwischenablage kopieren
             const dummy = document.createElement("textarea");
             document.body.appendChild(dummy);
             dummy.value = fullLink;
@@ -129,8 +152,14 @@
             document.execCommand("copy");
             document.body.removeChild(dummy);
             
-            alert("QR-Code erstellt und Link in Zwischenablage kopiert!");
+            alert("Erfolg! Der QR-Code wurde erstellt und der Link kopiert.");
+            
+            // questState aktualisieren, damit die App im Hintergrund mitzieht
+            questState = tasksToExport.map(t => ({ ...t, completed: false }));
+            save();
+
         } catch (e) {
+            console.error(e);
             alert("Fehler beim Erstellen des Links.");
         }
     }
@@ -151,6 +180,8 @@
         }
     }
 
+    // --- 2. ADMIN MODUS ---
+
     function handleHeaderClick() {
         clickCount++;
         if (clickCount >= 5) { toggleAdmin(); clickCount = 0; }
@@ -170,17 +201,36 @@
             const div = document.createElement('div');
             div.className = 'admin-task-item';
             div.innerHTML = `
-                <input type="text" class="admin-input" value="${task.title}" oninput="updateTask(${i}, 'title', this.value)">
-                <textarea class="admin-input" oninput="updateTask(${i}, 'info', this.value)">${task.info}</textarea>
+                <input type="text" class="admin-input task-title-input" value="${task.title}" placeholder="Titel der Aufgabe">
+                <textarea class="admin-input task-info-input" placeholder="Zusatzinfos / Tipps">${task.info}</textarea>
                 <button onclick="removeTask(${i})" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem; width:100%; text-align:right;">🗑 Entfernen</button>
             `;
             list.appendChild(div);
         });
     }
 
-    function addAdminTask() { questState.push({ title: "Neue Aufgabe", info: "", completed: false }); renderAdmin(); }
-    function removeTask(i) { questState.splice(i, 1); renderAdmin(); }
-    function updateTask(i, key, val) { questState[i][key] = val; }
+    function addAdminTask() {
+        // Wir fügen eine leere Aufgabe hinzu und rendern neu
+        questState.push({ title: "", info: "", completed: false });
+        renderAdmin();
+    }
+
+    function removeTask(i) {
+        // Wir lesen die aktuellen Werte aus den Feldern, bevor wir eines löschen
+        const taskElements = document.querySelectorAll('.admin-task-item');
+        questState = [];
+        taskElements.forEach(el => {
+            questState.push({
+                title: el.querySelector('.task-title-input').value,
+                info: el.querySelector('.task-info-input').value,
+                completed: false
+            });
+        });
+        questState.splice(i, 1);
+        renderAdmin();
+    }
+
+    // --- 3. APP FUNKTIONEN ---
 
     function toggleQuest(index) {
         questState[index].completed = !questState[index].completed;
@@ -237,6 +287,7 @@
         }, 100);
     }
 
+    // Start
     checkUrlParams();
     if (questState.length === 0) {
         const saved = localStorage.getItem('tasks_v_final_qr');
