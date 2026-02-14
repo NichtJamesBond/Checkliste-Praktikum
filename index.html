@@ -8,7 +8,7 @@
     <style>
         :root {
             --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
-            --bg: #f4f7f6; --text: #2d3436; --mail-color: #0984e3; --reset-color: #ff7675;
+            --bg: #f4f7f6; --text: #2d3436; --mail-color: #0984e3;
             --info-bg: #fff3bf; --info-border: #fcc419;
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
@@ -43,7 +43,6 @@
         .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
         .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; color: white; }
         .btn-mail { background: var(--mail-color); }
-        .btn-reset { background: var(--reset-color); }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 3000; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
@@ -92,7 +91,6 @@
     
     <div class="footer-actions">
         <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail verschicken</a>
-        <button class="action-btn btn-reset" onclick="fullReset()">🔄 Alles zurücksetzen</button>
     </div>
 </div>
 
@@ -106,20 +104,14 @@
     let score = 0;
     let clickCount = 0;
 
-    // --- 1. QR-LOGIK & URL-GENERIERUNG ---
-
     function generateAndShowQR() {
         try {
-            // Daten verpacken
             const tasksToExport = questState.map(t => ({ title: t.title, info: t.info }));
             const jsonStr = JSON.stringify(tasksToExport);
             const data = btoa(unescape(encodeURIComponent(jsonStr)));
-            
-            // Link präzise zusammenbauen
             const baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
             const fullLink = baseUrl + "?q=" + data;
 
-            // QR-Code anzeigen
             const qrDiv = document.getElementById("qrcode");
             qrDiv.innerHTML = ""; 
             new QRCode(qrDiv, {
@@ -130,7 +122,6 @@
             });
             document.getElementById('qr-container').style.display = 'block';
 
-            // Automatisch in Zwischenablage kopieren (Backup)
             const dummy = document.createElement("textarea");
             document.body.appendChild(dummy);
             dummy.value = fullLink;
@@ -152,18 +143,13 @@
                 const decoded = JSON.parse(decodeURIComponent(escape(atob(data))));
                 questState = decoded.map(t => ({ ...t, completed: false }));
                 save(); 
-                
-                // URL säubern
                 const baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
                 window.history.replaceState({}, document.title, baseUrl);
-                
                 alert("✅ Neue Aufgaben geladen!");
                 render();
             } catch (e) { console.error("Ladefehler", e); }
         }
     }
-
-    // --- 2. ADMIN MODUS ---
 
     function handleHeaderClick() {
         clickCount++;
@@ -195,8 +181,6 @@
     function addAdminTask() { questState.push({ title: "Neue Aufgabe", info: "", completed: false }); renderAdmin(); }
     function removeTask(i) { questState.splice(i, 1); renderAdmin(); }
     function updateTask(i, key, val) { questState[i][key] = val; }
-
-    // --- 3. APP FUNKTIONEN ---
 
     function toggleQuest(index) {
         questState[index].completed = !questState[index].completed;
@@ -237,13 +221,6 @@
 
     function closeInfo() { document.getElementById('infoModal').style.display = 'none'; }
 
-    function fullReset() {
-        if(confirm("Alle Häkchen löschen?")) {
-            questState.forEach(t => t.completed = false);
-            save();
-        }
-    }
-
     function checkMilestones() {
         const badge = document.getElementById('badge');
         const count = questState.filter(t => t.completed).length;
@@ -260,7 +237,6 @@
         }, 100);
     }
 
-    // Start
     checkUrlParams();
     if (questState.length === 0) {
         const saved = localStorage.getItem('tasks_v_final_qr');
