@@ -15,7 +15,6 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
         .app-container { background: white; padding: 2rem; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 400px; min-height: 620px; display: flex; flex-direction: column; position: relative; }
         
-        /* Optimierter Header-Abstand */
         .header { text-align: center; margin-bottom: 35px; cursor: pointer; user-select: none; }
         .score-board { background: var(--accent); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; color: #000; box-shadow: 0 4px 0 #e1b12c; margin-top: 15px; }
 
@@ -44,8 +43,8 @@
         .export-group { display: flex; gap: 10px; margin-top: 10px; }
         .export-group .admin-btn { flex: 1; font-size: 0.8rem; }
 
-        #qr-container { display: none; margin-top: 20px; text-align: center; background: #f0f0f0; padding: 15px; border-radius: 15px; border: 2px dashed #ccc; }
-        #qr-canvas { margin: 10px auto; display: block; max-width: 100%; height: auto; }
+        #qr-container { display: none; margin-top: 20px; text-align: center; background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed var(--success); }
+        #qr-canvas { margin: 10px auto; display: block; max-width: 100%; }
 
         .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
         .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; color: white; }
@@ -65,7 +64,6 @@
 <div id="adminPanel">
     <h2 style="color: var(--primary); margin: 0 0 15px 0;">Lehrer-Bereich 👨‍🏫</h2>
     <div id="adminTaskList"></div>
-    
     <button class="admin-btn" onclick="addAdminTask()" style="background: #eee; color: #333;">+ Neue Aufgabe hinzufügen</button>
     
     <div class="central-icon-picker" id="centralPicker"></div>
@@ -78,6 +76,7 @@
         <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background: #636e72; color: white;" disabled>📋 Link kopieren</button>
     </div>
     <div id="qr-container">
+        <p style="color: var(--success); font-weight: bold; margin-bottom: 5px;">Link erfolgreich generiert! ✅</p>
         <canvas id="qr-canvas"></canvas>
     </div>
     <button class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white; margin-top: 25px;">Zurück zur App</button>
@@ -108,7 +107,10 @@
     let clickCount = 0;
     let hasUnsavedChanges = false;
 
+    // Erweiterte Icon-Liste inklusive Zahlen
     const iconData = [
+        {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
+        {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
         {i: "📄", t: "Deckblatt"}, {i: "🏠", t: "Einrichtung"}, {i: "📊", t: "Bericht"}, {i: "⚖️", t: "Regeln"}, 
         {i: "📜", t: "Paragrafen"}, {i: "📁", t: "Doku"}, {i: "📅", t: "Wochenbericht"}, {i: "👋", t: "Vorstellung"}, 
         {i: "🏢", t: "Betrieb"}, {i: "🛠️", t: "Arbeiten"}, {i: "📐", t: "Zeichnung"}, {i: "✍️", t: "Skizze"}, 
@@ -122,6 +124,7 @@
 
     function initIconPicker() {
         const picker = document.getElementById('centralPicker');
+        picker.innerHTML = '';
         iconData.forEach(item => {
             const span = document.createElement('span');
             span.className = 'icon-choice';
@@ -170,6 +173,7 @@
     function markAsUnsaved() {
         hasUnsavedChanges = true;
         updateButtonStates();
+        document.getElementById('qr-container').style.display = 'none';
     }
 
     function updateButtonStates() {
@@ -222,8 +226,16 @@
 
     function generateQR() {
         if (hasUnsavedChanges) return;
-        document.getElementById('qr-container').style.display = 'block';
-        new QRious({ element: document.getElementById('qr-canvas'), value: getShareLink(), size: 200, level: 'L' });
+        const qrContainer = document.getElementById('qr-container');
+        qrContainer.style.display = 'block';
+        new QRious({
+            element: document.getElementById('qr-canvas'),
+            value: getShareLink(),
+            size: 250,
+            level: 'M',
+            background: 'white',
+            foreground: 'black'
+        });
     }
 
     function sendConfigMail() {
@@ -248,8 +260,8 @@
 
     function saveToLocalStorage() {
         score = questState.filter(t => t.completed).length * 10;
-        localStorage.setItem('flex_tasks_v2', JSON.stringify(questState));
-        localStorage.setItem('flex_score_v2', score.toString());
+        localStorage.setItem('flex_tasks_v4', JSON.stringify(questState));
+        localStorage.setItem('flex_score_v4', score.toString());
     }
 
     function render() {
@@ -268,7 +280,6 @@
             list.appendChild(item);
         });
         
-        // NEUES MAIL FORMAT MIT ABSTAND
         const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Score im Flex-O-Mat ist am Beamen 🚀");
         const mailBody = encodeURIComponent(`Hey!
 
@@ -326,9 +337,9 @@ Beste Grüße und bis bald!`);
     initIconPicker();
     loadFromUrl();
     if (questState.length === 0) {
-        const saved = localStorage.getItem('flex_tasks_v2');
+        const saved = localStorage.getItem('flex_tasks_v4');
         questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg beim Flexen!"}];
-        score = parseInt(localStorage.getItem('flex_score_v2')) || 0;
+        score = parseInt(localStorage.getItem('flex_score_v4')) || 0;
     }
     render();
 </script>
