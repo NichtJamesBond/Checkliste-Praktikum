@@ -3,306 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flex-O-Mat PRO v2026</title>
+    <title>Flex-O-Mat</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
         :root {
             --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
-            --bg: #dfe6e9; --text: #2d3436; --mail: #0984e3;
-            --share: #e84393; --card: #ffffff; --danger: #ff7675;
+            --bg: #f4f7f6; --text: #2d3436; --mail-color: #0984e3;
+            --info-bg: #fff3bf; --info-border: #fcc419;
+            --danger: #ff7675;
         }
         
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; justify-content: center; min-height: 100vh; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start;
+            padding: 20px; 
+            margin: 0; 
+            min-height: 100vh;
+        }
 
-        /* --- HAUPTANSICHT --- */
         .app-container { 
-            background: var(--card); padding: 25px; border-radius: 30px; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.12); width: 100%; max-width: 400px; 
-            display: flex; flex-direction: column; position: relative;
+            background: white; 
+            padding: 2rem; 
+            border-radius: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            width: 100%; 
+            max-width: 400px; 
+            min-height: 620px; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
         }
-
-        .header { text-align: center; margin-bottom: 35px; cursor: pointer; user-select: none; }
-        .header h1 { margin: 0 0 20px 0; color: var(--primary); font-size: 2rem; } /* Mehr Abstand */
         
-        .score-pill { 
-            background: var(--accent); color: white; display: inline-block; 
-            padding: 10px 25px; border-radius: 50px; font-weight: 800; 
-            box-shadow: 0 4px 0 #e1b12c; font-size: 1.2rem;
-        }
+        .header { text-align: center; margin-bottom: 45px; cursor: pointer; user-select: none; }
+        .score-board { background: var(--accent); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; color: #000; box-shadow: 0 4px 0 #e1b12c; margin-top: 20px; }
 
         .quest-list { list-style: none; padding: 0; flex-grow: 1; }
-        .quest-item { 
-            background: #fff; border: 2px solid #f1f2f6; margin-bottom: 12px; 
-            padding: 14px; border-radius: 18px; display: flex; align-items: center; gap: 12px;
-        }
-        .quest-item.done { background: #f0fff9; border-color: var(--success); opacity: 0.8; }
-        .quest-text { flex-grow: 1; font-weight: 600; cursor: pointer; color: var(--text); }
-        .done .quest-text { text-decoration: line-through; color: #b2bec3; }
+        .quest-item { background: white; border: 2px solid #f0f0f0; margin: 10px 0; padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 10px; }
+        .quest-item.done { background: #e8fcf3; border-color: var(--success); }
+        .quest-content { flex-grow: 1; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+        .quest-text { font-size: 1rem; font-weight: 600; color: var(--text); }
+        .done .quest-text { text-decoration: line-through; color: #a0a0a0; }
 
-        .check-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #dfe6e9; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; }
-        .done .check-btn { background: var(--success); border-color: var(--success); }
+        .info-btn { background: var(--info-bg); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; border: none; }
+        .check-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; }
+        .done .check-circle { background: var(--success); border-color: var(--success); color: white; }
 
-        .footer { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .btn { 
-            height: 52px; border-radius: 16px; border: none; font-weight: 700; 
-            display: flex; align-items: center; justify-content: center; gap: 10px; 
-            color: white; cursor: pointer; text-decoration: none; font-size: 1rem;
+        /* ADMIN PANEL */
+        #adminPanel { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: white; 
+            z-index: 5000; 
+            padding: 40px; 
+            box-sizing: border-box; 
+            overflow-y: auto; 
         }
-        .btn-m { background: var(--mail); }
-        .btn-s { background: var(--share); }
 
-        /* --- BACKEND --- */
-        #backend { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #fff; z-index: 5000; padding: 20px; box-sizing: border-box; overflow-y: auto; 
-        }
-        .be-card { background: #f8f9fa; padding: 15px; border-radius: 15px; border: 1px solid #eee; margin-bottom: 15px; }
-        .be-input { padding: 12px; border: 1px solid #ddd; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 8px; font-size: 1rem; }
+        .admin-task-item { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; display: flex; gap: 10px; flex-wrap: wrap; }
+        .admin-input.task-title { flex: 1; min-width: 200px; font-weight: bold; }
+        .admin-input.task-info { flex: 2; min-width: 200px; }
         
-        .icon-box { background: #f1f2f6; padding: 15px; border-radius: 15px; margin: 15px 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-        .ic { font-size: 1.6rem; cursor: pointer; transition: 0.2s; }
-        .ic:hover { transform: scale(1.3); }
+        .central-icon-picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; background: #f0f0f0; padding: 15px; border-radius: 15px; }
+        .icon-choice { cursor: pointer; font-size: 1.5rem; padding: 5px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        .config-area { margin: 20px 0; padding: 15px; background: #fff3bf; border-radius: 15px; border: 2px dashed #e1b12c; }
-        #qr-wrap { display: none; text-align: center; margin-top: 20px; border: 4px solid var(--success); border-radius: 20px; padding: 15px; }
+        .admin-input { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1rem; }
+        .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; transition: 0.3s; }
+        .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; opacity: 0.7; }
         
-        .be-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .be-btn { padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; padding-bottom: 40px; }
+        .full-width { grid-column: span 2; }
 
-        /* Modal */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 6000; }
-        .modal-c { background: white; padding: 25px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; }
+        #qr-container { display: none; margin-top: 20px; text-align: center; background: #fff; padding: 15px; border-radius: 20px; border: 3px dashed var(--success); }
+        #qr-canvas { margin: 10px auto; display: block; max-width: 100%; border-radius: 10px; }
+
+        .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
+        .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; color: white; }
+        .btn-mail { background: var(--mail-color); }
+
+        #badge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8rem; z-index: 6000; pointer-events: none; transition: transform 0.5s; }
+        #badge.show { transform: translate(-50%, -50%) scale(1.2); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 4000; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="backend">
-    <h2 style="text-align: center; color: var(--primary);">Backend Control ⚙️</h2>
+<div id="badge"></div>
+
+<div id="adminPanel">
+    <h2 style="color: var(--primary); text-align: center;">Flex-O-Mat Back-End ⚙️</h2>
+    <div id="adminTaskList"></div>
+    <button class="admin-btn" onclick="addAdminTask()" style="background: #eee; width: 100%; margin-bottom: 20px;">+ Neue Aufgabe hinzufügen</button>
     
-    <div id="be-list"></div>
-    <button class="be-btn" style="width:100%; background:#eee;" onclick="addRow()">➕ Neue Aufgabe</button>
-
-    <div class="icon-box" id="picker"></div>
-
-    <div class="config-area">
-        <label style="font-weight: bold; font-size: 0.8rem;">CONFIG-STRING (Manual Share):</label>
-        <input type="text" id="configString" class="be-input" readonly onclick="this.select()">
-        <button class="be-btn" style="width: 100%; background: var(--accent); color: white;" onclick="copyConfig()">📋 Code kopieren</button>
+    <div class="central-icon-picker" id="centralPicker"></div>
+    
+    <div class="admin-grid">
+        <button id="saveBtn" class="admin-btn full-width" onclick="saveAdminData()" style="background: var(--primary); color: white; height: 55px;">💾 Speichern & QR erneuern</button>
+        
+        <button id="qrBtn" class="admin-btn" onclick="toggleQRDisplay()" style="background: var(--success); color: white;" disabled>📱 QR Code anzeigen</button>
+        <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background: #636e72; color: white;" disabled>📋 Link kopieren</button>
+        <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background: var(--mail-color); color: white;" disabled>📧 Konfig senden</button>
+        <button id="appModeBtn" class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white;">🏠 App Modus</button>
     </div>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <button class="be-btn" style="flex:1; background: #636e72; color:white;" onclick="exportJSON()">💾 JSON Export</button>
-        <button class="be-btn" style="flex:1; background: #636e72; color:white;" onclick="document.getElementById('fileIn').click()">📂 JSON Import</button>
-        <input type="file" id="fileIn" style="display:none" onchange="importJSON(event)">
+    <div id="qr-container">
+        <p style="color: var(--success); font-weight: bold;">QR-Code ist aktuell! ✅</p>
+        <canvas id="qr-canvas"></canvas>
     </div>
-
-    <button id="saveBtn" class="be-btn" style="width:100%; background: var(--success); color:white; font-size: 1.1rem;" onclick="processSave()">💾 SPEICHERN & QR AKTUALISIEREN</button>
-
-    <div id="qr-wrap">
-        <canvas id="canvas"></canvas>
-        <p style="color: var(--success); font-weight: bold;">QR-CODE BEREIT ✅</p>
-    </div>
-
-    <button class="be-btn" style="width:100%; background: var(--text); color:white; margin-top: 20px;" onclick="closeBE()">🏠 ZURÜCK ZUR APP</button>
 </div>
 
-<div id="infoModal" class="modal" onclick="this.style.display='none'">
-    <div class="modal-c" onclick="event.stopPropagation()">
-        <h3 id="i-title" style="color:var(--primary); margin:0;"></h3>
-        <p id="i-text" style="color:#636e72; margin: 15px 0;"></p>
-        <button class="be-btn" style="width:100%; background:var(--success); color:white;" onclick="document.getElementById('infoModal').style.display='none'">Verstanden!</button>
+<div id="infoModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 id="modalTitle" style="color:var(--primary);"></h3>
+        <p id="modalDescription"></p>
+        <button class="action-btn btn-mail" onclick="document.getElementById('infoModal').style.display='none'">Check ich!</button>
     </div>
 </div>
 
 <div class="app-container">
-    <div class="header" onclick="accessBE()">
-        <h1>Flex-O-Mat</h1>
-        <div class="score-pill"><span id="score">0</span> ⭐</div>
+    <div class="header" onclick="handleHeaderClick()">
+        <h1 style="margin:0; color: var(--primary);">Flex-O-Mat 🎯</h1>
+        <div class="score-board"><span id="score">0</span> <span>⭐</span></div>
     </div>
-
-    <div id="main-list" class="quest-list"></div>
-
-    <div class="footer">
-        <a id="mail" href="#" class="btn btn-m">📧 Mail</a>
-        <button onclick="nativeShare()" class="btn btn-s">
-            <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
-            Teilen
-        </button>
+    <div id="quest-list" class="quest-list"></div>
+    <div class="footer-actions">
+        <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail verschicken</a>
     </div>
 </div>
 
 <script>
-let state = [];
-let taps = 0;
-let focusInp = null;
+    let questState = [];
+    let clickCount = 0;
+    let hasUnsavedChanges = false;
+    let isProcessing = false;
+    let achievedMilestones = { m50: false, m80: false, m100: false };
 
-const iconList = [
-    "0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣",
-    "🚗","🚕","🚙","🚌","🏎️","🚑","🚒","🚓","🚜","🏍️","🚀","🛸",
-    "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🦁","🐯","🐸","🐵","🐧","🐦","🐤",
-    "☀️","☁️","🌦️","🌧️","⛈️","❄️","🌪️","🌈","🌊","🔥",
-    "😀","😂","😎","😍","🤔","🤯","🥳","💀","💩","✨","⭐","💡","🎯"
-];
+    const iconData = [
+        {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
+        {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
+        {i: "📄", t: "Deckblatt"}, {i: "🏠", t: "Einrichtung"}, {i: "📊", t: "Bericht"}, {i: "⚖️", t: "Regeln"}, 
+        {i: "📜", t: "Paragrafen"}, {i: "📁", t: "Doku"}, {i: "📅", t: "Wochenbericht"}, {i: "👋", t: "Vorstellung"}, 
+        {i: "🏢", t: "Betrieb"}, {i: "🛠️", t: "Arbeiten"}, {i: "📐", t: "Zeichnung"}, {i: "✍️", t: "Skizze"}, 
+        {i: "💼", t: "Beruf"}, {i: "📱", t: "Handy"}, {i: "⚡", t: "Blitz"}, {i: "💡", t: "Licht"}, 
+        {i: "❗", t: "Achtung"}, {i: "❓", t: "Frage"}, {i: "🤔", t: "Reflexion"}, {i: "🎓", t: "Zertifikat"}, 
+        {i: "🦆", t: "Ente"}, {i: "📖", t: "Seite"}, {i: "💻", t: "Computer"}, {i: "😂", t: "Lachen"}, 
+        {i: "😴", t: "Schlafen"}, {i: "☀️", t: "Tag"}, {i: "🌙", t: "Nacht"}, {i: "📸", t: "Foto"},
+        {i: "🚗", t: "Auto"}, {i: "🚆", t: "Bahn"}, {i: "🔥", t: "Feuer"}, {i: "☄️", t: "Flamme"},
+        {i: "🐿️", t: "Eichhörnchen"}, {i: "🐘", t: "Elefant"}, {i: "🐱", t: "Katze"}, {i: "🐟", t: "Fisch"}
+    ];
 
-// START
-window.onload = () => {
-    buildPicker();
-    const urlP = new URLSearchParams(window.location.search);
-    const data = urlP.get('d');
-    if(data) {
-        try {
-            const dec = JSON.parse(decodeURIComponent(escape(atob(data))));
-            state = dec.map(x => ({ t: x.t, i: x.i, c: false }));
-            localStorage.setItem('flex_26', JSON.stringify(state));
-            window.history.replaceState({}, '', window.location.pathname);
-        } catch(e) { console.error("Import Error"); }
-    } else {
-        const saved = localStorage.getItem('flex_26');
-        state = saved ? JSON.parse(saved) : [{t: "Mission 1", i: "Willkommen!", c: false}];
-    }
-    renderApp();
-};
-
-function buildPicker() {
-    const p = document.getElementById('picker');
-    iconList.forEach(i => {
-        const s = document.createElement('span'); s.className = 'ic'; s.innerText = i;
-        s.onclick = () => {
-            if(focusInp) {
-                const start = focusInp.selectionStart;
-                focusInp.value = focusInp.value.slice(0,start) + i + focusInp.value.slice(focusInp.selectionEnd);
-                focusInp.focus();
-            }
-        };
-        p.appendChild(s);
-    });
-}
-
-function accessBE() { taps++; if(taps>=5){ document.getElementById('backend').style.display='block'; renderBE(); taps=0; } setTimeout(()=>taps=0,2000); }
-function closeBE() { sync(); renderApp(); document.getElementById('backend').style.display='none'; }
-
-function sync() {
-    const rows = document.querySelectorAll('.be-card');
-    state = Array.from(rows).map(r => ({
-        t: r.querySelector('.ti').value,
-        i: r.querySelector('.in').value,
-        c: false
-    })).filter(x => x.t.trim() !== "");
-}
-
-function renderBE() {
-    const l = document.getElementById('be-list'); l.innerHTML = '';
-    state.forEach((item, idx) => {
-        const d = document.createElement('div'); d.className = 'be-card';
-        d.innerHTML = `
-            <input type="text" class="be-input ti" value="${item.t}" placeholder="Aufgabe..." onfocus="focusInp=this">
-            <input type="text" class="be-input in" value="${item.i}" placeholder="Info..." onfocus="focusInp=this">
-            <button onclick="del(${idx})" style="color:var(--danger); border:none; background:none; cursor:pointer; font-weight:bold;">Löschen 🗑</button>
-        `;
-        l.appendChild(d);
-    });
-}
-
-function addRow() { sync(); state.push({t:"", i:"", c:false}); renderBE(); }
-function del(i) { sync(); state.splice(i,1); renderBE(); }
-
-// --- CORE FUNCTIONS ---
-function processSave() {
-    const b = document.getElementById('saveBtn');
-    b.innerText = "⏳ SYNCHRONISIERE...";
-    b.disabled = true;
-
-    sync();
-    localStorage.setItem('flex_26', JSON.stringify(state));
-
-    setTimeout(() => {
-        const shareData = state.map(x => ({ t: x.t, i: x.i }));
-        const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))));
-        const url = window.location.origin + window.location.pathname + "?d=" + base64;
-
-        document.getElementById('configString').value = base64;
-
-        new QRious({
-            element: document.getElementById('canvas'),
-            value: url,
-            size: 280,
-            level: 'M'
+    function initIconPicker() {
+        const picker = document.getElementById('centralPicker');
+        picker.innerHTML = '';
+        iconData.forEach(item => {
+            const span = document.createElement('span');
+            span.className = 'icon-choice';
+            span.innerText = item.i;
+            span.onclick = () => {
+                const titles = document.querySelectorAll('.task-title');
+                if (titles.length > 0) {
+                    titles[titles.length - 1].value += " " + item.i;
+                    markAsUnsaved();
+                }
+            };
+            picker.appendChild(span);
         });
-
-        document.getElementById('qr-wrap').style.display = 'block';
-        b.innerText = "✅ SPEICHERN & QR AKTUALISIEREN";
-        b.disabled = false;
-        renderApp();
-    }, 600);
-}
-
-function copyConfig() {
-    const el = document.getElementById('configString');
-    if(!el.value) { alert("Bitte erst Speichern!"); return; }
-    navigator.clipboard.writeText(el.value);
-    alert("Config-String kopiert! 📋");
-}
-
-function exportJSON() {
-    sync();
-    const data = JSON.stringify(state, null, 2);
-    const blob = new Blob([data], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'flex-o-mat-tasks.json';
-    a.click();
-}
-
-function importJSON(e) {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        try {
-            state = JSON.parse(ev.target.result);
-            renderBE();
-            alert("Erfolgreich importiert!");
-        } catch(err) { alert("Fehler beim Import!"); }
-    };
-    reader.readAsText(file);
-}
-
-// APP
-function renderApp() {
-    const l = document.getElementById('main-list'); l.innerHTML = '';
-    let sc = 0;
-    state.forEach((item, idx) => {
-        if(item.c) sc++;
-        const d = document.createElement('div'); d.className = `quest-item ${item.c?'done':''}`;
-        d.innerHTML = `
-            <div class="check-btn" onclick="toggle(${idx})">${item.c?'✔':''}</div>
-            <div class="quest-text" onclick="toggle(${idx})">${item.t}</div>
-            <button style="border:none; background:none; cursor:pointer;" onclick="info(${idx})">ℹ️</button>
-        `;
-        l.appendChild(d);
-    });
-    document.getElementById('score').innerText = sc * 10;
-    const body = encodeURIComponent(`Check meinen Flex-O-Mat Score: ${sc*10} Sterne!`);
-    document.getElementById('mail').href = `mailto:?subject=Flex-O-Mat&body=${body}`;
-}
-
-function toggle(i) { state[i].c = !state[i].c; renderApp(); }
-function info(i) {
-    document.getElementById('i-title').innerText = state[i].t;
-    document.getElementById('i-text').innerText = state[i].i || "Keine Info.";
-    document.getElementById('infoModal').style.display = 'flex';
-}
-
-async function nativeShare() {
-    sync();
-    const shareData = state.map(x => ({ t: x.t, i: x.i }));
-    const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))));
-    const url = window.location.origin + window.location.pathname + "?d=" + base64;
-    if(navigator.share) {
-        await navigator.share({title:'Flex-O-Mat', url: url});
-    } else {
-        navigator.clipboard.writeText(url); alert("Link kopiert!");
     }
-}
+
+    function handleHeaderClick() {
+        clickCount++;
+        if (clickCount >= 5) {
+            document.getElementById('adminPanel').style.display = 'block';
+            renderAdmin();
+            clickCount = 0;
+        }
+        setTimeout(() => clickCount = 0, 3000);
+    }
+
+    function renderAdmin() {
+        const list = document.getElementById('adminTaskList');
+        list.innerHTML = '';
+        questState.forEach((task, i) => {
+            const div = document.createElement('div');
+            div.className = 'admin-task-item';
+            div.innerHTML = `
+                <input type="text" class="admin-input task-title" value="${task.title}" placeholder="Aufgabe..." oninput="markAsUnsaved()">
+                <textarea class="admin-input task-info" placeholder="Infos..." oninput="markAsUnsaved()" rows="1">${task.info}</textarea>
+                <button onclick="removeAdminTask(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:bold; font-size:1.2rem;">🗑</button>
+            `;
+            list.appendChild(div);
+        });
+        updateButtonStates();
+    }
+
+    function markAsUnsaved() {
+        hasUnsavedChanges = true;
+        updateButtonStates();
+        document.getElementById('qr-container').style.display = 'none';
+    }
+
+    function updateButtonStates() {
+        const actionBtns = [
+            document.getElementById('qrBtn'), 
+            document.getElementById('mailConfigBtn'), 
+            document.getElementById('copyConfigBtn')
+        ];
+        
+        const saveBtn = document.getElementById('saveBtn');
+
+        if (isProcessing) {
+            saveBtn.disabled = true;
+            saveBtn.innerText = "⏳ Generiere Codes...";
+            actionBtns.forEach(btn => btn.disabled = true);
+        } else if (hasUnsavedChanges) {
+            saveBtn.disabled = false;
+            saveBtn.innerText = "💾 Speichern & QR erneuern";
+            saveBtn.style.background = "var(--primary)";
+            actionBtns.forEach(btn => btn.disabled = true);
+        } else {
+            saveBtn.disabled = false;
+            saveBtn.innerText = "✔ Alles aktuell";
+            saveBtn.style.background = "var(--success)";
+            actionBtns.forEach(btn => btn.disabled = false);
+        }
+    }
+
+    function syncCurrentInputs() {
+        const titles = document.querySelectorAll('.task-title');
+        const infos = document.querySelectorAll('.task-info');
+        return Array.from(titles).map((t, i) => ({
+            title: t.value,
+            info: infos[i].value,
+            completed: false
+        })).filter(t => t.title.trim() !== "");
+    }
+
+    function saveAdminData() {
+        isProcessing = true;
+        updateButtonStates();
+
+        // 1. Daten synchronisieren & LocalStorage
+        questState = syncCurrentInputs();
+        localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
+        hasUnsavedChanges = false;
+
+        // 2. Künstliche Pause für visuelles Feedback & Verarbeitungszeit
+        setTimeout(() => {
+            generateQRInternal();
+            isProcessing = false;
+            updateButtonStates();
+            render();
+            console.log("Atomic Update abgeschlossen.");
+        }, 500); // 500ms Pause, damit der Nutzer sieht, dass gearbeitet wird
+    }
+
+    function getShareLink() {
+        const cleanData = questState.map(t => ({ title: t.title, info: t.info }));
+        const dataStr = JSON.stringify(cleanData);
+        // UTF-8 Base64 Support
+        const base64 = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(parseInt(p1, 16))));
+        return window.location.origin + window.location.pathname + "?q=" + base64;
+    }
+
+    function generateQRInternal() {
+        const canvas = document.getElementById('qr-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Hartes Löschen
+        
+        new QRious({
+            element: canvas,
+            value: getShareLink(),
+            size: 450,
+            level: 'L'
+        });
+    }
+
+    function toggleQRDisplay() {
+        const container = document.getElementById('qr-container');
+        container.style.display = (container.style.display === 'block') ? 'none' : 'block';
+        if(container.style.display === 'block') container.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyConfigLink() {
+        const link = getShareLink();
+        navigator.clipboard.writeText(link).then(() => alert("Aktueller Link kopiert! 📋"));
+    }
+
+    function sendConfigMail() {
+        window.location.href = `mailto:?subject=Flex-O-Mat Konfiguration&body=${encodeURIComponent(getShareLink())}`;
+    }
+
+    function addAdminTask() {
+        questState = syncCurrentInputs();
+        questState.push({ title: "", info: "", completed: false });
+        renderAdmin();
+        markAsUnsaved();
+    }
+
+    function removeAdminTask(i) {
+        questState = syncCurrentInputs();
+        questState.splice(i, 1);
+        renderAdmin();
+        markAsUnsaved();
+    }
+
+    function closeAdmin() {
+        if (hasUnsavedChanges && !confirm("Nicht gespeichert! Schließen?")) return;
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    // ORIGINALER WYLDER MAIL-TEXT
+    function render() {
+        const list = document.getElementById('quest-list');
+        const completedCount = questState.filter(t => t.completed).length;
+        document.getElementById('score').innerText = completedCount * 10;
+        list.innerHTML = '';
+        questState.forEach((quest, i) => {
+            const item = document.createElement('div');
+            item.className = `quest-item ${quest.completed ? 'done' : ''}`;
+            item.innerHTML = `
+                <button class="info-btn" onclick="showInfo(${i})">💡</button>
+                <div class="quest-content" onclick="toggleQuest(${i})">
+                    <span class="quest-text">${quest.title}</span>
+                    <div class="check-circle">${quest.completed ? '✔' : ''}</div>
+                </div>`;
+            list.appendChild(item);
+        });
+        
+        const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Score im Flex-O-Mat ist am Beamen 🚀");
+        const mailBody = encodeURIComponent(`Hey!\n\nYo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. Mein Grind war heute richtig krass und ich hab die Aufgaben einfach weggemeddelt. ⚡️\n\nIch hab heute richtig krass ge-GLIMPFT und die Aufgaben ganz entspannt weg-GESCHLONZT. Schau dir meinen Score an, ich bin heute der absolute FLEX-O-MAT! 🔥\n\nHab jetzt legit ${completedCount * 10} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥\n\nBeste Grüße und bis bald!`);
+        document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
+    }
+
+    function toggleQuest(i) {
+        questState[i].completed = !questState[i].completed;
+        localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
+        render();
+        checkMilestones();
+    }
+
+    function showInfo(i) {
+        document.getElementById('modalTitle').innerText = questState[i].title;
+        document.getElementById('modalDescription').innerText = questState[i].info;
+        document.getElementById('infoModal').style.display = 'flex';
+    }
+
+    function checkMilestones() {
+        const badge = document.getElementById('badge');
+        if (questState.length === 0) return;
+        const progress = questState.filter(t => t.completed).length / questState.length;
+        let emoji = "";
+        if (progress === 1 && !achievedMilestones.m100) { emoji = "🏆"; achievedMilestones.m100 = true; } 
+        else if (progress >= 0.8 && !achievedMilestones.m80) { emoji = "🚀"; achievedMilestones.m80 = true; }
+        else if (progress >= 0.5 && !achievedMilestones.m50) { emoji = "👍"; achievedMilestones.m50 = true; }
+        if (emoji) {
+            badge.innerText = emoji; badge.classList.add('show');
+            setTimeout(() => badge.classList.remove('show'), 1200);
+        }
+    }
+
+    window.onload = () => {
+        const params = new URLSearchParams(window.location.search);
+        const data = params.get('q');
+        if (data) {
+            try {
+                const decoded = decodeURIComponent(atob(data).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                questState = JSON.parse(decoded).map(t => ({ ...t, completed: false }));
+                localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
+                window.history.replaceState({}, "", window.location.pathname);
+            } catch (e) { console.error("Import Error", e); }
+        } else {
+            const saved = localStorage.getItem('flex_tasks_v5');
+            questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg!", completed: false}];
+        }
+        initIconPicker();
+        render();
+    };
 </script>
 </body>
 </html>
+
