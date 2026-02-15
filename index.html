@@ -9,297 +9,393 @@
 
 <style>
 :root {
-    --primary: #6c5ce7;
-    --accent: #fdcb6e;
-    --success: #00b894;
-    --bg: #f4f7f6;
-    --text: #2d3436;
-    --mail-color: #0984e3;
-    --danger: #ff7675;
+    --primary:#6c5ce7;
+    --accent:#fdcb6e;
+    --success:#00b894;
+    --bg:#f4f7f6;
+    --text:#2d3436;
+    --danger:#ff7675;
 }
 
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: var(--bg);
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 20px;
-    margin: 0;
-    min-height: 100vh;
+body{
+    font-family:'Segoe UI',sans-serif;
+    background:var(--bg);
+    display:flex;
+    justify-content:center;
+    padding:20px;
+    margin:0;
 }
 
-.app-container {
-    background: white;
-    padding: 2rem;
-    border-radius: 30px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    width: 100%;
-    max-width: 400px;
-    min-height: 620px;
-    display: flex;
-    flex-direction: column;
+.app-container{
+    background:white;
+    padding:2rem;
+    border-radius:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+    width:100%;
+    max-width:420px;
+    min-height:620px;
+    display:flex;
+    flex-direction:column;
 }
 
-.header { text-align: center; margin-bottom: 40px; cursor: pointer; user-select: none; }
-
-.score-board {
-    background: var(--accent);
-    display: inline-block;
-    padding: 10px 25px;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: #000;
-    box-shadow: 0 4px 0 #e1b12c;
-    margin-top: 20px;
+.header{
+    text-align:center;
+    margin-bottom:40px;
+    cursor:pointer;
+    user-select:none;
 }
 
-.quest-list { list-style: none; padding: 0; flex-grow: 1; }
-
-.quest-item {
-    background: white;
-    border: 2px solid #f0f0f0;
-    margin: 10px 0;
-    padding: 12px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.score-board{
+    background:var(--accent);
+    display:inline-block;
+    padding:10px 25px;
+    border-radius:20px;
+    font-weight:bold;
+    margin-top:20px;
 }
 
-.quest-item.done {
-    background: #e8fcf3;
-    border-color: var(--success);
+.quest-item{
+    border:2px solid #eee;
+    padding:12px;
+    border-radius:16px;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
 
-.quest-content {
-    flex-grow: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.quest-item.done{
+    background:#e8fcf3;
+    border-color:var(--success);
 }
 
-.done .quest-text {
-    text-decoration: line-through;
-    color: #999;
+.quest-content{
+    flex-grow:1;
+    display:flex;
+    justify-content:space-between;
+    cursor:pointer;
 }
 
-.check-circle {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 2px solid #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.done .quest-text{
+    text-decoration:line-through;
+    color:#999;
 }
 
-.done .check-circle {
-    background: var(--success);
-    border-color: var(--success);
-    color: white;
+.info-btn{
+    border:none;
+    background:#f1f1f1;
+    border-radius:50%;
+    width:34px;
+    height:34px;
+    cursor:pointer;
 }
 
-.action-btn {
-    width: 100%;
-    height: 48px;
-    border-radius: 14px;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    color: white;
-    background: var(--mail-color);
-    margin-top: 20px;
+.check-circle{
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:2px solid #ccc;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.done .check-circle{
+    background:var(--success);
+    border-color:var(--success);
+    color:white;
+}
+
+/* ADMIN */
+
+#adminPanel{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:white;
+    padding:30px;
+    overflow:auto;
+    z-index:999;
+}
+
+.admin-task{
+    margin-bottom:15px;
+}
+
+.admin-task input,
+.admin-task textarea{
+    width:100%;
+    margin-bottom:5px;
+    padding:8px;
+}
+
+.icon-picker{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:20px 0;
+}
+
+.icon-choice{
+    cursor:pointer;
+    font-size:1.4rem;
+}
+
+button{
+    padding:10px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+#qr-container{
+    margin-top:20px;
+    text-align:center;
 }
 </style>
 </head>
 
 <body>
 
+<div id="adminPanel">
+    <h2>Admin-Bereich ⚙️</h2>
+    <div id="adminTasks"></div>
+    <button onclick="addTask()">+ Aufgabe</button>
+
+    <div class="icon-picker" id="iconPicker"></div>
+
+    <button onclick="saveAdmin()">💾 Speichern & QR erzeugen</button>
+    <button onclick="closeAdmin()">Schließen</button>
+
+    <div id="qr-container">
+        <p><strong>Share-Link:</strong></p>
+        <input id="shareLink" style="width:100%;" readonly>
+        <canvas id="qrCanvas"></canvas>
+    </div>
+</div>
+
 <div class="app-container">
-    <div class="header" onclick="openAdmin()">
-        <h1 style="margin:0; color:var(--primary);">Flex-O-Mat 🎯</h1>
+    <div class="header" onclick="handleHeaderClick()">
+        <h1>Flex-O-Mat 🎯</h1>
         <div class="score-board"><span id="score">0</span> ⭐</div>
     </div>
-
-    <div id="quest-list" class="quest-list"></div>
-
-    <button class="action-btn" onclick="openAdmin()">⚙️ Admin</button>
+    <div id="questList"></div>
 </div>
 
 <script>
 
-/* =============================
-   FLEX-O-MAT STATE & STORAGE
-   ============================= */
+/* ===============================
+   STATE + SHARE ENGINE
+================================= */
 
-const SHARE_VERSION = 1;
 const STORAGE_KEY = "flex_config_v1";
+const VERSION = 1;
 
 let questState = [];
 let clickCount = 0;
 
-/* =============================
-   SHARE ENGINE
-   ============================= */
+/* ---------- Encoding ---------- */
 
-function encodeConfig(obj) {
+function encodeConfig(obj){
     const json = JSON.stringify(obj);
-    const utf8 = new TextEncoder().encode(json);
-    let binary = "";
-    utf8.forEach(b => binary += String.fromCharCode(b));
-    return btoa(binary)
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/, "");
+    const bytes = new TextEncoder().encode(json);
+    let binary="";
+    bytes.forEach(b=>binary+=String.fromCharCode(b));
+    return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 }
 
-function decodeConfig(str) {
-    str = str.replace(/-/g, "+").replace(/_/g, "/");
-    const binary = atob(str);
-    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+function decodeConfig(str){
+    str=str.replace(/-/g,"+").replace(/_/g,"/");
+    const binary=atob(str);
+    const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
     return JSON.parse(new TextDecoder().decode(bytes));
 }
 
-function buildConfig() {
+/* ---------- Persistence ---------- */
+
+function buildConfig(){
     return {
-        version: SHARE_VERSION,
-        createdAt: Date.now(),
-        tasks: questState.map(t => ({
-            title: t.title,
-            info: t.info
+        version:VERSION,
+        tasks:questState.map(t=>({
+            title:t.title,
+            info:t.info
         }))
     };
 }
 
-function persistConfig() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(buildConfig()));
+function persist(){
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(buildConfig()));
 }
 
-function loadFromURL() {
-    const params = new URLSearchParams(window.location.search);
-    const configStr = params.get("config");
-    if (!configStr) return false;
+function loadFromURL(){
+    const params=new URLSearchParams(location.search);
+    const cfg=params.get("config");
+    if(!cfg) return false;
 
-    try {
-        const config = decodeConfig(configStr);
-        questState = config.tasks.map(t => ({
-            title: t.title,
-            info: t.info,
-            completed: false
-        }));
-        persistConfig();
+    try{
+        const data=decodeConfig(cfg);
+        questState=data.tasks.map(t=>({...t,completed:false}));
+        persist();
         return true;
-    } catch (e) {
+    }catch{
         alert("Fehler beim Laden der Konfiguration.");
         return false;
     }
 }
 
-function loadFromStorage() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return false;
-    const config = JSON.parse(saved);
-    questState = config.tasks.map(t => ({
-        title: t.title,
-        info: t.info,
-        completed: false
-    }));
+function loadFromStorage(){
+    const saved=localStorage.getItem(STORAGE_KEY);
+    if(!saved) return false;
+    const data=JSON.parse(saved);
+    questState=data.tasks.map(t=>({...t,completed:false}));
     return true;
 }
 
-function getShareLink() {
-    const encoded = encodeConfig(buildConfig());
-    return window.location.origin + window.location.pathname + "?config=" + encoded;
+function getShareLink(){
+    return location.origin+location.pathname+"?config="+encodeConfig(buildConfig());
 }
 
-function generateQR() {
-    const qr = new QRious({
-        value: getShareLink(),
-        size: 300
+function generateQR(){
+    const canvas=document.getElementById("qrCanvas");
+    canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height);
+    new QRious({
+        element:canvas,
+        value:getShareLink(),
+        size:250
     });
-    const win = window.open("");
-    win.document.write("<h3>QR-Code</h3>");
-    win.document.body.appendChild(qr.image);
 }
 
-/* =============================
-   UI LOGIC
-   ============================= */
+/* ===============================
+   UI
+================================= */
 
-function render() {
-    const list = document.getElementById("quest-list");
-    list.innerHTML = "";
+function render(){
+    const list=document.getElementById("questList");
+    list.innerHTML="";
+    let score=0;
 
-    let completed = 0;
+    questState.forEach((task,i)=>{
+        if(task.completed) score++;
 
-    questState.forEach((task, i) => {
-        if (task.completed) completed++;
+        const div=document.createElement("div");
+        div.className="quest-item "+(task.completed?"done":"");
 
-        const div = document.createElement("div");
-        div.className = "quest-item " + (task.completed ? "done" : "");
-
-        div.innerHTML = `
+        div.innerHTML=`
+            <button class="info-btn" onclick="showInfo(${i})">💡</button>
             <div class="quest-content" onclick="toggleTask(${i})">
                 <span class="quest-text">${task.title}</span>
-                <div class="check-circle">${task.completed ? "✔" : ""}</div>
+                <div class="check-circle">${task.completed?"✔":""}</div>
             </div>
         `;
         list.appendChild(div);
     });
 
-    document.getElementById("score").innerText = completed * 10;
+    document.getElementById("score").innerText=score*10;
 }
 
-function toggleTask(i) {
-    questState[i].completed = !questState[i].completed;
-    persistConfig();
+function toggleTask(i){
+    questState[i].completed=!questState[i].completed;
+    persist();
     render();
 }
 
-/* =============================
-   ADMIN PANEL (Prompt-Basiert)
-   ============================= */
+function showInfo(i){
+    alert(questState[i].info || "Keine Zusatzinfo");
+}
 
-function openAdmin() {
-    const input = prompt("Neue Aufgaben eingeben (durch Komma getrennt):");
-    if (!input) return;
+/* ===============================
+   ADMIN
+================================= */
 
-    questState = input.split(",").map(t => ({
-        title: t.trim(),
-        info: "",
-        completed: false
-    }));
-
-    persistConfig();
-    render();
-
-    if (confirm("QR-Code erzeugen?")) {
-        generateQR();
+function handleHeaderClick(){
+    clickCount++;
+    if(clickCount>=5){
+        openAdmin();
+        clickCount=0;
     }
+    setTimeout(()=>clickCount=0,3000);
 }
 
-/* =============================
+function openAdmin(){
+    document.getElementById("adminPanel").style.display="block";
+    renderAdmin();
+}
+
+function closeAdmin(){
+    document.getElementById("adminPanel").style.display="none";
+}
+
+function renderAdmin(){
+    const container=document.getElementById("adminTasks");
+    container.innerHTML="";
+
+    questState.forEach((t,i)=>{
+        const div=document.createElement("div");
+        div.className="admin-task";
+        div.innerHTML=`
+            <input value="${t.title}" onchange="updateTask(${i},this.value,'title')">
+            <textarea onchange="updateTask(${i},this.value,'info')">${t.info}</textarea>
+        `;
+        container.appendChild(div);
+    });
+
+    renderIcons();
+}
+
+function updateTask(i,val,type){
+    questState[i][type]=val;
+}
+
+function addTask(){
+    questState.push({title:"",info:"",completed:false});
+    renderAdmin();
+}
+
+function renderIcons(){
+    const picker=document.getElementById("iconPicker");
+    picker.innerHTML="";
+    const icons=["📄","📊","📚","💡","🔥","🚀","⭐","🎯","📘","✍️"];
+
+    icons.forEach(icon=>{
+        const span=document.createElement("span");
+        span.className="icon-choice";
+        span.innerText=icon;
+        span.onclick=()=>{
+            const inputs=document.querySelectorAll("#adminTasks input");
+            if(inputs.length>0){
+                inputs[inputs.length-1].value+=" "+icon;
+                inputs[inputs.length-1].dispatchEvent(new Event("change"));
+            }
+        };
+        picker.appendChild(span);
+    });
+}
+
+function saveAdmin(){
+    persist();
+    render();
+    const link=getShareLink();
+    document.getElementById("shareLink").value=link;
+    generateQR();
+}
+
+/* ===============================
    INIT
-   ============================= */
+================================= */
 
-window.onload = () => {
-
-    const fromURL = loadFromURL();
-
-    if (!fromURL) {
-        const fromStorage = loadFromStorage();
-        if (!fromStorage) {
-            questState = [{
-                title: "Level 1 starten!",
-                info: "Viel Erfolg!",
-                completed: false
+window.onload=()=>{
+    const fromURL=loadFromURL();
+    if(!fromURL){
+        const fromStorage=loadFromStorage();
+        if(!fromStorage){
+            questState=[{
+                title:"Level 1 starten!",
+                info:"Viel Erfolg!",
+                completed:false
             }];
         }
     }
-
     render();
 };
 
