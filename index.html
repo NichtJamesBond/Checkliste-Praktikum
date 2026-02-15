@@ -3,510 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flex-O-Mat</title>
+    <title>Flex-O-Mat PRO</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
         :root {
-            --primary: #6c5ce7; 
-            --accent: #fdcb6e; 
-            --success: #00b894;
-            --bg: #dfe6e9; 
-            --text: #2d3436; 
-            --mail-color: #0984e3;
-            --share-color: #e84393; 
-            --card-bg: #ffffff;
+            --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
+            --bg: #f0f3f5; --text: #2d3436; --mail: #0984e3; --share: #e84393;
         }
         
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: var(--bg); 
-            margin: 0; padding: 20px; 
-            display: flex; justify-content: center; 
-            min-height: 100vh;
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; justify-content: center; min-height: 100vh; }
+
+        /* APP CONTAINER */
+        .app-card { 
+            background: white; padding: 25px; border-radius: 32px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; 
+            display: flex; flex-direction: column; position: relative;
         }
 
-        /* --- HAUPT APP --- */
-        .app-container { 
-            background: var(--card-bg); 
-            padding: 2rem; 
-            border-radius: 30px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            width: 100%; max-width: 420px; 
-            min-height: 650px; 
-            display: flex; flex-direction: column; 
-            position: relative; 
+        .header { text-align: center; margin-bottom: 20px; cursor: pointer; }
+        .score-pill { 
+            background: var(--accent); color: white; display: inline-block; 
+            padding: 6px 18px; border-radius: 50px; font-weight: 800; 
+            box-shadow: 0 4px 0 #e1b12c; margin-top: 8px;
         }
 
-        .header { 
-            text-align: center; margin-bottom: 25px; 
-            cursor: pointer; user-select: none; 
-            transition: transform 0.1s;
+        /* LISTE */
+        .q-list { list-style: none; padding: 0; flex-grow: 1; }
+        .q-item { 
+            background: #fff; border: 2px solid #f1f2f6; margin-bottom: 12px; 
+            padding: 14px; border-radius: 20px; display: flex; align-items: center; gap: 12px;
+            transition: 0.2s;
         }
-        .header:active { transform: scale(0.98); }
+        .q-item.done { background: #f0fff9; border-color: var(--success); opacity: 0.8; }
+        .q-text { flex-grow: 1; font-weight: 600; cursor: pointer; color: var(--text); }
+        .done .q-text { text-decoration: line-through; color: #b2bec3; }
+        .check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #dfe6e9; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; }
+        .done .check { background: var(--success); border-color: var(--success); }
 
-        .score-board { 
-            background: var(--accent); display: inline-block; 
-            padding: 8px 20px; border-radius: 20px; 
-            font-weight: bold; font-size: 1.3rem; color: #fff;
-            text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
-            box-shadow: 0 4px 0 #e1b12c; margin-top: 10px; 
+        /* BUTTONS */
+        .f-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .btn { 
+            height: 52px; border-radius: 16px; border: none; font-weight: 700; 
+            display: flex; align-items: center; justify-content: center; gap: 8px; 
+            color: white; cursor: pointer; transition: 0.1s; text-decoration: none;
         }
+        .btn:active { transform: scale(0.97); }
+        .btn-m { background: var(--mail); }
+        .btn-s { background: var(--share); }
 
-        /* Liste */
-        .quest-list { list-style: none; padding: 0; flex-grow: 1; overflow-y: auto; }
-        .quest-item { 
-            background: #fff; border: 2px solid #eee; margin: 12px 0; 
-            padding: 12px; border-radius: 16px; 
-            display: flex; align-items: center; gap: 12px; 
-            transition: all 0.2s ease;
-        }
-        .quest-item.done { 
-            background: #e8fcf3; border-color: var(--success); 
-            opacity: 0.7; transform: scale(0.98);
-        }
-        
-        .quest-content { flex-grow: 1; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-        .quest-text { font-size: 1.05rem; font-weight: 600; color: var(--text); word-break: break-word; }
-        .done .quest-text { text-decoration: line-through; color: #b2bec3; }
-
-        .info-btn { 
-            background: #ffeaa7; width: 32px; height: 32px; border-radius: 50%; 
-            cursor: pointer; border: none; font-size: 1.1rem; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-        }
-        
-        .check-circle { 
-            width: 26px; height: 26px; border-radius: 50%; border: 2px solid #dfe6e9; 
-            display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;
-        }
-        .done .check-circle { background: var(--success); border-color: var(--success); }
-
-        /* Footer */
-        .footer-actions { 
-            margin-top: auto; padding-top: 20px; border-top: 1px solid #f1f2f6;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
-        }
-        .action-btn { 
-            height: 50px; border-radius: 15px; border: none; font-weight: bold; 
-            display: flex; align-items: center; justify-content: center; gap: 10px; 
-            text-decoration: none; color: white; cursor: pointer; font-size: 1rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-        .action-btn:active { transform: translateY(2px); box-shadow: none; }
-        .btn-mail { background: var(--mail-color); }
-        .btn-share { background: var(--share-color); }
-        .share-icon-svg { width: 20px; height: 20px; fill: white; }
-
-        /* --- BACKEND PANEL --- */
-        #backendPanel { 
+        /* BACKEND MODAL */
+        #backend { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #fdfdfd; z-index: 5000; padding: 25px; box-sizing: border-box; overflow-y: auto; 
+            background: #ffffff; z-index: 999; padding: 20px; box-sizing: border-box; overflow-y: auto; 
         }
+        .be-row { display: flex; gap: 8px; background: #f8f9fa; padding: 10px; border-radius: 14px; margin-bottom: 10px; border: 1px solid #eee; }
+        .be-col { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
+        .be-input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; }
         
-        .backend-header { text-align: center; color: var(--text); margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        /* KOMPAKTER ICON BEREICH */
+        .icon-bar { 
+            display: flex; overflow-x: auto; gap: 10px; padding: 12px 5px; 
+            background: #f1f2f6; border-radius: 12px; margin: 15px 0;
+            scrollbar-width: thin;
+        }
+        .ic-btn { font-size: 1.6rem; cursor: pointer; user-select: none; transition: 0.2s; }
+        .ic-btn:hover { transform: scale(1.2); }
 
-        .task-row { 
-            background: white; padding: 10px; border-radius: 12px; border: 1px solid #e0e0e0; 
-            margin-bottom: 10px; display: flex; gap: 8px; align-items: flex-start;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-        }
-        .task-inputs { flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
-        .be-input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; width: 100%; box-sizing: border-box; font-family: inherit; }
-        .del-btn { background: #ff7675; color: white; border: none; border-radius: 8px; width: 40px; height: 100%; cursor: pointer; font-size: 1.2rem; }
-
-        /* Icon Picker */
-        .icon-area {
-            background: #fff; padding: 10px; border-radius: 15px; margin: 20px 0;
-            max-height: 180px; overflow-y: auto; border: 1px solid #eee;
-        }
-        .icon-category { font-size: 0.8rem; color: #888; margin: 5px 0; font-weight: bold; text-transform: uppercase; }
-        .icon-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-        .icon-item { 
-            font-size: 1.5rem; padding: 5px; cursor: pointer; border-radius: 6px; 
-            transition: background 0.2s; user-select: none;
-        }
-        .icon-item:hover { background: #f0f0f0; transform: scale(1.1); }
-
-        /* Controls */
-        .backend-controls { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 20px; }
-        .be-btn { 
-            padding: 14px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; 
-            font-size: 1rem; color: white; display: flex; justify-content: center; align-items: center;
-        }
-        .btn-add { background: #b2bec3; color: #2d3436; }
-        .btn-save { background: var(--success); box-shadow: 0 4px 0 #009476; transition: all 0.1s; }
-        .btn-save:active { transform: translateY(4px); box-shadow: none; }
-        .btn-close { background: var(--text); margin-top: 20px; }
+        .be-ctrl { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .btn-save { background: var(--success); padding: 15px; font-size: 1rem; }
+        .btn-add { background: #636e72; padding: 10px; }
         
-        #qr-section { 
-            display: none; margin-top: 30px; text-align: center; 
-            background: white; padding: 20px; border-radius: 20px; border: 3px dashed var(--success);
-            animation: fadeIn 0.5s;
+        #qr-wrap { 
+            display: none; text-align: center; margin-top: 20px; 
+            padding: 15px; border: 2px solid var(--success); border-radius: 20px; 
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #qr-wrap canvas { max-width: 100%; height: auto; }
 
-        /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 6000; backdrop-filter: blur(2px); }
-        .modal-box { background: white; padding: 30px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-c { background: white; padding: 25px; border-radius: 24px; width: 80%; max-width: 300px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="backendPanel">
-    <div class="backend-header">
-        <h2 style="margin:0;">Backend ⚙️</h2>
-        <small style="color:#888;">Hier werden die Aufgaben geschmiedet</small>
-    </div>
+<div id="backend">
+    <h2 style="text-align: center; margin-top: 0;">Backend ⚙️</h2>
+    <div id="be-list"></div>
     
-    <div id="backendList"></div>
-    
-    <button class="be-btn btn-add" onclick="addRow()">➕ Zeile hinzufügen</button>
+    <button class="btn btn-add" onclick="addEmptyRow()" style="width: 100%;">➕ Neue Zeile</button>
 
-    <div class="icon-area">
-        <div class="icon-category">Zahlen & Zeichen</div>
-        <div id="iconGridNumbers" class="icon-grid"></div>
-        <div class="icon-category">Fahrzeuge & Action</div>
-        <div id="iconGridVehicles" class="icon-grid"></div>
-        <div class="icon-category">Smileys & Diverses</div>
-        <div id="iconGridMisc" class="icon-grid"></div>
-    </div>
+    <div class="icon-bar" id="icon-bar"></div>
 
-    <div class="backend-controls">
-        <button id="btnSave" class="be-btn btn-save" onclick="executeSaveSequence()">💾 Speichern & Links generieren</button>
+    <div class="be-ctrl">
+        <button id="main-save-btn" class="btn btn-save" onclick="saveAndLock()">💾 SPEICHERN & QR GENERIEREN</button>
         
-        <div id="qr-section">
-            <p style="color:var(--success); font-weight:bold;">Links erfolgreich generiert! ✅</p>
-            <canvas id="qrCanvas"></canvas>
-            <p style="font-size:0.9rem; color:#666; margin-top:10px;">Scanne diesen Code oder teile den Link aus der App.</p>
+        <div id="qr-wrap">
+            <canvas id="canvas"></canvas>
+            <p style="font-size: 12px; color: var(--success); font-weight: bold; margin-top: 5px;">QR-CODE AKTUELL ✅</p>
         </div>
 
-        <button class="be-btn btn-close" onclick="closeBackend()">🏠 Zurück zum App-Modus</button>
+        <button class="btn" onclick="closeBE()" style="background: var(--text);">🏠 ZURÜCK ZUR APP</button>
     </div>
 </div>
 
-<div id="infoModal" class="modal-overlay" onclick="closeInfo()">
-    <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 id="mTitle" style="color:var(--primary); margin-top:0;"></h3>
-        <p id="mText" style="line-height:1.6; color:#555;"></p>
-        <button class="action-btn btn-mail" style="width:100%" onclick="closeInfo()">Alles klar! 👍</button>
+<div id="i-modal" class="modal" onclick="this.style.display='none'">
+    <div class="modal-c" onclick="event.stopPropagation()">
+        <h3 id="i-title" style="color: var(--primary); margin: 0 0 10px 0;"></h3>
+        <p id="i-text" style="color: #636e72; font-size: 14px; line-height: 1.5;"></p>
+        <button class="btn btn-m" style="width: 100%;" onclick="document.getElementById('i-modal').style.display='none'">Verstanden!</button>
     </div>
 </div>
 
-<div class="app-container">
-    <div class="header" onclick="checkAdminAccess()">
-        <h1 style="margin:0; color:var(--primary);">Flex-O-Mat 🎯</h1>
-        <div class="score-board"><span id="scoreVal">0</span> Points</div>
+<div class="app-card">
+    <div class="header" onclick="handleSecretTap()">
+        <h1 style="margin: 0; color: var(--primary); font-size: 1.6rem;">Flex-O-Mat PRO</h1>
+        <div class="score-pill"><span id="score">0</span> XP</div>
     </div>
 
-    <ul id="questContainer" class="quest-list"></ul>
+    <div id="q-container" class="q-list"></div>
 
-    <div class="footer-actions">
-        <a id="mailBtn" href="#" class="action-btn btn-mail">
-            <span>📧 Flexen</span>
-        </a>
-        
-        <button onclick="shareConfig()" class="action-btn btn-share">
-            <svg class="share-icon-svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
-            <span>Teilen</span>
+    <div class="f-actions">
+        <a id="mail-link" href="#" class="btn btn-m">📧 Mailen</a>
+        <button class="btn btn-s" onclick="nativeShare()">
+            <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+            Teilen
         </button>
     </div>
 </div>
 
 <script>
-// --- DATEN & SETUP ---
-let globalTasks = []; // Das ist der gespeicherte, "echte" Zustand
-let tapCount = 0;
+// DATEN-ZENTRALE
+let state = [];
+let tapTimer = 0;
+let lastFocus = null;
 
-// Erweiterte Icons
-const iconsNumbers = ["0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","#️⃣","*️⃣"];
-const iconsVehicles = ["🚗","🚕","🚙","🚌","🚎","🏎️","🚓","🚑","🚒","🚜","🛵","🏍️","🚲","🚂","🚅","✈️","🚀","🛸","🚤","🛳️"];
-const iconsMisc = ["😀","😎","🤯","🤡","👻","💩","🤖","🎃","🔥","❄️","☀️","🌈","🍔","🍕","⚽","🎮","🏆","💡","💸","💎","❤️","✅","❌","❓"];
+const iconPool = [
+    "0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣",
+    "🚗","🚑","🚒","🚓","🚀","🛸","🚲","🚜","🏎️","🚁",
+    "😀","😎","🤯","🔥","🌈","☀️","❄️","🍕","🏆","💎"
+];
 
+// INITIALISIERUNG
 window.onload = () => {
-    initIcons();
-    loadStateFromURLorStorage();
+    buildIcons();
+    const urlParams = new URLSearchParams(window.location.search);
+    const data = urlParams.get('d');
+    
+    if (data) {
+        try {
+            const decoded = JSON.parse(decodeURIComponent(escape(atob(data))));
+            state = decoded.map(x => ({ t: x.t, i: x.i, c: false }));
+            localStorage.setItem('flex_pro_tasks', JSON.stringify(state));
+            window.history.replaceState({}, '', window.location.pathname);
+        } catch (e) { console.error("URL Load Error"); }
+    } else {
+        const saved = localStorage.getItem('flex_pro_tasks');
+        state = saved ? JSON.parse(saved) : [{ t: "Admin öffnen", i: "Tippe 5x auf den Titel", c: false }];
+    }
     renderApp();
 };
 
-function initIcons() {
-    fillIconGrid('iconGridNumbers', iconsNumbers);
-    fillIconGrid('iconGridVehicles', iconsVehicles);
-    fillIconGrid('iconGridMisc', iconsMisc);
-}
-
-function fillIconGrid(elementId, iconArray) {
-    const el = document.getElementById(elementId);
-    iconArray.forEach(ic => {
-        const s = document.createElement('div');
-        s.className = 'icon-item'; s.innerText = ic;
-        s.onclick = () => insertIconAtCursor(ic);
-        el.appendChild(s);
+function buildIcons() {
+    const bar = document.getElementById('icon-bar');
+    iconPool.forEach(icon => {
+        const s = document.createElement('span');
+        s.className = 'ic-btn';
+        s.innerText = icon;
+        s.onclick = () => {
+            if (lastFocus) {
+                const start = lastFocus.selectionStart;
+                lastFocus.value = lastFocus.value.slice(0, start) + icon + lastFocus.value.slice(lastFocus.selectionEnd);
+                lastFocus.focus();
+                lastFocus.setSelectionRange(start + icon.length, start + icon.length);
+            }
+        };
+        bar.appendChild(s);
     });
 }
 
-// --- BACKEND LOGIK ---
-
-function checkAdminAccess() {
-    tapCount++;
-    if(tapCount >= 5) {
-        // Beim Öffnen: Daten aus globaler Variable ins Formular laden
-        renderBackendRows();
-        document.getElementById('backendPanel').style.display = 'block';
-        
-        // QR Code verstecken beim Öffnen, da er erst nach Save neu generiert werden soll
-        document.getElementById('qr-section').style.display = 'none';
-        
-        tapCount = 0;
-    }
-    setTimeout(() => tapCount = 0, 2000);
+// BACKEND LOGIK
+function handleSecretTap() {
+    tapTimer++;
+    if (tapTimer >= 5) { openBE(); tapTimer = 0; }
+    setTimeout(() => tapTimer = 0, 2000);
 }
 
-function renderBackendRows() {
-    const list = document.getElementById('backendList');
+function openBE() {
+    document.getElementById('backend').style.display = 'block';
+    renderBEList();
+    document.getElementById('qr-wrap').style.display = 'none';
+}
+
+function closeBE() { 
+    syncFromDOM(); 
+    renderApp(); 
+    document.getElementById('backend').style.display = 'none'; 
+}
+
+function renderBEList() {
+    const list = document.getElementById('be-list');
     list.innerHTML = '';
-    
-    // Wir nutzen hier globalTasks als Basis für die Anzeige
-    globalTasks.forEach((task, index) => {
-        const div = document.createElement('div');
-        div.className = 'task-row';
-        div.innerHTML = `
-            <div class="task-inputs">
-                <input type="text" class="be-input title-in" value="${task.title}" placeholder="Aufgabe..." onfocus="lastFocused=this">
-                <input type="text" class="be-input info-in" value="${task.info}" placeholder="Infos..." onfocus="lastFocused=this">
+    state.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'be-row';
+        row.innerHTML = `
+            <div class="be-col">
+                <input type="text" class="be-input ti" value="${item.t}" placeholder="Titel..." onfocus="lastFocus=this">
+                <input type="text" class="be-input in" value="${item.i}" placeholder="Zusatz-Info..." onfocus="lastFocus=this">
             </div>
-            <button class="del-btn" onclick="deleteRow(${index})">🗑</button>
+            <button onclick="removeRow(${idx})" style="border:none; background:none; font-size:1.2rem; cursor:pointer;">🗑️</button>
         `;
-        list.appendChild(div);
+        list.appendChild(row);
     });
 }
 
-// Hilfsvariable für Icon-Insert
-let lastFocused = null;
-function insertIconAtCursor(icon) {
-    if(lastFocused) {
-        const start = lastFocused.selectionStart;
-        const end = lastFocused.selectionEnd;
-        lastFocused.value = lastFocused.value.substring(0, start) + icon + lastFocused.value.substring(end);
-        lastFocused.focus();
-        lastFocused.setSelectionRange(start + icon.length, start + icon.length);
-    } else {
-        alert("Bitte erst in ein Textfeld klicken!");
-    }
+function syncFromDOM() {
+    const titles = document.querySelectorAll('.ti');
+    const infos = document.querySelectorAll('.in');
+    state = Array.from(titles).map((el, i) => ({
+        t: el.value,
+        i: infos[i].value,
+        c: state[i] ? state[i].c : false
+    })).filter(x => x.t.trim() !== "");
 }
 
-// Synchronisiert DOM -> Variable (ohne zu speichern/generieren)
-// Damit beim Zeile hinzufügen nichts verloren geht
-function syncDomToVar() {
-    const tInputs = document.querySelectorAll('.title-in');
-    const iInputs = document.querySelectorAll('.info-in');
-    
-    // Temporäres Array bauen
-    const temp = [];
-    tInputs.forEach((inp, idx) => {
-        temp.push({
-            title: inp.value,
-            info: iInputs[idx].value,
-            completed: globalTasks[idx] ? globalTasks[idx].completed : false
-        });
-    });
-    globalTasks = temp;
-}
+function addEmptyRow() { syncFromDOM(); state.push({ t: "", i: "", c: false }); renderBEList(); }
+function removeRow(idx) { syncFromDOM(); state.splice(idx, 1); renderBEList(); }
 
-function addRow() {
-    syncDomToVar(); // Aktuelle Eingaben sichern
-    globalTasks.push({ title: "", info: "", completed: false }); // Leere Zeile anfügen
-    renderBackendRows(); // Neu zeichnen
-}
-
-function deleteRow(idx) {
-    syncDomToVar(); // Aktuelle Eingaben sichern
-    globalTasks.splice(idx, 1);
-    renderBackendRows();
-}
-
-// --- CORE: SPEICHERN & GENERIEREN (MIT PAUSE) ---
-
-function executeSaveSequence() {
-    const btn = document.getElementById('btnSave');
-    
-    // 1. UI Feedback: Button sperren
-    btn.innerHTML = "⏳ Verarbeite Daten...";
+// --- DER SPEICHER-KERN ---
+function saveAndLock() {
+    const btn = document.getElementById('main-save-btn');
+    btn.innerText = "⏳ VERARBEITE...";
     btn.disabled = true;
-    btn.style.opacity = "0.7";
 
-    // 2. Zwangspause (Simulation von Processing & Sicherheits-Sync)
     setTimeout(() => {
+        syncFromDOM(); // Finaler Sync
+        localStorage.setItem('flex_pro_tasks', JSON.stringify(state));
         
-        // 3. Erst JETZT Daten final ziehen
-        syncDomToVar();
-        
-        // Leere Einträge entfernen
-        globalTasks = globalTasks.filter(t => t.title.trim() !== "");
+        // Link Generierung
+        const cleanData = state.map(x => ({ t: x.t, i: x.i }));
+        const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleanData))));
+        const finalUrl = window.location.origin + window.location.pathname + "?d=" + b64;
 
-        // 4. In LocalStorage
-        localStorage.setItem('flexTasksV6', JSON.stringify(globalTasks));
+        // QR Code
+        new QRious({
+            element: document.getElementById('canvas'),
+            value: finalUrl,
+            size: 250,
+            level: 'H'
+        });
 
-        // 5. JETZT erst Links und QR generieren
-        const shareLink = generateSafeLink();
-        
-        // QR Zeichnen
-        const canvas = document.getElementById('qrCanvas');
-        new QRious({ element: canvas, value: shareLink, size: 250, level: 'M' });
-        document.getElementById('qr-section').style.display = 'block';
-
-        // 6. Hauptansicht aktualisieren
-        renderApp();
-
-        // 7. Success State
-        btn.innerHTML = "✅ Gespeichert!";
-        btn.style.background = "#00b894";
+        document.getElementById('qr-wrap').style.display = 'block';
+        btn.innerText = "✅ GESPEICHERT & QR BEREIT";
         btn.disabled = false;
-        btn.style.opacity = "1";
-
-        // Reset Button Text nach kurzer Zeit
-        setTimeout(() => {
-            btn.innerHTML = "💾 Speichern & Links generieren";
-            btn.style.background = "#00b894"; // Bleibt grün oder zurück zur Farbe
-        }, 2000);
-
-    }, 800); // 800ms Zwangspause
+        renderApp();
+    }, 600);
 }
 
-function closeBackend() {
-    document.getElementById('backendPanel').style.display = 'none';
-}
-
-// --- LINK LOGIK (UTF-8 Safe) ---
-
-function generateSafeLink() {
-    // Nur Title und Info exportieren
-    const exportData = globalTasks.map(t => ({ t: t.title, i: t.info }));
-    const json = JSON.stringify(exportData);
-    
-    // Base64 Encode mit UTF-8 Fix
-    const b64 = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g,
-        function toSolidBytes(match, p1) { return String.fromCharCode('0x' + p1); }));
-
-    return window.location.origin + window.location.pathname + "?d=" + b64;
-}
-
-// --- HAUPT APP LOGIK ---
-
+// APP LOGIK
 function renderApp() {
-    const ul = document.getElementById('questContainer');
-    ul.innerHTML = '';
-    let done = 0;
+    const container = document.getElementById('q-container');
+    container.innerHTML = '';
+    let doneCount = 0;
 
-    globalTasks.forEach((task, idx) => {
-        if(task.completed) done++;
-        const li = document.createElement('li');
-        li.className = `quest-item ${task.completed ? 'done' : ''}`;
-        li.innerHTML = `
-            <button class="info-btn" onclick="showInfo(${idx})">i</button>
-            <div class="quest-content" onclick="toggleTask(${idx})">
-                <span class="quest-text">${task.title}</span>
-                <div class="check-circle">${task.completed ? '✔' : ''}</div>
-            </div>
+    state.forEach((item, idx) => {
+        if (item.c) doneCount++;
+        const div = document.createElement('div');
+        div.className = `q-item ${item.c ? 'done' : ''}`;
+        div.innerHTML = `
+            <button class="check" onclick="toggleTask(${idx})">${item.c ? '✔' : ''}</button>
+            <div class="q-text" onclick="toggleTask(${idx})">${item.t}</div>
+            <button style="border:none; background:none; cursor:pointer; font-size:1rem;" onclick="showInfo(${idx})">ℹ️</button>
         `;
-        ul.appendChild(li);
+        container.appendChild(div);
     });
 
-    document.getElementById('scoreVal').innerText = done * 10;
-    updateMailText(done * 10);
+    document.getElementById('score').innerText = doneCount * 10;
+    updateMail(doneCount * 10);
 }
 
-function toggleTask(idx) {
-    globalTasks[idx].completed = !globalTasks[idx].completed;
-    localStorage.setItem('flexTasksV6', JSON.stringify(globalTasks));
-    renderApp();
-}
+function toggleTask(idx) { state[idx].c = !state[idx].c; renderApp(); }
 
 function showInfo(idx) {
-    document.getElementById('mTitle').innerText = globalTasks[idx].title;
-    document.getElementById('mText').innerText = globalTasks[idx].info || "Keine weiteren Infos.";
-    document.getElementById('infoModal').style.display = 'flex';
+    document.getElementById('i-title').innerText = state[idx].t;
+    document.getElementById('i-text').innerText = state[idx].i || "Keine weiteren Infos vorhanden.";
+    document.getElementById('i-modal').style.display = 'flex';
 }
-function closeInfo() { document.getElementById('infoModal').style.display = 'none'; }
 
-// --- LOAD LOGIC ---
+function updateMail(score) {
+    const subj = encodeURIComponent("Flex-O-Mat PRO Score!");
+    const body = encodeURIComponent(`Yo! Mein Cringe-Kompensator lief heute auf 0, dafür ist mein Gönn-Dir-Modus bei ${score} XP. Absolut Flex-O-Tronic! Sheesh.`);
+    document.getElementById('mail-link').href = `mailto:?subject=${subj}&body=${body}`;
+}
 
-function loadStateFromURLorStorage() {
-    const params = new URLSearchParams(window.location.search);
-    const dataHash = params.get('d');
+async function nativeShare() {
+    syncFromDOM();
+    const cleanData = state.map(x => ({ t: x.t, i: x.i }));
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleanData))));
+    const url = window.location.origin + window.location.pathname + "?d=" + b64;
 
-    if(dataHash) {
-        try {
-            // Decoding mit UTF-8 Fix
-            const json = decodeURIComponent(atob(dataHash).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            
-            const imported = JSON.parse(json);
-            globalTasks = imported.map(x => ({ title: x.t, info: x.i, completed: false }));
-            
-            // URL säubern
-            window.history.replaceState({}, document.title, window.location.pathname);
-            // Speichern damit es bleibt
-            localStorage.setItem('flexTasksV6', JSON.stringify(globalTasks));
-            
-        } catch(e) {
-            console.error("Import Fehler", e);
-            globalTasks = [{title: "Fehler beim Laden ⚠️", info: "Link war ungültig", completed: false}];
-        }
+    if (navigator.share) {
+        await navigator.share({ title: 'Flex-O-Mat', text: 'Check meine Liste!', url: url });
     } else {
-        const saved = localStorage.getItem('flexTasksV6');
-        if(saved) {
-            globalTasks = JSON.parse(saved);
-        } else {
-            globalTasks = [{title: "Start deine Mission 🚀", info: "Tippe 5x auf den Titel oben für das Backend.", completed: false}];
-        }
+        navigator.clipboard.writeText(url);
+        alert("Link kopiert! 📋");
     }
 }
-
-// --- TEILEN & MAIL ---
-
-function updateMailText(score) {
-    // Jugendsprache + 3 erfundene Wörter: "Cringe-Kompensator", "Flex-O-Tronic", "Gönn-Dir-Modus"
-    const subject = encodeURIComponent(`Flex-O-Mat Status: ${score} Points! 🤯`);
-    const bodyRaw = `Yo!
-
-Ich hab grad den Flex-O-Mat durchgespielt. Kein Witz, mein **Cringe-Kompensator** musste nicht mal anspringen, lief alles smooth.
-
-Hab die Aufgaben im totalen **Gönn-Dir-Modus** erledigt. Das System ist echt **Flex-O-Tronic** zertifiziert. 🔥
-
-Ergebnis: ${score} Punkte. 
-Mach das erstmal nach!
-
-Sheesh & peace out! ✌️`;
-
-    document.getElementById('mailBtn').href = `mailto:?subject=${subject}&body=${encodeURIComponent(bodyRaw)}`;
-}
-
-async function shareConfig() {
-    // WICHTIG: Hier wird KEIN neuer Link generiert basierend auf Backend-Inputs.
-    // Es wird nur der Link basierend auf der Variable 'globalTasks' generiert.
-    // Da 'globalTasks' nur beim Speichern aktualisiert wird, ist dies sicher.
-    
-    const link = generateSafeLink(); 
-    
-    const shareData = {
-        title: 'Flex-O-Mat Challenge',
-        text: 'Gönn dir diese Challenge! 🎯',
-        url: link
-    };
-
-    try {
-        if(navigator.share) {
-            await navigator.share(shareData);
-        } else {
-            navigator.clipboard.writeText(link);
-            alert("Link in Zwischenablage kopiert! 📋");
-        }
-    } catch(e) { console.log("Share cancelled"); }
-}
-
 </script>
 </body>
 </html>
