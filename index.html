@@ -3,342 +3,199 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flex-O-Mat</title>
-
+<title>Flex-O-Mat Admin</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-
 <style>
-:root{
---primary:#6c5ce7;
---accent:#fdcb6e;
---success:#00b894;
---bg:#f4f7f6;
---text:#2d3436;
---danger:#ff7675;
+:root {
+    --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
+    --bg: #f4f7f6; --text: #2d3436; --mail-color: #0984e3;
+    --info-bg: #fff3bf; --info-border: #fcc419; --danger: #ff7675;
 }
-
-body{
-font-family:'Segoe UI',sans-serif;
-background:var(--bg);
-margin:0;
-display:flex;
-justify-content:center;
-padding:20px;
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg);
+    margin: 0; padding: 0; display: flex; justify-content: center; align-items: flex-start;
+    min-height: 100vh;
 }
-
-.app-container{
-background:white;
-padding:2rem;
-border-radius:30px;
-box-shadow:0 10px 30px rgba(0,0,0,0.08);
-width:100%;
-max-width:420px;
-min-height:600px;
-display:flex;
-flex-direction:column;
+#adminPanel {
+    display: none;
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #fefefe;
+    padding: 30px; box-sizing: border-box;
+    overflow-y: auto;
+    z-index: 5000;
 }
-
-.header{
-text-align:center;
-margin-bottom:30px;
-cursor:pointer;
-user-select:none;
+#adminPanel h2 {
+    text-align: center;
+    color: var(--primary);
+    margin-bottom: 20px;
 }
-
-.score-board{
-background:var(--accent);
-padding:8px 20px;
-border-radius:20px;
-font-weight:bold;
-margin-top:10px;
-display:inline-block;
+.admin-task-item {
+    background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #ddd;
+    margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
-
-.quest-item{
-border:2px solid #eee;
-border-radius:18px;
-padding:12px;
-margin-bottom:10px;
-display:flex;
-align-items:center;
-gap:10px;
+.admin-input {
+    padding: 10px; border: 1px solid #ccc; border-radius: 10px; font-size: 1rem;
 }
-
-.quest-item.done{
-background:#e8fcf3;
-border-color:var(--success);
+.task-title { flex: 1; font-weight: bold; }
+.task-info { flex: 2; }
+.central-icon-picker {
+    display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; padding: 15px;
+    border-radius: 15px; background: #f0f0f0;
 }
-
-.quest-content{
-flex:1;
-display:flex;
-justify-content:space-between;
-cursor:pointer;
+.icon-choice {
+    cursor: pointer; font-size: 1.5rem; padding: 5px; background: white;
+    border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s;
 }
-
-.info-btn{
-width:36px;
-height:36px;
-border-radius:50%;
-border:none;
-background:#fff3bf;
-cursor:pointer;
+.icon-choice:hover { transform: scale(1.2); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+.full-width { grid-column: span 2; }
+.admin-btn {
+    padding: 12px; border-radius: 14px; border: none; cursor: pointer; font-weight: bold;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem;
+    transition: 0.3s;
 }
-
-.check-circle{
-width:26px;
-height:26px;
-border-radius:50%;
-border:2px solid #ccc;
-display:flex;
-align-items:center;
-justify-content:center;
-}
-
-.quest-item.done .check-circle{
-background:var(--success);
-color:white;
-border-color:var(--success);
-}
-
-/* ADMIN */
-
-#adminPanel{
-display:none;
-position:fixed;
-inset:0;
-background:white;
-z-index:5000;
-overflow:auto;
-padding:30px;
-}
-
-.admin-card{
-background:#f9f9ff;
-border-radius:18px;
-padding:15px;
-margin-bottom:15px;
-box-shadow:0 6px 18px rgba(0,0,0,0.05);
-}
-
-.admin-input{
-width:100%;
-padding:10px;
-border-radius:10px;
-border:1px solid #ddd;
-margin-bottom:8px;
-}
-
-.admin-btn{
-width:100%;
-padding:14px;
-border:none;
-border-radius:14px;
-font-weight:bold;
-cursor:pointer;
-margin-bottom:10px;
-}
-
-.primary{background:var(--primary);color:white;}
-.success{background:var(--success);color:white;}
-.danger{background:var(--danger);color:white;}
-
-#qr-container{
-display:none;
-margin-top:20px;
-text-align:center;
-border:2px dashed var(--success);
-padding:15px;
-border-radius:20px;
-}
-
+.admin-btn:disabled { background: #ccc; color: #888; cursor: not-allowed; }
+#qr-container { display: none; margin-top: 20px; text-align: center; padding: 15px; border-radius: 15px; border: 3px dashed var(--success); background: #fff; }
+#qr-canvas { display: block; margin: 0 auto; max-width: 100%; border-radius: 10px; }
 </style>
 </head>
 <body>
 
 <div id="adminPanel">
-<h2 style="text-align:center;color:var(--primary)">Flex-O-Mat Back-End ⚙️</h2>
+    <h2>Flex-O-Mat Admin ⚙️</h2>
+    <div id="adminTaskList"></div>
+    <button class="admin-btn full-width" onclick="addAdminTask()" style="background:#eee;">+ Neue Aufgabe hinzufügen</button>
 
-<div id="adminTaskList"></div>
+    <div class="central-icon-picker" id="centralPicker"></div>
 
-<button class="admin-btn primary" onclick="addTask()">+ Aufgabe</button>
-<button class="admin-btn success" onclick="saveConfig()">💾 Speichern & QR</button>
-<button class="admin-btn" onclick="closeAdmin()">🏠 App-Modus</button>
+    <div class="admin-grid">
+        <button id="saveBtn" class="admin-btn full-width" onclick="saveAdminData()" style="background:var(--primary); color:white;">💾 Speichern & QR erneuern</button>
+        <button id="qrBtn" class="admin-btn" onclick="toggleQRDisplay()" style="background:var(--success); color:white;" disabled>📱 QR Code anzeigen</button>
+        <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background:#636e72; color:white;" disabled>📋 Link kopieren</button>
+        <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background:var(--mail-color); color:white;" disabled>📧 Konfig senden</button>
+    </div>
 
-<div id="qr-container">
-<p><strong>Aktueller Share-Code</strong></p>
-<canvas id="qr"></canvas>
-</div>
-</div>
-
-<div class="app-container">
-<div class="header" onclick="handleHeaderClick()">
-<h1 style="margin:0;color:var(--primary)">Flex-O-Mat 🎯</h1>
-<div class="score-board"><span id="score">0</span> ⭐</div>
-</div>
-
-<div id="quest-list"></div>
+    <div id="qr-container">
+        <p style="color:var(--success); font-weight:bold;">QR-Code ist aktuell! ✅</p>
+        <canvas id="qr-canvas"></canvas>
+    </div>
 </div>
 
 <script>
-/* ================================
-   STABILE SHARE ENGINE v1
-================================ */
+let questState = [];
+let hasUnsavedChanges = false;
+let isProcessing = false;
 
-const STORAGE_KEY="flex_tasks_v6";
-const SHARE_VERSION="v1";
-
-let questState=[];
-let clickCount=0;
-
-/* ---------- BASE64 URL SAFE ---------- */
-
-function encodeState(obj){
-const json=JSON.stringify({v:SHARE_VERSION,data:obj});
-const bytes=new TextEncoder().encode(json);
-let bin="";
-bytes.forEach(b=>bin+=String.fromCharCode(b));
-return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
-}
-
-function decodeState(str){
-try{
-str=str.replace(/-/g,"+").replace(/_/g,"/");
-const bin=atob(str);
-const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
-const json=new TextDecoder().decode(bytes);
-const parsed=JSON.parse(json);
-if(parsed.v!==SHARE_VERSION) return null;
-return parsed.data;
-}catch(e){
-console.error("Decode Fehler:",e);
-return null;
-}
-}
-
-/* ---------- LOAD ---------- */
-
-function loadInitialState(){
-const params=new URLSearchParams(location.search);
-const shared=params.get("q");
-
-if(shared){
-const decoded=decodeState(shared);
-if(decoded){
-questState=decoded.map(t=>({...t,completed:false}));
-localStorage.setItem(STORAGE_KEY,JSON.stringify(questState));
-return;
-}
-}
-
-const saved=localStorage.getItem(STORAGE_KEY);
-questState=saved?JSON.parse(saved):[
-{title:"Level 1 starten!",info:"Viel Erfolg!",completed:false}
+const iconData = [
+    "0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣",
+    "➕","➖","🚗","🚌","🚢","🐘","🐿️","⚡","🌩️","🌧️","☀️","🌙",
+    "😭","😂","😴","😢","🔥","🚀","💨","📝","💻","📊","✏️"
 ];
+
+function initIconPicker() {
+    const picker = document.getElementById('centralPicker');
+    picker.innerHTML = '';
+    iconData.forEach(icon => {
+        const span = document.createElement('span');
+        span.className = 'icon-choice';
+        span.innerText = icon;
+        span.onclick = () => {
+            const titles = document.querySelectorAll('.task-title');
+            if(titles.length>0) { 
+                titles[titles.length-1].value += " " + icon; 
+                markAsUnsaved();
+            }
+        };
+        picker.appendChild(span);
+    });
 }
 
-/* ---------- SAVE ---------- */
-
-function saveConfig(){
-localStorage.setItem(STORAGE_KEY,JSON.stringify(questState));
-const link=location.origin+location.pathname+"?q="+encodeState(questState);
-generateQR(link);
-document.getElementById("qr-container").style.display="block";
+function renderAdmin() {
+    const list = document.getElementById('adminTaskList');
+    list.innerHTML = '';
+    questState.forEach((task,i)=>{
+        const div = document.createElement('div');
+        div.className = 'admin-task-item';
+        div.innerHTML = `
+            <input type="text" class="admin-input task-title" value="${task.title}" placeholder="Aufgabe..." oninput="markAsUnsaved()">
+            <textarea class="admin-input task-info" rows="1" placeholder="Infos..." oninput="markAsUnsaved()">${task.info}</textarea>
+            <button onclick="removeAdminTask(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-size:1.2rem;">🗑</button>
+        `;
+        list.appendChild(div);
+    });
 }
 
-/* ---------- QR ---------- */
-
-function generateQR(link){
-new QRious({
-element:document.getElementById("qr"),
-value:link,
-size:260
-});
+function markAsUnsaved() { 
+    hasUnsavedChanges=true; 
+    document.getElementById('qr-container').style.display='none'; 
 }
 
-/* ---------- RENDER ---------- */
-
-function render(){
-const list=document.getElementById("quest-list");
-list.innerHTML="";
-let score=0;
-
-questState.forEach((q,i)=>{
-if(q.completed) score+=10;
-
-const div=document.createElement("div");
-div.className="quest-item"+(q.completed?" done":"");
-div.innerHTML=`
-<button class="info-btn" onclick="showInfo(${i})">💡</button>
-<div class="quest-content" onclick="toggleQuest(${i})">
-<span>${q.title}</span>
-<div class="check-circle">${q.completed?"✔":""}</div>
-</div>
-`;
-list.appendChild(div);
-});
-
-document.getElementById("score").innerText=score;
+function addAdminTask() { 
+    questState.push({title:"", info:"", completed:false});
+    renderAdmin();
+    markAsUnsaved();
 }
 
-/* ---------- LOGIC ---------- */
-
-function toggleQuest(i){
-questState[i].completed=!questState[i].completed;
-localStorage.setItem(STORAGE_KEY,JSON.stringify(questState));
-render();
+function removeAdminTask(i){ 
+    questState.splice(i,1); 
+    renderAdmin(); 
+    markAsUnsaved(); 
 }
 
-function showInfo(i){
-alert(questState[i].info||"Keine Info");
+// --- QR & Share ---
+function getShareLink(){
+    const dataStr = JSON.stringify(questState.map(t=>({title:t.title, info:t.info})));
+    const base64 = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g,(m,p)=>String.fromCharCode(parseInt(p,16))));
+    return window.location.origin + window.location.pathname + "?v=1&q=" + base64;
 }
 
-/* ---------- ADMIN ---------- */
-
-function handleHeaderClick(){
-clickCount++;
-if(clickCount>=5){
-document.getElementById("adminPanel").style.display="block";
-renderAdmin();
-clickCount=0;
-}
+function generateQRInternal(){
+    const canvas = document.getElementById('qr-canvas');
+    canvas.width = 450; canvas.height = 450;
+    new QRious({element:canvas,value:getShareLink(),size:450,level:'L'});
+    document.getElementById('qrBtn').disabled=false;
+    document.getElementById('copyConfigBtn').disabled=false;
+    document.getElementById('mailConfigBtn').disabled=false;
 }
 
-function renderAdmin(){
-const list=document.getElementById("adminTaskList");
-list.innerHTML="";
-questState.forEach((q,i)=>{
-const div=document.createElement("div");
-div.className="admin-card";
-div.innerHTML=`
-<input class="admin-input" value="${q.title}" onchange="questState[${i}].title=this.value">
-<textarea class="admin-input" onchange="questState[${i}].info=this.value">${q.info}</textarea>
-<button class="admin-btn danger" onclick="removeTask(${i})">Löschen</button>
-`;
-list.appendChild(div);
-});
+function saveAdminData(){
+    isProcessing=true;
+    questState = Array.from(document.querySelectorAll('.task-title')).map((t,i)=>{
+        return {title:t.value, info:document.querySelectorAll('.task-info')[i].value, completed:false};
+    });
+    localStorage.setItem('flex_tasks_v5',JSON.stringify(questState));
+    hasUnsavedChanges=false;
+    setTimeout(()=>{
+        generateQRInternal();
+        isProcessing=false;
+        renderAdmin();
+    },300);
 }
 
-function addTask(){
-questState.push({title:"Neue Aufgabe",info:"",completed:false});
-renderAdmin();
+function toggleQRDisplay(){ 
+    const c=document.getElementById('qr-container'); 
+    c.style.display=(c.style.display==='block')?'none':'block'; 
+    if(c.style.display==='block') c.scrollIntoView({behavior:'smooth'});
 }
 
-function removeTask(i){
-questState.splice(i,1);
-renderAdmin();
+function copyConfigLink(){ 
+    navigator.clipboard.writeText(getShareLink()).then(()=>alert("Link kopiert! 📋"));
 }
 
-function closeAdmin(){
-document.getElementById("adminPanel").style.display="none";
-render();
+function sendConfigMail(){ 
+    window.location.href=`mailto:?subject=Flex-O-Mat Konfiguration&body=${encodeURIComponent(getShareLink())}`;
 }
 
-/* ---------- INIT ---------- */
-
-loadInitialState();
-render();
-
+// --- INIT ---
+window.onload = ()=>{
+    const saved = localStorage.getItem('flex_tasks_v5');
+    questState = saved?JSON.parse(saved):[{title:"Level 1 starten!", info:"Viel Erfolg!", completed:false}];
+    initIconPicker();
+    renderAdmin();
+};
 </script>
 </body>
 </html>
