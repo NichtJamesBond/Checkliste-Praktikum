@@ -9,18 +9,16 @@
         :root {
             --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
             --bg: #f4f7f6; --text: #2d3436; --mail-color: #0984e3;
-            --info-bg: #fff3bf; --danger: #ff7675;
+            --share-color: #e84393; --info-bg: #fff3bf; --danger: #ff7675;
         }
         
         body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: var(--bg); 
-            margin: 0; padding: 20px;
-            display: flex; justify-content: center; align-items: flex-start;
-            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif; background: var(--bg); 
+            margin: 0; padding: 20px; display: flex; justify-content: center; 
+            align-items: flex-start; min-height: 100vh;
         }
 
-        /* HAUPTMASKE - Zuerst sichtbar */
+        /* HAUPTMASKE */
         .app-container { 
             background: white; padding: 2rem; border-radius: 30px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
@@ -45,7 +43,6 @@
         .quest-text { font-size: 1rem; font-weight: 600; color: var(--text); }
         .done .quest-text { text-decoration: line-through; color: #a0a0a0; }
 
-        /* HILFE-SYMBOL */
         .info-btn { 
             background: var(--info-bg); width: 36px; height: 36px; border-radius: 50%; 
             cursor: pointer; font-size: 18px; display: flex; align-items: center; 
@@ -55,42 +52,46 @@
         .check-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; }
         .done .check-circle { background: var(--success); border-color: var(--success); color: white; }
 
-        /* ADMIN PANEL - Initial versteckt */
+        /* FOOTER ACTIONS */
+        .footer-actions { 
+            margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+        }
+        .action-btn { 
+            height: 48px; border-radius: 14px; border: none; font-weight: bold; 
+            display: flex; align-items: center; justify-content: center; gap: 8px; 
+            text-decoration: none; color: white; cursor: pointer; font-size: 0.85rem;
+        }
+        .btn-mail { background: var(--mail-color); }
+        .btn-share { background: var(--share-color); }
+
+        /* ADMIN PANEL */
         #adminPanel { 
             display: none; position: fixed; top: 0; left: 0; 
             width: 100%; height: 100%; background: #fefefe; 
             z-index: 5000; padding: 30px; box-sizing: border-box; overflow-y: auto; 
         }
-
         .admin-task-item { 
             background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #ddd; 
             margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
         }
         .admin-input { padding: 10px; border: 1px solid #ccc; border-radius: 10px; font-size: 1rem; }
         .task-title { flex: 1; font-weight: bold; min-width: 150px; }
         .task-info { flex: 2; min-width: 200px; }
-
         .central-icon-picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; padding: 15px; border-radius: 15px; background: #f0f0f0; }
-        .icon-choice { cursor: pointer; font-size: 1.5rem; padding: 5px; background: white; border-radius: 10px; transition: 0.2s; }
+        .icon-choice { cursor: pointer; font-size: 1.5rem; padding: 5px; background: white; border-radius: 10px; }
 
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
         .full-width { grid-column: span 2; }
-        .admin-btn { 
-            padding: 12px; border-radius: 14px; border: none; cursor: pointer; 
-            font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; 
-        }
+        .admin-btn { padding: 12px; border-radius: 14px; border: none; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .admin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         #qr-container { display: none; margin-top: 20px; text-align: center; border: 3px dashed var(--success); padding: 15px; border-radius: 15px; }
         #qr-canvas { display: block; margin: 0 auto; max-width: 100%; }
 
-        /* MODAL & BADGE */
+        /* MODALS & BADGE */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 6000; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
-        .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
-        .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; color: white; cursor: pointer; }
-        .btn-mail { background: var(--mail-color); }
         #badge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8rem; z-index: 7000; pointer-events: none; transition: 0.5s; }
         #badge.show { transform: translate(-50%, -50%) scale(1.2); }
     </style>
@@ -100,17 +101,17 @@
 <div id="badge"></div>
 
 <div id="adminPanel">
-    <h2>Flex-O-Mat Admin ⚙️</h2>
+    <h2 style="text-align:center; color:var(--primary);">Flex-O-Mat Admin ⚙️</h2>
     <div id="adminTaskList"></div>
     <button class="admin-btn full-width" onclick="addAdminTask()" style="background:#eee;">+ Neue Aufgabe hinzufügen</button>
     <div class="central-icon-picker" id="centralPicker"></div>
     
     <div class="admin-grid">
         <button id="saveBtn" class="admin-btn full-width" onclick="saveAdminData()" style="background:var(--primary); color:white;">💾 Speichern & QR erneuern</button>
-        <button id="qrBtn" class="admin-btn" onclick="toggleQRDisplay()" style="background:var(--success); color:white;" disabled>📱 QR Code anzeigen</button>
+        <button id="qrBtn" class="admin-btn" onclick="toggleQRDisplay()" style="background:var(--success); color:white;" disabled>📱 QR Code</button>
         <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background:#636e72; color:white;" disabled>📋 Link kopieren</button>
         <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background:var(--mail-color); color:white;" disabled>📧 Konfig senden</button>
-        <button id="closeAdminBtn" class="admin-btn" onclick="closeAdmin()" style="background:#b2bec3; color:white;">🏠 App-Modus öffnen</button>
+        <button id="closeAdminBtn" class="admin-btn" onclick="closeAdmin()" style="background:#b2bec3; color:white;">🏠 App-Modus</button>
     </div>
 
     <div id="qr-container">
@@ -123,7 +124,7 @@
     <div class="modal-content">
         <h3 id="modalTitle" style="color:var(--primary);"></h3>
         <p id="modalDescription"></p>
-        <button class="action-btn btn-mail" onclick="document.getElementById('infoModal').style.display='none'">Check ich!</button>
+        <button class="action-btn btn-mail" style="width:100%" onclick="document.getElementById('infoModal').style.display='none'">Check ich!</button>
     </div>
 </div>
 
@@ -134,7 +135,8 @@
     </div>
     <div id="quest-list" class="quest-list"></div>
     <div class="footer-actions">
-        <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail verschicken</a>
+        <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail</a>
+        <button onclick="shareAppConfiguration()" class="action-btn btn-share">📤 Teilen</button>
     </div>
 </div>
 
@@ -181,7 +183,6 @@ function renderAdmin() {
     questState.forEach((task, i) => {
         const div = document.createElement('div');
         div.className = 'admin-task-item';
-        // Strings sauber in Template Literals verpackt
         div.innerHTML = `
             <input type="text" class="admin-input task-title" value="${task.title}" placeholder="Aufgabe..." oninput="markAsUnsaved()">
             <textarea class="admin-input task-info" rows="1" placeholder="Infos..." oninput="markAsUnsaved()">${task.info}</textarea>
@@ -235,7 +236,6 @@ function saveAdminData() {
     isProcessing = true;
     updateButtonStates();
     
-    // Daten aus Inputs lesen
     const titles = document.querySelectorAll('.task-title');
     const infos = document.querySelectorAll('.task-info');
     questState = Array.from(titles).map((t, i) => ({
@@ -244,24 +244,43 @@ function saveAdminData() {
         completed: false
     })).filter(t => t.title.trim() !== "");
 
-    // Speichern
     localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
     hasUnsavedChanges = false;
 
-    // Künstliche Pause für QR Generierung
     setTimeout(() => {
         generateQRInternal();
         isProcessing = false;
         updateButtonStates();
-        render(); // Hauptmaske im Hintergrund aktualisieren
+        render();
     }, 600);
 }
 
 function getShareLink() {
-    const dataStr = JSON.stringify(questState.map(t => ({ title: t.title, info: t.info })));
-    // UTF-8 sichere Base64 Kodierung
+    const cleanData = questState.map(t => ({ title: t.title, info: t.info }));
+    const dataStr = JSON.stringify(cleanData);
     const base64 = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g, (m, p) => String.fromCharCode(parseInt(p, 16))));
     return window.location.origin + window.location.pathname + "?q=" + base64;
+}
+
+// NEU: TEILEN FUNKTION FÜR DEN APP-MODUS
+async function shareAppConfiguration() {
+    const link = getShareLink();
+    const shareData = {
+        title: 'Flex-O-Mat Liste',
+        text: 'Check meine Aufgabenliste im Flex-O-Mat aus! 🎯',
+        url: link
+    };
+
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+        } else {
+            await navigator.clipboard.writeText(link);
+            alert("Link zur Liste wurde in die Zwischenablage kopiert! 📋");
+        }
+    } catch (err) {
+        console.log("Teilen abgebrochen oder fehlgeschlagen");
+    }
 }
 
 function generateQRInternal() {
@@ -276,7 +295,7 @@ function toggleQRDisplay() {
 }
 
 function copyConfigLink() {
-    navigator.clipboard.writeText(getShareLink()).then(() => alert("Link kopiert! 📋"));
+    navigator.clipboard.writeText(getShareLink()).then(() => alert("Konfig-Link kopiert! 📋"));
 }
 
 function sendConfigMail() {
@@ -307,7 +326,6 @@ function render() {
         list.appendChild(item);
     });
 
-    // WYLDER MAIL TEXT
     const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Score im Flex-O-Mat ist am Beamen 🚀");
     const mailBody = encodeURIComponent(`Hey!\n\nYo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. Mein Grind war heute richtig krass und ich hab die Aufgaben einfach weggemeddelt. ⚡️\n\nIch hab heute richtig krass ge-GLIMPFT und die Aufgaben ganz entspannt weg-GESCHLONZT. Schau dir meinen Score an, ich bin heute der absolute FLEX-O-MAT! 🔥\n\nHab jetzt legit ${completedCount * 10} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥\n\nBeste Grüße und bis bald!`);
     document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
@@ -355,7 +373,6 @@ window.onload = () => {
         const saved = localStorage.getItem('flex_tasks_v5');
         questState = saved ? JSON.parse(saved) : [{ title: "Level 1 starten!", info: "Viel Erfolg!", completed: false }];
     }
-    
     initIconPicker();
     render();
 };
