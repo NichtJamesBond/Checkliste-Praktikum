@@ -24,7 +24,7 @@
             min-height: 100vh;
         }
 
-        /* APP-CONTAINER (Immer schmal) */
+        /* APP-CONTAINER */
         .app-container { 
             background: white; 
             padding: 2rem; 
@@ -52,7 +52,7 @@
         .check-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; }
         .done .check-circle { background: var(--success); border-color: var(--success); color: white; }
 
-        /* BACK-END PANEL (Vollbild am PC) */
+        /* BACK-END PANEL */
         #adminPanel { 
             display: none; 
             position: fixed; 
@@ -78,7 +78,7 @@
         .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; }
         
         #qr-container { display: none; margin-top: 30px; text-align: center; background: #fff; padding: 20px; border-radius: 20px; border: 3px dashed var(--success); max-width: 400px; margin: 20px auto; }
-        #qr-canvas { margin: 10px auto; display: block; }
+        #qr-canvas { margin: 10px auto; display: block; max-width: 100%; height: auto; }
 
         .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
         .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; color: white; }
@@ -122,6 +122,7 @@
     <div id="qr-container">
         <p style="color: var(--success); font-weight: bold; margin-bottom: 5px;">Scan bereit! ✅</p>
         <canvas id="qr-canvas"></canvas>
+        <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Scanne diesen Code mit einem anderen Handy, um die Aufgaben zu übertragen.</p>
     </div>
 </div>
 
@@ -151,6 +152,7 @@
     let hasUnsavedChanges = false;
     let achievedMilestones = { m50: false, m80: false, m100: false };
 
+    // ICONS
     const iconData = [
         {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
         {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
@@ -183,6 +185,7 @@
         });
     }
 
+    // 5-Klick Login
     function handleHeaderClick() {
         clickCount++;
         if (clickCount >= 5) {
@@ -193,6 +196,7 @@
         setTimeout(() => clickCount = 0, 3000);
     }
 
+    // ADMIN RENDER
     function renderAdmin() {
         const list = document.getElementById('adminTaskList');
         list.innerHTML = '';
@@ -212,6 +216,7 @@
     function markAsUnsaved() {
         hasUnsavedChanges = true;
         updateButtonStates();
+        // QR Container ausblenden, wenn Änderungen gemacht wurden
         document.getElementById('qr-container').style.display = 'none';
     }
 
@@ -253,29 +258,49 @@
         render(); 
     }
 
-    // VERBESSERTE KODIERUNG FÜR DEN LINK
+    // --- QR CODE UND LINK LOGIK ---
+
     function getShareLink() {
+        // Wir nehmen nur Titel und Info (nicht completed status) für den Link
         const dataStr = JSON.stringify(questState.map(t => ({ title: t.title, info: t.info })));
-        // Sicherer Weg für Sonderzeichen & Emojis
-        const base64 = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+        
+        // Kompakte und sichere Codierung für URL und QR
+        const base64 = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g, 
+            function(match, p1) {
+                return String.fromCharCode(parseInt(p1, 16));
+            }
+        ));
+        
         return window.location.origin + window.location.pathname + "?q=" + base64;
     }
 
     function generateQR() {
         if (hasUnsavedChanges) return;
+        
         const qrContainer = document.getElementById('qr-container');
+        const canvas = document.getElementById('qr-canvas');
+        
+        // WICHTIG: Canvas explizit löschen vor dem Neuzeichnen
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         qrContainer.style.display = 'block';
+        
+        // QR Code Generierung
+        // Level 'L' (Low) ermöglicht die meiste Datenmenge (gut für 30 Aufgaben)
+        // Size 450 für hohe Auflösung
         new QRious({
-            element: document.getElementById('qr-canvas'),
+            element: canvas,
             value: getShareLink(),
-            size: 280,
-            level: 'H'
+            size: 450,
+            level: 'L' 
         });
+        
         qrContainer.scrollIntoView({ behavior: 'smooth' });
     }
 
     function sendConfigMail() {
-        window.location.href = `mailto:?subject=Flex-O-Mat&body=${encodeURIComponent(getShareLink())}`;
+        window.location.href = `mailto:?subject=Flex-O-Mat Konfiguration&body=${encodeURIComponent(getShareLink())}`;
     }
 
     function copyConfigLink() {
@@ -286,6 +311,8 @@
         if (hasUnsavedChanges && !confirm("Nicht gespeichert! Schließen?")) return;
         document.getElementById('adminPanel').style.display = 'none';
     }
+
+    // --- APP RENDER LOGIK ---
 
     function render() {
         const list = document.getElementById('quest-list');
@@ -339,26 +366,37 @@
         }
     }
 
+    // --- STARTUP / IMPORT ---
+
     window.onload = () => {
         const params = new URLSearchParams(window.location.search);
         const data = params.get('q');
+        
+        // Import Logic
         if (data) {
             try {
-                // Sicherer Import
+                // Decodierung passend zur neuen Encoding Funktion
                 const decoded = decodeURIComponent(atob(data).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                
+                // Wir resetten 'completed' auf false beim Import, damit man von vorn beginnt
                 questState = JSON.parse(decoded).map(t => ({ ...t, completed: false }));
                 localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
+                
+                // URL bereinigen, damit man nicht beim Reload wieder importiert
                 window.history.replaceState({}, "", window.location.pathname);
-            } catch (e) { console.error("Import fehlgeschlagen"); }
+            } catch (e) { console.error("Import fehlgeschlagen", e); }
         } else {
+            // Load Logic
             const saved = localStorage.getItem('flex_tasks_v5');
             questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg!", completed: false}];
         }
+        
+        // Score aus dem gespeicherten Zustand berechnen, nicht separat laden (vermeidet Sync-Fehler)
+        // Wird in render() erledigt
+        
         initIconPicker();
         render();
     };
 </script>
 </body>
 </html>
-
-
