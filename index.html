@@ -5,355 +5,339 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flex-O-Mat</title>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 
 <style>
 :root{
-    --primary:#4f46e5;
-    --bg:#f5f7fb;
-    --card:#ffffff;
-    --success:#10b981;
-    --danger:#ef4444;
-    --text:#1f2937;
-    --muted:#6b7280;
+--primary:#6c5ce7;
+--accent:#fdcb6e;
+--success:#00b894;
+--bg:#f4f7f6;
+--text:#2d3436;
+--danger:#ff7675;
 }
 
 body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto;
-    background:var(--bg);
-    color:var(--text);
+font-family:'Segoe UI',sans-serif;
+background:var(--bg);
+margin:0;
+display:flex;
+justify-content:center;
+padding:20px;
 }
 
-header{
-    text-align:center;
-    padding:25px;
-    font-size:1.8rem;
-    font-weight:600;
-    cursor:pointer;
+.app-container{
+background:white;
+padding:2rem;
+border-radius:30px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+width:100%;
+max-width:420px;
+min-height:600px;
+display:flex;
+flex-direction:column;
 }
 
-.container{
-    max-width:800px;
-    margin:auto;
-    padding:20px;
+.header{
+text-align:center;
+margin-bottom:30px;
+cursor:pointer;
+user-select:none;
 }
 
-.card{
-    background:var(--card);
-    border-radius:20px;
-    padding:20px;
-    margin-bottom:20px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.05);
+.score-board{
+background:var(--accent);
+padding:8px 20px;
+border-radius:20px;
+font-weight:bold;
+margin-top:10px;
+display:inline-block;
 }
 
-.task-title{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    font-weight:600;
-    margin-bottom:10px;
+.quest-item{
+border:2px solid #eee;
+border-radius:18px;
+padding:12px;
+margin-bottom:10px;
+display:flex;
+align-items:center;
+gap:10px;
 }
 
-.help-icon{
-    margin-left:auto;
-    cursor:pointer;
+.quest-item.done{
+background:#e8fcf3;
+border-color:var(--success);
 }
 
-.ican{
-    margin-left:20px;
-    color:var(--muted);
+.quest-content{
+flex:1;
+display:flex;
+justify-content:space-between;
+cursor:pointer;
 }
 
-button{
-    border:none;
-    border-radius:12px;
-    padding:8px 14px;
-    cursor:pointer;
-    font-weight:500;
+.info-btn{
+width:36px;
+height:36px;
+border-radius:50%;
+border:none;
+background:#fff3bf;
+cursor:pointer;
 }
 
-.primary{ background:var(--primary); color:white; }
-.success{ background:var(--success); color:white; }
-.danger{ background:var(--danger); color:white; }
-
-input, textarea{
-    width:100%;
-    padding:8px;
-    border-radius:10px;
-    border:1px solid #ddd;
-    margin-bottom:8px;
+.check-circle{
+width:26px;
+height:26px;
+border-radius:50%;
+border:2px solid #ccc;
+display:flex;
+align-items:center;
+justify-content:center;
 }
 
-.icon-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(40px,1fr));
-    gap:8px;
-    margin-bottom:15px;
+.quest-item.done .check-circle{
+background:var(--success);
+color:white;
+border-color:var(--success);
 }
 
-.icon-choice{
-    text-align:center;
-    padding:6px;
-    border-radius:10px;
-    cursor:pointer;
-    border:1px solid #eee;
+/* ADMIN */
+
+#adminPanel{
+display:none;
+position:fixed;
+inset:0;
+background:white;
+z-index:5000;
+overflow:auto;
+padding:30px;
 }
 
-.icon-choice:hover{
-    background:var(--primary);
-    color:white;
+.admin-card{
+background:#f9f9ff;
+border-radius:18px;
+padding:15px;
+margin-bottom:15px;
+box-shadow:0 6px 18px rgba(0,0,0,0.05);
 }
 
-.admin{
-    display:none;
+.admin-input{
+width:100%;
+padding:10px;
+border-radius:10px;
+border:1px solid #ddd;
+margin-bottom:8px;
 }
 
-.admin-footer{
-    position:sticky;
-    bottom:0;
-    background:white;
-    padding:15px;
-    border-top:1px solid #eee;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+.admin-btn{
+width:100%;
+padding:14px;
+border:none;
+border-radius:14px;
+font-weight:bold;
+cursor:pointer;
+margin-bottom:10px;
 }
 
-.share-box{
-    margin-top:20px;
-    padding:15px;
-    border-radius:15px;
-    border:2px dashed var(--success);
-    background:#f0fff8;
-    text-align:center;
+.primary{background:var(--primary);color:white;}
+.success{background:var(--success);color:white;}
+.danger{background:var(--danger);color:white;}
+
+#qr-container{
+display:none;
+margin-top:20px;
+text-align:center;
+border:2px dashed var(--success);
+padding:15px;
+border-radius:20px;
 }
+
 </style>
 </head>
 <body>
 
-<header id="title">Flex-O-Mat</header>
+<div id="adminPanel">
+<h2 style="text-align:center;color:var(--primary)">Flex-O-Mat Back-End ⚙️</h2>
 
-<div class="container">
-    <div id="app"></div>
+<div id="adminTaskList"></div>
 
-    <div id="admin" class="admin">
-        <h2>Admin</h2>
+<button class="admin-btn primary" onclick="addTask()">+ Aufgabe</button>
+<button class="admin-btn success" onclick="saveConfig()">💾 Speichern & QR</button>
+<button class="admin-btn" onclick="closeAdmin()">🏠 App-Modus</button>
 
-        <div id="taskList"></div>
-        <button class="primary" onclick="addTask()">+ Aufgabe</button>
+<div id="qr-container">
+<p><strong>Aktueller Share-Code</strong></p>
+<canvas id="qr"></canvas>
+</div>
+</div>
 
-        <h3>Icons</h3>
-        <div id="iconGrid" class="icon-grid"></div>
+<div class="app-container">
+<div class="header" onclick="handleHeaderClick()">
+<h1 style="margin:0;color:var(--primary)">Flex-O-Mat 🎯</h1>
+<div class="score-board"><span id="score">0</span> ⭐</div>
+</div>
 
-        <div id="shareBox" class="share-box" style="display:none;">
-            <input id="shareLink" readonly>
-            <canvas id="qr"></canvas>
-        </div>
-
-        <div class="admin-footer">
-            <span id="status">Nicht gespeichert</span>
-            <button class="success" onclick="saveState()">Speichern</button>
-        </div>
-    </div>
+<div id="quest-list"></div>
 </div>
 
 <script>
-/* ===============================
-   Stabiler Core
+/* ================================
+   STABILE SHARE ENGINE v1
 ================================ */
 
-let state = { tasks: [] };
-let clickCount = 0;
-let selectedIcon = "⭐";
+const STORAGE_KEY="flex_tasks_v6";
+const SHARE_VERSION="v1";
 
-/* ---------- Icons ---------- */
+let questState=[];
+let clickCount=0;
 
-const icons = [
-"⭐","➕","➖",
-"0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣",
-"🚗","🚌","🚢",
-"🐘","🐿️",
-"⚡","🌩️","🌧️","☀️","🌙",
-"😭","😂","😴","😢",
-"🔥","🚀","💨",
-"📝","💻","📊","✏️"
+/* ---------- BASE64 URL SAFE ---------- */
+
+function encodeState(obj){
+const json=JSON.stringify({v:SHARE_VERSION,data:obj});
+const bytes=new TextEncoder().encode(json);
+let bin="";
+bytes.forEach(b=>bin+=String.fromCharCode(b));
+return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+
+function decodeState(str){
+try{
+str=str.replace(/-/g,"+").replace(/_/g,"/");
+const bin=atob(str);
+const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
+const json=new TextDecoder().decode(bytes);
+const parsed=JSON.parse(json);
+if(parsed.v!==SHARE_VERSION) return null;
+return parsed.data;
+}catch(e){
+console.error("Decode Fehler:",e);
+return null;
+}
+}
+
+/* ---------- LOAD ---------- */
+
+function loadInitialState(){
+const params=new URLSearchParams(location.search);
+const shared=params.get("q");
+
+if(shared){
+const decoded=decodeState(shared);
+if(decoded){
+questState=decoded.map(t=>({...t,completed:false}));
+localStorage.setItem(STORAGE_KEY,JSON.stringify(questState));
+return;
+}
+}
+
+const saved=localStorage.getItem(STORAGE_KEY);
+questState=saved?JSON.parse(saved):[
+{title:"Level 1 starten!",info:"Viel Erfolg!",completed:false}
 ];
-
-/* ---------- Base64URL Engine ---------- */
-
-function encodeBase64Url(obj){
-    const json = JSON.stringify(obj);
-    const bytes = new TextEncoder().encode(json);
-    let binary = "";
-    bytes.forEach(b => binary += String.fromCharCode(b));
-    return btoa(binary)
-        .replace(/\+/g,"-")
-        .replace(/\//g,"_")
-        .replace(/=+$/,"");
 }
 
-function decodeBase64Url(str){
-    try{
-        str = str.replace(/-/g,"+").replace(/_/g,"/");
-        const binary = atob(str);
-        const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
-        const json = new TextDecoder().decode(bytes);
-        return JSON.parse(json);
-    }catch(e){
-        console.error("Decode Fehler:", e);
-        return null;
-    }
+/* ---------- SAVE ---------- */
+
+function saveConfig(){
+localStorage.setItem(STORAGE_KEY,JSON.stringify(questState));
+const link=location.origin+location.pathname+"?q="+encodeState(questState);
+generateQR(link);
+document.getElementById("qr-container").style.display="block";
 }
 
-/* ---------- Rendering ---------- */
+/* ---------- QR ---------- */
 
-function renderApp(){
-    const app = document.getElementById("app");
-    app.innerHTML = "";
+function generateQR(link){
+new QRious({
+element:document.getElementById("qr"),
+value:link,
+size:260
+});
+}
 
-    if(state.tasks.length === 0){
-        app.innerHTML = "<div class='card'>Keine Aufgaben vorhanden.</div>";
-        return;
-    }
+/* ---------- RENDER ---------- */
 
-    state.tasks.forEach(t=>{
-        const card = document.createElement("div");
-        card.className="card";
+function render(){
+const list=document.getElementById("quest-list");
+list.innerHTML="";
+let score=0;
 
-        const title = document.createElement("div");
-        title.className="task-title";
-        title.innerHTML = t.icon + " " + t.title;
+questState.forEach((q,i)=>{
+if(q.completed) score+=10;
 
-        const help = document.createElement("span");
-        help.className="help-icon";
-        help.innerText="❓";
-        help.onclick=()=>alert(t.info || "Keine Info");
-        title.appendChild(help);
+const div=document.createElement("div");
+div.className="quest-item"+(q.completed?" done":"");
+div.innerHTML=`
+<button class="info-btn" onclick="showInfo(${i})">💡</button>
+<div class="quest-content" onclick="toggleQuest(${i})">
+<span>${q.title}</span>
+<div class="check-circle">${q.completed?"✔":""}</div>
+</div>
+`;
+list.appendChild(div);
+});
 
-        card.appendChild(title);
+document.getElementById("score").innerText=score;
+}
 
-        t.icans.forEach(ic=>{
-            const p=document.createElement("div");
-            p.className="ican";
-            p.innerText="• "+ic;
-            card.appendChild(p);
-        });
+/* ---------- LOGIC ---------- */
 
-        app.appendChild(card);
-    });
+function toggleQuest(i){
+questState[i].completed=!questState[i].completed;
+localStorage.setItem(STORAGE_KEY,JSON.stringify(questState));
+render();
+}
+
+function showInfo(i){
+alert(questState[i].info||"Keine Info");
+}
+
+/* ---------- ADMIN ---------- */
+
+function handleHeaderClick(){
+clickCount++;
+if(clickCount>=5){
+document.getElementById("adminPanel").style.display="block";
+renderAdmin();
+clickCount=0;
+}
 }
 
 function renderAdmin(){
-    const list = document.getElementById("taskList");
-    list.innerHTML="";
-
-    state.tasks.forEach((t,i)=>{
-        const card=document.createElement("div");
-        card.className="card";
-
-        card.innerHTML=`
-            <input value="${t.title}" onchange="state.tasks[${i}].title=this.value">
-            <textarea onchange="state.tasks[${i}].info=this.value">${t.info||""}</textarea>
-            <div id="icans${i}"></div>
-            <button onclick="addICan(${i})">+ ICan</button>
-            <button class="danger" onclick="deleteTask(${i})">Löschen</button>
-        `;
-
-        list.appendChild(card);
-
-        const icanDiv=document.getElementById("icans"+i);
-        t.icans.forEach((ic,j)=>{
-            const input=document.createElement("input");
-            input.value=ic;
-            input.onchange=()=>state.tasks[i].icans[j]=input.value;
-            icanDiv.appendChild(input);
-        });
-    });
+const list=document.getElementById("adminTaskList");
+list.innerHTML="";
+questState.forEach((q,i)=>{
+const div=document.createElement("div");
+div.className="admin-card";
+div.innerHTML=`
+<input class="admin-input" value="${q.title}" onchange="questState[${i}].title=this.value">
+<textarea class="admin-input" onchange="questState[${i}].info=this.value">${q.info}</textarea>
+<button class="admin-btn danger" onclick="removeTask(${i})">Löschen</button>
+`;
+list.appendChild(div);
+});
 }
-
-function renderIcons(){
-    const grid=document.getElementById("iconGrid");
-    grid.innerHTML="";
-    icons.forEach(icon=>{
-        const div=document.createElement("div");
-        div.className="icon-choice";
-        div.innerText=icon;
-        div.onclick=()=>selectedIcon=icon;
-        grid.appendChild(div);
-    });
-}
-
-/* ---------- CRUD ---------- */
 
 function addTask(){
-    state.tasks.push({title:"Neue Aufgabe",info:"",icon:selectedIcon,icans:[]});
-    renderAdmin();
+questState.push({title:"Neue Aufgabe",info:"",completed:false});
+renderAdmin();
 }
 
-function deleteTask(i){
-    state.tasks.splice(i,1);
-    renderAdmin();
+function removeTask(i){
+questState.splice(i,1);
+renderAdmin();
 }
 
-function addICan(i){
-    state.tasks[i].icans.push("Neuer Punkt");
-    renderAdmin();
+function closeAdmin(){
+document.getElementById("adminPanel").style.display="none";
+render();
 }
 
-/* ---------- Save ---------- */
+/* ---------- INIT ---------- */
 
-function saveState(){
-    localStorage.setItem("flexomat", JSON.stringify(state));
-
-    const encoded = encodeBase64Url(state);
-    const link = location.origin + location.pathname + "?data=" + encoded;
-
-    document.getElementById("shareLink").value = link;
-    document.getElementById("shareBox").style.display="block";
-
-    if(window.QRCode){
-        QRCode.toCanvas(document.getElementById("qr"), link);
-    }
-
-    document.getElementById("status").innerText="Gespeichert ✓";
-    renderApp();
-}
-
-/* ---------- Load ---------- */
-
-function loadState(){
-    const params=new URLSearchParams(location.search);
-    const shared=params.get("data");
-
-    if(shared){
-        const decoded=decodeBase64Url(shared);
-        if(decoded) state=decoded;
-        return;
-    }
-
-    const saved=localStorage.getItem("flexomat");
-    if(saved){
-        try{ state=JSON.parse(saved); }
-        catch(e){ console.error(e); }
-    }
-}
-
-/* ---------- Admin Unlock ---------- */
-
-document.getElementById("title").onclick=()=>{
-    clickCount++;
-    if(clickCount>=5){
-        document.getElementById("admin").style.display="block";
-        renderAdmin();
-    }
-};
-
-/* ---------- Init ---------- */
-
-loadState();
-renderIcons();
-renderApp();
+loadInitialState();
+render();
 
 </script>
 </body>
