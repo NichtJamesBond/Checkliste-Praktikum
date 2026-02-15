@@ -24,7 +24,6 @@
             min-height: 100vh;
         }
 
-        /* APP-CONTAINER */
         .app-container { 
             background: white; 
             padding: 2rem; 
@@ -52,7 +51,7 @@
         .check-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; }
         .done .check-circle { background: var(--success); border-color: var(--success); color: white; }
 
-        /* BACK-END PANEL */
+        /* ADMIN PANEL */
         #adminPanel { 
             display: none; 
             position: fixed; 
@@ -65,7 +64,7 @@
             overflow-y: auto; 
         }
 
-        .admin-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .admin-header-row { margin-bottom: 20px; text-align: center; }
         .admin-task-item { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         .admin-input.task-title { flex: 1; min-width: 200px; font-weight: bold; }
         .admin-input.task-info { flex: 2; min-width: 200px; }
@@ -74,9 +73,12 @@
         .icon-choice { cursor: pointer; font-size: 1.8rem; padding: 8px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         .admin-input { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1rem; }
-        .admin-btn { padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
-        .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; }
+        .admin-btn { padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; font-size: 0.9rem; }
+        .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; opacity: 0.6; }
         
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .full-width { grid-column: span 2; }
+
         #qr-container { display: none; margin-top: 30px; text-align: center; background: #fff; padding: 20px; border-radius: 20px; border: 3px dashed var(--success); max-width: 400px; margin: 20px auto; }
         #qr-canvas { margin: 10px auto; display: block; max-width: 100%; height: auto; }
 
@@ -98,7 +100,6 @@
 <div id="adminPanel">
     <div class="admin-header-row">
         <h2 style="color: var(--primary); margin: 0; font-size: 2rem;">Flex-O-Mat Back-End ⚙️</h2>
-        <button class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white;">App Modus 📱</button>
     </div>
 
     <div id="adminTaskList"></div>
@@ -109,20 +110,20 @@
     
     <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
     
-    <div style="display: flex; gap: 15px;">
-        <button id="saveBtn" class="admin-btn" onclick="saveAdminData()" style="background: var(--primary); color: white; flex: 1;">💾 Änderungen speichern</button>
-        <button id="qrBtn" class="admin-btn" onclick="generateQR()" style="background: var(--success); color: white; flex: 1;" disabled>📱 QR-Code anzeigen</button>
-    </div>
-    
-    <div style="display: flex; gap: 15px; margin-top: 15px;">
-        <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background: var(--mail-color); color: white; flex: 1;" disabled>📧 Konfig senden</button>
-        <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background: #636e72; color: white; flex: 1;" disabled>📋 Link kopieren</button>
+    <div class="admin-grid">
+        <button id="saveBtn" class="admin-btn full-width" onclick="saveAdminData()" style="background: var(--primary); color: white; height: 55px; font-size: 1.1rem;">💾 Alles Speichern & QR erneuern</button>
+        
+        <button id="qrBtn" class="admin-btn" onclick="toggleQRDisplay()" style="background: var(--success); color: white;" disabled>📱 QR anzeigen</button>
+        <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background: #636e72; color: white;" disabled>📋 Link kopieren</button>
+        
+        <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background: var(--mail-color); color: white;" disabled>📧 Per Mail senden</button>
+        <button class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white;">🏠 App Modus</button>
     </div>
 
     <div id="qr-container">
         <p style="color: var(--success); font-weight: bold; margin-bottom: 5px;">Scan bereit! ✅</p>
         <canvas id="qr-canvas"></canvas>
-        <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Scanne diesen Code mit einem anderen Handy, um die Aufgaben zu übertragen.</p>
+        <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Scanne diesen Code mit einem anderen Handy.</p>
     </div>
 </div>
 
@@ -147,12 +148,10 @@
 
 <script>
     let questState = [];
-    let score = 0;
     let clickCount = 0;
     let hasUnsavedChanges = false;
     let achievedMilestones = { m50: false, m80: false, m100: false };
 
-    // ICONS
     const iconData = [
         {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
         {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
@@ -160,11 +159,7 @@
         {i: "📜", t: "Paragrafen"}, {i: "📁", t: "Doku"}, {i: "📅", t: "Wochenbericht"}, {i: "👋", t: "Vorstellung"}, 
         {i: "🏢", t: "Betrieb"}, {i: "🛠️", t: "Arbeiten"}, {i: "📐", t: "Zeichnung"}, {i: "✍️", t: "Skizze"}, 
         {i: "💼", t: "Beruf"}, {i: "📱", t: "Handy"}, {i: "⚡", t: "Blitz"}, {i: "💡", t: "Licht"}, 
-        {i: "❗", t: "Achtung"}, {i: "❓", t: "Frage"}, {i: "🤔", t: "Reflexion"}, {i: "🎓", t: "Zertifikat"}, 
-        {i: "🦆", t: "Ente"}, {i: "📖", t: "Seite"}, {i: "💻", t: "Computer"}, {i: "😂", t: "Lachen"}, 
-        {i: "😴", t: "Schlafen"}, {i: "☀️", t: "Tag"}, {i: "🌙", t: "Nacht"}, {i: "📸", t: "Foto"},
-        {i: "🚗", t: "Auto"}, {i: "🚆", t: "Bahn"}, {i: "🔥", t: "Feuer"}, {i: "☄️", t: "Flamme"},
-        {i: "🐿️", t: "Eichhörnchen"}, {i: "🐘", t: "Elefant"}, {i: "🐱", t: "Katze"}, {i: "🐟", t: "Fisch"}
+        {i: "❗", t: "Achtung"}, {i: "❓", t: "Frage"}, {i: "🤔", t: "Reflexion"}, {i: "🎓", t: "Zertifikat"}
     ];
 
     function initIconPicker() {
@@ -185,7 +180,6 @@
         });
     }
 
-    // 5-Klick Login
     function handleHeaderClick() {
         clickCount++;
         if (clickCount >= 5) {
@@ -196,7 +190,6 @@
         setTimeout(() => clickCount = 0, 3000);
     }
 
-    // ADMIN RENDER
     function renderAdmin() {
         const list = document.getElementById('adminTaskList');
         list.innerHTML = '';
@@ -216,14 +209,14 @@
     function markAsUnsaved() {
         hasUnsavedChanges = true;
         updateButtonStates();
-        // QR Container ausblenden, wenn Änderungen gemacht wurden
         document.getElementById('qr-container').style.display = 'none';
     }
 
     function updateButtonStates() {
         const btns = [document.getElementById('qrBtn'), document.getElementById('mailConfigBtn'), document.getElementById('copyConfigBtn')];
         btns.forEach(btn => btn.disabled = hasUnsavedChanges);
-        document.getElementById('saveBtn').innerText = hasUnsavedChanges ? "💾 Änderungen speichern" : "✔ Gespeichert";
+        document.getElementById('saveBtn').innerText = hasUnsavedChanges ? "💾 Änderungen speichern & QR erneuern" : "✔ Alles aktuell";
+        document.getElementById('saveBtn').style.background = hasUnsavedChanges ? "var(--primary)" : "#00b894";
     }
 
     function addAdminTask() {
@@ -250,75 +243,73 @@
         })).filter(t => t.title.trim() !== "");
     }
 
+    // --- ZENTRALE SPEICHER- UND GENERIERLOGIK ---
     function saveAdminData() {
+        // 1. Daten aus Inputs ziehen
         questState = syncCurrentInputs();
-        hasUnsavedChanges = false;
+        
+        // 2. Im Browser speichern
         localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
+        
+        // 3. Status auf "gespeichert" setzen
+        hasUnsavedChanges = false;
+        
+        // 4. QR Code & Link sofort im Hintergrund vorbereiten
         updateButtonStates();
+        generateQRInternal(); 
+        
+        // 5. App-Ansicht aktualisieren
         render(); 
+        
+        console.log("Daten synchronisiert und QR generiert.");
     }
 
-    // --- QR CODE UND LINK LOGIK ---
-
     function getShareLink() {
-        // Wir nehmen nur Titel und Info (nicht completed status) für den Link
-        const dataStr = JSON.stringify(questState.map(t => ({ title: t.title, info: t.info })));
-        
-        // Kompakte und sichere Codierung für URL und QR
-        const base64 = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g, 
-            function(match, p1) {
-                return String.fromCharCode(parseInt(p1, 16));
-            }
-        ));
-        
+        const cleanData = questState.map(t => ({ title: t.title, info: t.info }));
+        const dataStr = JSON.stringify(cleanData);
+        const base64 = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(parseInt(p1, 16))));
         return window.location.origin + window.location.pathname + "?q=" + base64;
     }
 
-    function generateQR() {
-        if (hasUnsavedChanges) return;
-        
-        const qrContainer = document.getElementById('qr-container');
+    function generateQRInternal() {
         const canvas = document.getElementById('qr-canvas');
-        
-        // WICHTIG: Canvas explizit löschen vor dem Neuzeichnen
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        qrContainer.style.display = 'block';
-        
-        // QR Code Generierung
-        // Level 'L' (Low) ermöglicht die meiste Datenmenge (gut für 30 Aufgaben)
-        // Size 450 für hohe Auflösung
         new QRious({
             element: canvas,
             value: getShareLink(),
             size: 450,
             level: 'L' 
         });
-        
-        qrContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleQRDisplay() {
+        const container = document.getElementById('qr-container');
+        container.style.display = container.style.display === 'block' ? 'none' : 'block';
+        if (container.style.display === 'block') {
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     function sendConfigMail() {
+        if(hasUnsavedChanges) return;
         window.location.href = `mailto:?subject=Flex-O-Mat Konfiguration&body=${encodeURIComponent(getShareLink())}`;
     }
 
     function copyConfigLink() {
-        navigator.clipboard.writeText(getShareLink()).then(() => alert("Kopiert! 📋"));
+        if(hasUnsavedChanges) return;
+        navigator.clipboard.writeText(getShareLink()).then(() => alert("Aktueller Link kopiert! 📋"));
     }
 
     function closeAdmin() {
-        if (hasUnsavedChanges && !confirm("Nicht gespeichert! Schließen?")) return;
+        if (hasUnsavedChanges && !confirm("Nicht gespeichert! Änderungen gehen verloren. Schließen?")) return;
         document.getElementById('adminPanel').style.display = 'none';
     }
 
     // --- APP RENDER LOGIK ---
-
     function render() {
         const list = document.getElementById('quest-list');
         const completedCount = questState.filter(t => t.completed).length;
-        score = completedCount * 10;
-        document.getElementById('score').innerText = score;
+        document.getElementById('score').innerText = completedCount * 10;
+        
         list.innerHTML = '';
         questState.forEach((quest, i) => {
             const item = document.createElement('div');
@@ -332,8 +323,8 @@
             list.appendChild(item);
         });
         
-        const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Score im Flex-O-Mat ist am Beamen 🚀");
-        const mailBody = encodeURIComponent(`Hey!\n\nYo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. Mein Grind war heute richtig krass und ich hab die Aufgaben einfach weggemeddelt. ⚡️\n\nIch hab heute richtig krass ge-GLIMPFT und die Aufgaben ganz entspannt weg-GESCHLONZT. Schau dir meinen Score an, ich bin heute der absolute FLEX-O-MAT! 🔥\n\nHab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥\n\nBeste Grüße und bis bald!`);
+        const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Flex-O-Mat Score");
+        const mailBody = encodeURIComponent(`Ich hab heute im Flex-O-Mat abgeliefert!\n\nScore: ${completedCount * 10} Sterne 🌟\n\nBeste Grüße!`);
         document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
     }
 
@@ -352,6 +343,7 @@
 
     function checkMilestones() {
         const badge = document.getElementById('badge');
+        if (questState.length === 0) return;
         const progress = questState.filter(t => t.completed).length / questState.length;
         let emoji = "";
 
@@ -366,33 +358,21 @@
         }
     }
 
-    // --- STARTUP / IMPORT ---
-
     window.onload = () => {
         const params = new URLSearchParams(window.location.search);
         const data = params.get('q');
         
-        // Import Logic
         if (data) {
             try {
-                // Decodierung passend zur neuen Encoding Funktion
                 const decoded = decodeURIComponent(atob(data).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-                
-                // Wir resetten 'completed' auf false beim Import, damit man von vorn beginnt
                 questState = JSON.parse(decoded).map(t => ({ ...t, completed: false }));
                 localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
-                
-                // URL bereinigen, damit man nicht beim Reload wieder importiert
                 window.history.replaceState({}, "", window.location.pathname);
             } catch (e) { console.error("Import fehlgeschlagen", e); }
         } else {
-            // Load Logic
             const saved = localStorage.getItem('flex_tasks_v5');
             questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg!", completed: false}];
         }
-        
-        // Score aus dem gespeicherten Zustand berechnen, nicht separat laden (vermeidet Sync-Fehler)
-        // Wird in render() erledigt
         
         initIconPicker();
         render();
