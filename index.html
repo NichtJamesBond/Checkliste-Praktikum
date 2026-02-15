@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flex-O-Mat Admin</title>
+<title>Flex-O-Mat</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <style>
 :root {
@@ -14,112 +14,158 @@
 body {
     font-family: 'Segoe UI', sans-serif;
     background: var(--bg);
-    margin: 0; padding: 0; display: flex; justify-content: center; align-items: flex-start;
+    margin: 0; padding: 20px;
+    display: flex; justify-content: center; align-items: flex-start;
     min-height: 100vh;
 }
+.app-container {
+    background: #fff;
+    border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    width: 100%; max-width: 400px;
+    min-height: 620px;
+    display: flex; flex-direction: column;
+    position: relative;
+    padding: 2rem;
+}
+.header {
+    text-align: center; margin-bottom: 45px; cursor: pointer; user-select: none;
+}
+.score-board {
+    background: var(--accent); display: inline-block;
+    padding: 10px 25px; border-radius: 20px;
+    font-weight: bold; font-size: 1.2rem; color: #000;
+    box-shadow: 0 4px 0 #e1b12c; margin-top: 20px;
+}
+.quest-list { list-style: none; padding: 0; flex-grow: 1; }
+.quest-item {
+    background: white; border: 2px solid #f0f0f0; margin: 10px 0;
+    padding: 12px; border-radius: 18px;
+    display: flex; align-items: center; gap: 10px;
+}
+.quest-item.done { background: #e8fcf3; border-color: var(--success); }
+.quest-content {
+    flex-grow: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.quest-text { font-size: 1rem; font-weight: 600; color: var(--text); }
+.done .quest-text { text-decoration: line-through; color: #a0a0a0; }
+.info-btn {
+    background: var(--info-bg); width: 36px; height: 36px;
+    border-radius: 50%; cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center; border: none;
+}
+.check-circle {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid #ddd; display: flex; align-items: center; justify-content: center;
+}
+.done .check-circle { background: var(--success); border-color: var(--success); color: white; }
+
+/* ADMIN PANEL */
 #adminPanel {
-    display: none;
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: #fefefe;
-    padding: 30px; box-sizing: border-box;
-    overflow-y: auto;
-    z-index: 5000;
+    display: none; position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%; background: #fefefe;
+    z-index: 5000; padding: 30px; box-sizing: border-box; overflow-y: auto;
 }
-#adminPanel h2 {
-    text-align: center;
-    color: var(--primary);
-    margin-bottom: 20px;
-}
+#adminPanel h2 { text-align:center; color:var(--primary); margin-bottom:20px; }
 .admin-task-item {
-    background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #ddd;
-    margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    background:#fff; padding:15px; border-radius:15px; border:1px solid #ddd;
+    margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.05);
 }
-.admin-input {
-    padding: 10px; border: 1px solid #ccc; border-radius: 10px; font-size: 1rem;
-}
-.task-title { flex: 1; font-weight: bold; }
-.task-info { flex: 2; }
+.admin-input { padding:10px; border:1px solid #ccc; border-radius:10px; font-size:1rem; }
+.task-title { flex:1; font-weight:bold; }
+.task-info { flex:2; }
 .central-icon-picker {
-    display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; padding: 15px;
-    border-radius: 15px; background: #f0f0f0;
+    display:flex; flex-wrap:wrap; gap:8px; margin:15px 0; padding:15px;
+    border-radius:15px; background:#f0f0f0;
 }
 .icon-choice {
-    cursor: pointer; font-size: 1.5rem; padding: 5px; background: white;
-    border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s;
+    cursor:pointer; font-size:1.5rem; padding:5px; background:white;
+    border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:0.2s;
 }
-.icon-choice:hover { transform: scale(1.2); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+.icon-choice:hover { transform: scale(1.2); box-shadow:0 4px 8px rgba(0,0,0,0.2); }
+.admin-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; }
 .full-width { grid-column: span 2; }
 .admin-btn {
-    padding: 12px; border-radius: 14px; border: none; cursor: pointer; font-weight: bold;
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem;
-    transition: 0.3s;
+    padding:12px; border-radius:14px; border:none; cursor:pointer; font-weight:bold;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:0.9rem;
+    transition:0.3s;
 }
-.admin-btn:disabled { background: #ccc; color: #888; cursor: not-allowed; }
-#qr-container { display: none; margin-top: 20px; text-align: center; padding: 15px; border-radius: 15px; border: 3px dashed var(--success); background: #fff; }
-#qr-canvas { display: block; margin: 0 auto; max-width: 100%; border-radius: 10px; }
+.admin-btn:disabled { background:#ccc; color:#888; cursor:not-allowed; }
+#qr-container { display:none; margin-top:20px; text-align:center; padding:15px; border-radius:15px; border:3px dashed var(--success); background:#fff; }
+#qr-canvas { display:block; margin:0 auto; max-width:100%; border-radius:10px; }
+.modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:4000; }
+.modal-content { background:white; padding:25px; border-radius:20px; width:85%; max-width:350px; text-align:center; }
 </style>
 </head>
 <body>
 
+<div id="badge"></div>
+
+<!-- ADMIN PANEL -->
 <div id="adminPanel">
     <h2>Flex-O-Mat Admin ⚙️</h2>
     <div id="adminTaskList"></div>
     <button class="admin-btn full-width" onclick="addAdminTask()" style="background:#eee;">+ Neue Aufgabe hinzufügen</button>
-
     <div class="central-icon-picker" id="centralPicker"></div>
-
     <div class="admin-grid">
         <button id="saveBtn" class="admin-btn full-width" onclick="saveAdminData()" style="background:var(--primary); color:white;">💾 Speichern & QR erneuern</button>
         <button id="qrBtn" class="admin-btn" onclick="toggleQRDisplay()" style="background:var(--success); color:white;" disabled>📱 QR Code anzeigen</button>
         <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background:#636e72; color:white;" disabled>📋 Link kopieren</button>
         <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background:var(--mail-color); color:white;" disabled>📧 Konfig senden</button>
     </div>
-
     <div id="qr-container">
         <p style="color:var(--success); font-weight:bold;">QR-Code ist aktuell! ✅</p>
         <canvas id="qr-canvas"></canvas>
     </div>
 </div>
 
+<!-- INFO MODAL -->
+<div id="infoModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 id="modalTitle" style="color:var(--primary);"></h3>
+        <p id="modalDescription"></p>
+        <button class="action-btn btn-mail" onclick="document.getElementById('infoModal').style.display='none'">Check ich!</button>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app-container">
+    <div class="header" onclick="handleHeaderClick()">
+        <h1 style="margin:0; color: var(--primary);">Flex-O-Mat 🎯</h1>
+        <div class="score-board"><span id="score">0</span> ⭐</div>
+    </div>
+    <div id="quest-list" class="quest-list"></div>
+    <div class="footer-actions">
+        <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail verschicken</a>
+    </div>
+</div>
+
 <script>
-let questState = [];
-let hasUnsavedChanges = false;
-let isProcessing = false;
+let questState=[]; let clickCount=0; let hasUnsavedChanges=false; let isProcessing=false;
+const achievedMilestones={ m50:false, m80:false, m100:false };
+const iconData=["0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣",
+"➕","➖","🚗","🚌","🚢","🐘","🐿️","⚡","🌩️","🌧️","☀️","🌙",
+"😭","😂","😴","😢","🔥","🚀","💨","📝","💻","📊","✏️"];
 
-const iconData = [
-    "0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣",
-    "➕","➖","🚗","🚌","🚢","🐘","🐿️","⚡","🌩️","🌧️","☀️","🌙",
-    "😭","😂","😴","😢","🔥","🚀","💨","📝","💻","📊","✏️"
-];
-
-function initIconPicker() {
-    const picker = document.getElementById('centralPicker');
-    picker.innerHTML = '';
-    iconData.forEach(icon => {
-        const span = document.createElement('span');
-        span.className = 'icon-choice';
-        span.innerText = icon;
-        span.onclick = () => {
-            const titles = document.querySelectorAll('.task-title');
-            if(titles.length>0) { 
-                titles[titles.length-1].value += " " + icon; 
-                markAsUnsaved();
-            }
-        };
+function initIconPicker(){
+    const picker=document.getElementById('centralPicker'); picker.innerHTML='';
+    iconData.forEach(icon=>{
+        const span=document.createElement('span');
+        span.className='icon-choice'; span.innerText=icon;
+        span.onclick=()=>{ const titles=document.querySelectorAll('.task-title'); if(titles.length>0){ titles[titles.length-1].value+=" "+icon; markAsUnsaved(); } };
         picker.appendChild(span);
     });
 }
 
-function renderAdmin() {
-    const list = document.getElementById('adminTaskList');
-    list.innerHTML = '';
+function handleHeaderClick(){ clickCount++; if(clickCount>=5){ document.getElementById('adminPanel').style.display='block'; renderAdmin(); clickCount=0; } setTimeout(()=>clickCount=0,3000); }
+
+function renderAdmin(){
+    const list=document.getElementById('adminTaskList'); list.innerHTML='';
     questState.forEach((task,i)=>{
-        const div = document.createElement('div');
-        div.className = 'admin-task-item';
-        div.innerHTML = `
+        const div=document.createElement('div'); div.className='admin-task-item';
+        div.innerHTML=`
             <input type="text" class="admin-input task-title" value="${task.title}" placeholder="Aufgabe..." oninput="markAsUnsaved()">
             <textarea class="admin-input task-info" rows="1" placeholder="Infos..." oninput="markAsUnsaved()">${task.info}</textarea>
             <button onclick="removeAdminTask(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-size:1.2rem;">🗑</button>
@@ -128,73 +174,85 @@ function renderAdmin() {
     });
 }
 
-function markAsUnsaved() { 
-    hasUnsavedChanges=true; 
-    document.getElementById('qr-container').style.display='none'; 
+function markAsUnsaved(){ hasUnsavedChanges=true; document.getElementById('qr-container').style.display='none'; }
+
+function addAdminTask(){ questState.push({title:"",info:"",completed:false}); renderAdmin(); markAsUnsaved(); }
+function removeAdminTask(i){ questState.splice(i,1); renderAdmin(); markAsUnsaved(); }
+
+function syncCurrentInputs(){ 
+    return Array.from(document.querySelectorAll('.task-title')).map((t,i)=>({title:t.value, info:document.querySelectorAll('.task-info')[i].value, completed:false})).filter(t=>t.title.trim()!=="");
 }
 
-function addAdminTask() { 
-    questState.push({title:"", info:"", completed:false});
-    renderAdmin();
-    markAsUnsaved();
-}
-
-function removeAdminTask(i){ 
-    questState.splice(i,1); 
-    renderAdmin(); 
-    markAsUnsaved(); 
-}
-
-// --- QR & Share ---
-function getShareLink(){
-    const dataStr = JSON.stringify(questState.map(t=>({title:t.title, info:t.info})));
-    const base64 = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g,(m,p)=>String.fromCharCode(parseInt(p,16))));
-    return window.location.origin + window.location.pathname + "?v=1&q=" + base64;
-}
-
-function generateQRInternal(){
-    const canvas = document.getElementById('qr-canvas');
-    canvas.width = 450; canvas.height = 450;
-    new QRious({element:canvas,value:getShareLink(),size:450,level:'L'});
-    document.getElementById('qrBtn').disabled=false;
-    document.getElementById('copyConfigBtn').disabled=false;
-    document.getElementById('mailConfigBtn').disabled=false;
-}
-
-function saveAdminData(){
+function saveAdminData(){ 
     isProcessing=true;
-    questState = Array.from(document.querySelectorAll('.task-title')).map((t,i)=>{
-        return {title:t.value, info:document.querySelectorAll('.task-info')[i].value, completed:false};
-    });
+    questState=syncCurrentInputs();
     localStorage.setItem('flex_tasks_v5',JSON.stringify(questState));
     hasUnsavedChanges=false;
-    setTimeout(()=>{
-        generateQRInternal();
-        isProcessing=false;
-        renderAdmin();
-    },300);
+    setTimeout(()=>{ generateQRInternal(); isProcessing=false; renderAdmin(); },300);
+}
+
+function getShareLink(){ 
+    const dataStr=JSON.stringify(questState.map(t=>({title:t.title, info:t.info})));
+    const base64=btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g,(m,p)=>String.fromCharCode(parseInt(p,16))));
+    return window.location.origin+window.location.pathname+"?v=1&q="+base64;
+}
+
+function generateQRInternal(){ 
+    const canvas=document.getElementById('qr-canvas'); canvas.width=450; canvas.height=450;
+    new QRious({element:canvas,value:getShareLink(),size:450,level:'L'});
+    document.getElementById('qrBtn').disabled=false; document.getElementById('copyConfigBtn').disabled=false; document.getElementById('mailConfigBtn').disabled=false;
 }
 
 function toggleQRDisplay(){ 
-    const c=document.getElementById('qr-container'); 
-    c.style.display=(c.style.display==='block')?'none':'block'; 
-    if(c.style.display==='block') c.scrollIntoView({behavior:'smooth'});
+    const c=document.getElementById('qr-container'); c.style.display=(c.style.display==='block')?'none':'block'; if(c.style.display==='block') c.scrollIntoView({behavior:'smooth'});
 }
 
-function copyConfigLink(){ 
-    navigator.clipboard.writeText(getShareLink()).then(()=>alert("Link kopiert! 📋"));
+function copyConfigLink(){ navigator.clipboard.writeText(getShareLink()).then(()=>alert("Link kopiert! 📋")); }
+function sendConfigMail(){ window.location.href=`mailto:?subject=Flex-O-Mat Konfiguration&body=${encodeURIComponent(getShareLink())}`; }
+
+function closeAdmin(){ if(hasUnsavedChanges && !confirm("Nicht gespeichert! Schließen?")) return; document.getElementById('adminPanel').style.display='none'; }
+
+function render(){
+    const list=document.getElementById('quest-list'); list.innerHTML='';
+    const completedCount=questState.filter(t=>t.completed).length;
+    document.getElementById('score').innerText=completedCount*10;
+
+    questState.forEach((quest,i)=>{
+        const item=document.createElement('div'); item.className='quest-item'+(quest.completed?' done':'');
+        item.innerHTML=`
+            <button class="info-btn" onclick="showInfo(${i})">💡</button>
+            <div class="quest-content" onclick="toggleQuest(${i})">
+                <span class="quest-text">${quest.title}</span>
+                <div class="check-circle">${quest.completed?'✔':''}</div>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+
+    const mailSubject=encodeURIComponent("Mein Score im Flex-O-Mat 🚀");
+    const mailBody=encodeURIComponent(`Hey!\n\nIch hab ${completedCount*10} Sterne erreicht!`);
+    document.getElementById('mailLink').href=`mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
 }
 
-function sendConfigMail(){ 
-    window.location.href=`mailto:?subject=Flex-O-Mat Konfiguration&body=${encodeURIComponent(getShareLink())}`;
+function toggleQuest(i){ questState[i].completed=!questState[i].completed; localStorage.setItem('flex_tasks_v5',JSON.stringify(questState)); render(); checkMilestones(); }
+
+function showInfo(i){ document.getElementById('modalTitle').innerText=questState[i].title; document.getElementById('modalDescription').innerText=questState[i].info; document.getElementById('infoModal').style.display='flex'; }
+
+function checkMilestones(){
+    const badge=document.getElementById('badge'); if(questState.length===0) return;
+    const progress=questState.filter(t=>t.completed).length/questState.length;
+    let emoji="";
+    if(progress===1 && !achievedMilestones.m100){ emoji="🏆"; achievedMilestones.m100=true; }
+    else if(progress>=0.8 && !achievedMilestones.m80){ emoji="🚀"; achievedMilestones.m80=true; }
+    else if(progress>=0.5 && !achievedMilestones.m50){ emoji="👍"; achievedMilestones.m50=true; }
+    if(emoji){ badge.innerText=emoji; badge.classList.add('show'); setTimeout(()=>badge.classList.remove('show'),1200); }
 }
 
-// --- INIT ---
-window.onload = ()=>{
-    const saved = localStorage.getItem('flex_tasks_v5');
-    questState = saved?JSON.parse(saved):[{title:"Level 1 starten!", info:"Viel Erfolg!", completed:false}];
-    initIconPicker();
-    renderAdmin();
+window.onload=()=>{
+    const params=new URLSearchParams(window.location.search); const data=params.get('q');
+    if(data){ try{ const decoded=decodeURIComponent(atob(data).split('').map(c=>'%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')); questState=JSON.parse(decoded).map(t=>({...t,completed:false})); localStorage.setItem('flex_tasks_v5',JSON.stringify(questState)); window.history.replaceState({}, "", window.location.pathname); }catch(e){ console.error("Import Error",e);} }
+    else{ const saved=localStorage.getItem('flex_tasks_v5'); questState=saved?JSON.parse(saved):[{title:"Level 1 starten!",info:"Viel Erfolg!",completed:false}]; }
+    initIconPicker(); render();
 };
 </script>
 </body>
