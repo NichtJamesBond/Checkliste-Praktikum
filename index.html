@@ -3,342 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flex-O-Mat</title>
+    <title>Flex-O-Mat PRO v2026</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
         :root {
             --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
-            --bg: #dfe6e9; --text: #2d3436; --mail-color: #0984e3;
-            --share-color: #e84393; --card-bg: #ffffff; --danger: #ff7675;
+            --bg: #dfe6e9; --text: #2d3436; --mail: #0984e3;
+            --share: #e84393; --card: #ffffff; --danger: #ff7675;
         }
         
-        body { 
-            font-family: 'Segoe UI', Tahoma, sans-serif; 
-            background: var(--bg); margin: 0; padding: 20px; 
-            display: flex; justify-content: center; min-height: 100vh;
-        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; justify-content: center; min-height: 100vh; }
 
-        /* --- HAUPT APP DESIGN (ORIGINAL) --- */
+        /* --- HAUPTANSICHT --- */
         .app-container { 
-            background: var(--card-bg); padding: 2rem; border-radius: 30px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; 
-            min-height: 650px; display: flex; flex-direction: column; position: relative; 
+            background: var(--card); padding: 25px; border-radius: 30px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12); width: 100%; max-width: 400px; 
+            display: flex; flex-direction: column; position: relative;
         }
 
-        .header { text-align: center; margin-bottom: 25px; cursor: pointer; }
-        .score-board { 
-            background: var(--accent); display: inline-block; padding: 8px 20px; 
-            border-radius: 20px; font-weight: bold; font-size: 1.3rem; color: #fff;
-            text-shadow: 1px 1px 0 rgba(0,0,0,0.1); box-shadow: 0 4px 0 #e1b12c;
+        .header { text-align: center; margin-bottom: 35px; cursor: pointer; user-select: none; }
+        .header h1 { margin: 0 0 20px 0; color: var(--primary); font-size: 2rem; } /* Mehr Abstand */
+        
+        .score-pill { 
+            background: var(--accent); color: white; display: inline-block; 
+            padding: 10px 25px; border-radius: 50px; font-weight: 800; 
+            box-shadow: 0 4px 0 #e1b12c; font-size: 1.2rem;
         }
 
         .quest-list { list-style: none; padding: 0; flex-grow: 1; }
         .quest-item { 
-            background: #fff; border: 2px solid #eee; margin: 12px 0; 
-            padding: 12px; border-radius: 16px; display: flex; align-items: center; gap: 12px; 
+            background: #fff; border: 2px solid #f1f2f6; margin-bottom: 12px; 
+            padding: 14px; border-radius: 18px; display: flex; align-items: center; gap: 12px;
         }
-        .quest-item.done { background: #e8fcf3; border-color: var(--success); opacity: 0.8; }
-        .quest-text { font-size: 1.05rem; font-weight: 600; color: var(--text); flex-grow: 1; cursor: pointer; }
+        .quest-item.done { background: #f0fff9; border-color: var(--success); opacity: 0.8; }
+        .quest-text { flex-grow: 1; font-weight: 600; cursor: pointer; color: var(--text); }
         .done .quest-text { text-decoration: line-through; color: #b2bec3; }
 
-        .info-btn { 
-            background: #ffeaa7; width: 32px; height: 32px; border-radius: 50%; 
-            border: none; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
-        }
-        .check-circle { 
-            width: 26px; height: 26px; border-radius: 50%; border: 2px solid #dfe6e9; 
-            display: flex; align-items: center; justify-content: center; color: white;
-        }
-        .done .check-circle { background: var(--success); border-color: var(--success); }
+        .check-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #dfe6e9; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; }
+        .done .check-btn { background: var(--success); border-color: var(--success); }
 
-        .footer-actions { margin-top: auto; padding-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .action-btn { 
-            height: 50px; border-radius: 15px; border: none; font-weight: bold; 
+        .footer { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .btn { 
+            height: 52px; border-radius: 16px; border: none; font-weight: 700; 
             display: flex; align-items: center; justify-content: center; gap: 10px; 
-            text-decoration: none; color: white; cursor: pointer;
+            color: white; cursor: pointer; text-decoration: none; font-size: 1rem;
         }
-        .btn-mail { background: var(--mail-color); }
-        .btn-share { background: var(--share-color); }
+        .btn-m { background: var(--mail); }
+        .btn-s { background: var(--share); }
 
-        /* --- BACKEND (ORIGINAL GRAPHICS) --- */
-        #backendPanel { 
+        /* --- BACKEND --- */
+        #backend { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #fdfdfd; z-index: 5000; padding: 25px; box-sizing: border-box; overflow-y: auto; 
+            background: #fff; z-index: 5000; padding: 20px; box-sizing: border-box; overflow-y: auto; 
         }
-        .backend-header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
-        .task-row { 
-            background: white; padding: 15px; border-radius: 15px; border: 1px solid #ddd; 
-            margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;
-        }
-        .be-input { padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 1rem; width: 100%; box-sizing: border-box; }
+        .be-card { background: #f8f9fa; padding: 15px; border-radius: 15px; border: 1px solid #eee; margin-bottom: 15px; }
+        .be-input { padding: 12px; border: 1px solid #ddd; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 8px; font-size: 1rem; }
         
-        /* Icon Picker - Groß und übersichtlich */
-        .icon-area { background: #f0f0f0; padding: 15px; border-radius: 20px; margin: 20px 0; }
-        .icon-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-        .icon-item { font-size: 1.8rem; cursor: pointer; padding: 5px; transition: 0.2s; }
-        .icon-item:hover { transform: scale(1.3); }
+        .icon-box { background: #f1f2f6; padding: 15px; border-radius: 15px; margin: 15px 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .ic { font-size: 1.6rem; cursor: pointer; transition: 0.2s; }
+        .ic:hover { transform: scale(1.3); }
 
-        .backend-controls { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        .be-btn { padding: 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; }
-        .btn-save { background: var(--success); color: white; box-shadow: 0 4px 0 #009476; }
-        .btn-save:disabled { background: #b2bec3; box-shadow: none; transform: translateY(4px); }
-
-        #qr-section { 
-            display: none; margin-top: 25px; text-align: center; background: white; 
-            padding: 20px; border-radius: 25px; border: 4px dashed var(--success); 
-        }
-        #qr-canvas { max-width: 100%; }
+        .config-area { margin: 20px 0; padding: 15px; background: #fff3bf; border-radius: 15px; border: 2px dashed #e1b12c; }
+        #qr-wrap { display: none; text-align: center; margin-top: 20px; border: 4px solid var(--success); border-radius: 20px; padding: 15px; }
+        
+        .be-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .be-btn { padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
 
         /* Modal */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 6000; }
-        .modal-box { background: white; padding: 30px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; }
+        .modal-c { background: white; padding: 25px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="backendPanel">
-    <div class="backend-header">
-        <h2 style="margin:0; color: var(--primary);">Backend ⚙️</h2>
-        <p style="color:#888;">Erstelle und teile deine Aufgaben</p>
-    </div>
+<div id="backend">
+    <h2 style="text-align: center; color: var(--primary);">Backend Control ⚙️</h2>
     
-    <div id="backendList"></div>
-    <button class="be-btn" onclick="addBackendRow()" style="background:#dfe6e9; margin-bottom: 20px; width:100%;">➕ Neue Aufgabe hinzufügen</button>
+    <div id="be-list"></div>
+    <button class="be-btn" style="width:100%; background:#eee;" onclick="addRow()">➕ Neue Aufgabe</button>
 
-    <div class="icon-area">
-        <div class="icon-grid" id="fullIconPicker"></div>
+    <div class="icon-box" id="picker"></div>
+
+    <div class="config-area">
+        <label style="font-weight: bold; font-size: 0.8rem;">CONFIG-STRING (Manual Share):</label>
+        <input type="text" id="configString" class="be-input" readonly onclick="this.select()">
+        <button class="be-btn" style="width: 100%; background: var(--accent); color: white;" onclick="copyConfig()">📋 Code kopieren</button>
     </div>
 
-    <div class="backend-controls">
-        <button id="saveBtn" class="be-btn btn-save" onclick="runSaveSequence()">💾 SPEICHERN & QR ERZEUGEN</button>
-        
-        <div id="qr-section">
-            <h3 style="color:var(--success); margin-top:0;">QR-Code ist bereit! ✅</h3>
-            <canvas id="qr-canvas"></canvas>
-            <p style="font-size: 0.8rem;">Dieser Code enthält die aktuelle Liste.</p>
-        </div>
-
-        <button class="be-btn" onclick="closeBackend()" style="background:var(--text); color:white; margin-top:15px;">🏠 Zurück zur App</button>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button class="be-btn" style="flex:1; background: #636e72; color:white;" onclick="exportJSON()">💾 JSON Export</button>
+        <button class="be-btn" style="flex:1; background: #636e72; color:white;" onclick="document.getElementById('fileIn').click()">📂 JSON Import</button>
+        <input type="file" id="fileIn" style="display:none" onchange="importJSON(event)">
     </div>
+
+    <button id="saveBtn" class="be-btn" style="width:100%; background: var(--success); color:white; font-size: 1.1rem;" onclick="processSave()">💾 SPEICHERN & QR AKTUALISIEREN</button>
+
+    <div id="qr-wrap">
+        <canvas id="canvas"></canvas>
+        <p style="color: var(--success); font-weight: bold;">QR-CODE BEREIT ✅</p>
+    </div>
+
+    <button class="be-btn" style="width:100%; background: var(--text); color:white; margin-top: 20px;" onclick="closeBE()">🏠 ZURÜCK ZUR APP</button>
 </div>
 
 <div id="infoModal" class="modal" onclick="this.style.display='none'">
-    <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 id="mTitle" style="color:var(--primary); margin-top:0;"></h3>
-        <p id="mText" style="color:#636e72; line-height:1.5;"></p>
-        <button class="be-btn" style="background:var(--success); color:white; width:100%;" onclick="document.getElementById('infoModal').style.display='none'">OK!</button>
+    <div class="modal-c" onclick="event.stopPropagation()">
+        <h3 id="i-title" style="color:var(--primary); margin:0;"></h3>
+        <p id="i-text" style="color:#636e72; margin: 15px 0;"></p>
+        <button class="be-btn" style="width:100%; background:var(--success); color:white;" onclick="document.getElementById('infoModal').style.display='none'">Verstanden!</button>
     </div>
 </div>
 
 <div class="app-container">
-    <div class="header" onclick="checkBackendAccess()">
-        <h1 style="margin:0; color:var(--primary);">Flex-O-Mat 🎯</h1>
-        <div class="score-board"><span id="scoreVal">0</span> Points</div>
+    <div class="header" onclick="accessBE()">
+        <h1>Flex-O-Mat</h1>
+        <div class="score-pill"><span id="score">0</span> ⭐</div>
     </div>
 
-    <div id="mainQuestList" class="quest-list"></div>
+    <div id="main-list" class="quest-list"></div>
 
-    <div class="footer-actions">
-        <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail</a>
-        <button onclick="shareViaLink()" class="action-btn btn-share">📤 Teilen</button>
+    <div class="footer">
+        <a id="mail" href="#" class="btn btn-m">📧 Mail</a>
+        <button onclick="nativeShare()" class="btn btn-s">
+            <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+            Teilen
+        </button>
     </div>
 </div>
 
 <script>
-let questState = [];
-let tapCount = 0;
-let lastActiveInput = null;
+let state = [];
+let taps = 0;
+let focusInp = null;
 
-// ICON DATEN (JETZT VOLLSTÄNDIG)
 const iconList = [
     "0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣",
-    "🚗","🚕","🚙","🚌","🏎️","🚑","🚒","🚓","🚜","🏍️",
-    "🚲","🚀","🛸","🚁","🚂","🚤","✈️","🏠","💡","🔥"
+    "🚗","🚕","🚙","🚌","🏎️","🚑","🚒","🚓","🚜","🏍️","🚀","🛸",
+    "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🦁","🐯","🐸","🐵","🐧","🐦","🐤",
+    "☀️","☁️","🌦️","🌧️","⛈️","❄️","🌪️","🌈","🌊","🔥",
+    "😀","😂","😎","😍","🤔","🤯","🥳","💀","💩","✨","⭐","💡","🎯"
 ];
 
-function init() {
-    initIconPicker();
-    loadData();
+// START
+window.onload = () => {
+    buildPicker();
+    const urlP = new URLSearchParams(window.location.search);
+    const data = urlP.get('d');
+    if(data) {
+        try {
+            const dec = JSON.parse(decodeURIComponent(escape(atob(data))));
+            state = dec.map(x => ({ t: x.t, i: x.i, c: false }));
+            localStorage.setItem('flex_26', JSON.stringify(state));
+            window.history.replaceState({}, '', window.location.pathname);
+        } catch(e) { console.error("Import Error"); }
+    } else {
+        const saved = localStorage.getItem('flex_26');
+        state = saved ? JSON.parse(saved) : [{t: "Mission 1", i: "Willkommen!", c: false}];
+    }
     renderApp();
-}
+};
 
-function initIconPicker() {
-    const grid = document.getElementById('fullIconPicker');
-    iconList.forEach(ic => {
-        const s = document.createElement('span');
-        s.className = 'icon-item'; s.innerText = ic;
+function buildPicker() {
+    const p = document.getElementById('picker');
+    iconList.forEach(i => {
+        const s = document.createElement('span'); s.className = 'ic'; s.innerText = i;
         s.onclick = () => {
-            if(lastActiveInput) {
-                const start = lastActiveInput.selectionStart;
-                lastActiveInput.value = lastActiveInput.value.slice(0, start) + ic + lastActiveInput.value.slice(lastActiveInput.selectionEnd);
-                lastActiveInput.focus();
+            if(focusInp) {
+                const start = focusInp.selectionStart;
+                focusInp.value = focusInp.value.slice(0,start) + i + focusInp.value.slice(focusInp.selectionEnd);
+                focusInp.focus();
             }
         };
-        grid.appendChild(s);
+        p.appendChild(s);
     });
 }
 
-// BACKEND LOGIK
-function checkBackendAccess() {
-    tapCount++;
-    if(tapCount >= 5) {
-        document.getElementById('backendPanel').style.display = 'block';
-        renderBackend();
-        document.getElementById('qr-section').style.display = 'none';
-        tapCount = 0;
-    }
-    setTimeout(() => tapCount = 0, 2000);
+function accessBE() { taps++; if(taps>=5){ document.getElementById('backend').style.display='block'; renderBE(); taps=0; } setTimeout(()=>taps=0,2000); }
+function closeBE() { sync(); renderApp(); document.getElementById('backend').style.display='none'; }
+
+function sync() {
+    const rows = document.querySelectorAll('.be-card');
+    state = Array.from(rows).map(r => ({
+        t: r.querySelector('.ti').value,
+        i: r.querySelector('.in').value,
+        c: false
+    })).filter(x => x.t.trim() !== "");
 }
 
-function syncInputsToVar() {
-    const rows = document.querySelectorAll('.task-row');
-    questState = Array.from(rows).map(row => ({
-        title: row.querySelector('.ti').value,
-        info: row.querySelector('.in').value,
-        completed: false
-    })).filter(q => q.title.trim() !== "");
-}
-
-function renderBackend() {
-    const list = document.getElementById('backendList');
-    list.innerHTML = '';
-    questState.forEach((q, i) => {
-        const div = document.createElement('div');
-        div.className = 'task-row';
-        div.innerHTML = `
-            <input type="text" class="be-input ti" value="${q.title}" placeholder="Was ist zu tun?" onfocus="lastActiveInput=this">
-            <input type="text" class="be-input in" value="${q.info}" placeholder="Zusatzinfos..." onfocus="lastActiveInput=this">
-            <button onclick="deleteTask(${i})" style="color:var(--danger); border:none; background:none; cursor:pointer; font-weight:bold; text-align:right;">Eintrag löschen 🗑</button>
+function renderBE() {
+    const l = document.getElementById('be-list'); l.innerHTML = '';
+    state.forEach((item, idx) => {
+        const d = document.createElement('div'); d.className = 'be-card';
+        d.innerHTML = `
+            <input type="text" class="be-input ti" value="${item.t}" placeholder="Aufgabe..." onfocus="focusInp=this">
+            <input type="text" class="be-input in" value="${item.i}" placeholder="Info..." onfocus="focusInp=this">
+            <button onclick="del(${idx})" style="color:var(--danger); border:none; background:none; cursor:pointer; font-weight:bold;">Löschen 🗑</button>
         `;
-        list.appendChild(div);
+        l.appendChild(d);
     });
 }
 
-function addBackendRow() {
-    syncInputsToVar();
-    questState.push({title: "", info: "", completed: false});
-    renderBackend();
-}
+function addRow() { sync(); state.push({t:"", i:"", c:false}); renderBE(); }
+function del(i) { sync(); state.splice(i,1); renderBE(); }
 
-function deleteTask(i) {
-    syncInputsToVar();
-    questState.splice(i, 1);
-    renderBackend();
-}
+// --- CORE FUNCTIONS ---
+function processSave() {
+    const b = document.getElementById('saveBtn');
+    b.innerText = "⏳ SYNCHRONISIERE...";
+    b.disabled = true;
 
-// --- DIE SPEICHER-SEQUENZ (QR CODE LOGIK) ---
-function runSaveSequence() {
-    const btn = document.getElementById('saveBtn');
-    btn.innerText = "⏳ Liste wird versiegelt...";
-    btn.disabled = true;
+    sync();
+    localStorage.setItem('flex_26', JSON.stringify(state));
 
-    // 1. Aktuelle Eingaben aus dem Formular ziehen
-    syncInputsToVar();
-
-    // 2. LocalStorage sichern
-    localStorage.setItem('flex_v10_data', JSON.stringify(questState));
-
-    // 3. Kurze Pause erzwingen (Sicherheits-Puffer für die URL-Generierung)
     setTimeout(() => {
-        const finalUrl = generateShareURL();
-        
-        // QR Code neu zeichnen
+        const shareData = state.map(x => ({ t: x.t, i: x.i }));
+        const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))));
+        const url = window.location.origin + window.location.pathname + "?d=" + base64;
+
+        document.getElementById('configString').value = base64;
+
         new QRious({
-            element: document.getElementById('qr-canvas'),
-            value: finalUrl,
-            size: 300,
+            element: document.getElementById('canvas'),
+            value: url,
+            size: 280,
             level: 'M'
         });
 
-        document.getElementById('qr-section').style.display = 'block';
-        btn.innerText = "✅ GESPEICHERT!";
-        setTimeout(() => {
-            btn.innerText = "💾 SPEICHERN & QR ERZEUGEN";
-            btn.disabled = false;
-        }, 2000);
-
+        document.getElementById('qr-wrap').style.display = 'block';
+        b.innerText = "✅ SPEICHERN & QR AKTUALISIEREN";
+        b.disabled = false;
         renderApp();
-    }, 800);
+    }, 600);
 }
 
-function generateShareURL() {
-    // Nur Titel und Info exportieren, Status "completed" wird beim Teilen genullt
-    const exportData = questState.map(q => ({ t: q.title, i: q.info }));
-    const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(exportData))));
-    return window.location.origin + window.location.pathname + "?d=" + base64;
+function copyConfig() {
+    const el = document.getElementById('configString');
+    if(!el.value) { alert("Bitte erst Speichern!"); return; }
+    navigator.clipboard.writeText(el.value);
+    alert("Config-String kopiert! 📋");
 }
 
-function closeBackend() {
-    document.getElementById('backendPanel').style.display = 'none';
+function exportJSON() {
+    sync();
+    const data = JSON.stringify(state, null, 2);
+    const blob = new Blob([data], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'flex-o-mat-tasks.json';
+    a.click();
 }
 
-// APP LOGIK
+function importJSON(e) {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        try {
+            state = JSON.parse(ev.target.result);
+            renderBE();
+            alert("Erfolgreich importiert!");
+        } catch(err) { alert("Fehler beim Import!"); }
+    };
+    reader.readAsText(file);
+}
+
+// APP
 function renderApp() {
-    const list = document.getElementById('mainQuestList');
-    list.innerHTML = '';
-    let done = 0;
-
-    questState.forEach((q, i) => {
-        if(q.completed) done++;
-        const div = document.createElement('div');
-        div.className = `quest-item ${q.completed ? 'done' : ''}`;
-        div.innerHTML = `
-            <button class="info-btn" onclick="showInfo(${i})">i</button>
-            <div class="quest-text" onclick="toggleQuest(${i})">${q.title}</div>
-            <div class="check-circle" onclick="toggleQuest(${i})">${q.completed ? '✔' : ''}</div>
+    const l = document.getElementById('main-list'); l.innerHTML = '';
+    let sc = 0;
+    state.forEach((item, idx) => {
+        if(item.c) sc++;
+        const d = document.createElement('div'); d.className = `quest-item ${item.c?'done':''}`;
+        d.innerHTML = `
+            <div class="check-btn" onclick="toggle(${idx})">${item.c?'✔':''}</div>
+            <div class="quest-text" onclick="toggle(${idx})">${item.t}</div>
+            <button style="border:none; background:none; cursor:pointer;" onclick="info(${idx})">ℹ️</button>
         `;
-        list.appendChild(div);
+        l.appendChild(d);
     });
-
-    document.getElementById('scoreVal').innerText = done * 10;
-    updateMail(done * 10);
+    document.getElementById('score').innerText = sc * 10;
+    const body = encodeURIComponent(`Check meinen Flex-O-Mat Score: ${sc*10} Sterne!`);
+    document.getElementById('mail').href = `mailto:?subject=Flex-O-Mat&body=${body}`;
 }
 
-function toggleQuest(i) {
-    questState[i].completed = !questState[i].completed;
-    localStorage.setItem('flex_v10_data', JSON.stringify(questState));
-    renderApp();
-}
-
-function showInfo(i) {
-    document.getElementById('mTitle').innerText = questState[i].title;
-    document.getElementById('mText').innerText = questState[i].info || "Keine weiteren Infos.";
+function toggle(i) { state[i].c = !state[i].c; renderApp(); }
+function info(i) {
+    document.getElementById('i-title').innerText = state[i].t;
+    document.getElementById('i-text').innerText = state[i].i || "Keine Info.";
     document.getElementById('infoModal').style.display = 'flex';
 }
 
-function updateMail(score) {
-    const subj = encodeURIComponent("Flex-O-Mat: Mein neuer Score!");
-    const body = encodeURIComponent(`Ich habe ${score} Punkte erreicht! Das ist absolut flex-o-matisch!`);
-    document.getElementById('mailLink').href = `mailto:?subject=${subj}&body=${body}`;
-}
-
-async function shareViaLink() {
-    const url = generateShareURL();
+async function nativeShare() {
+    sync();
+    const shareData = state.map(x => ({ t: x.t, i: x.i }));
+    const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))));
+    const url = window.location.origin + window.location.pathname + "?d=" + base64;
     if(navigator.share) {
-        await navigator.share({ title: 'Flex-O-Mat', text: 'Schau dir meine Aufgaben an!', url: url });
+        await navigator.share({title:'Flex-O-Mat', url: url});
     } else {
-        navigator.clipboard.writeText(url);
-        alert("Link wurde kopiert! 📋");
+        navigator.clipboard.writeText(url); alert("Link kopiert!");
     }
 }
-
-function loadData() {
-    const params = new URLSearchParams(window.location.search);
-    const data = params.get('d');
-    if(data) {
-        try {
-            const decoded = JSON.parse(decodeURIComponent(escape(atob(data))));
-            questState = decoded.map(x => ({ title: x.t, info: x.i, completed: false }));
-            localStorage.setItem('flex_v10_data', JSON.stringify(questState));
-            window.history.replaceState({}, '', window.location.pathname);
-        } catch(e) { console.error("Import Fehler"); }
-    } else {
-        const saved = localStorage.getItem('flex_v10_data');
-        questState = saved ? JSON.parse(saved) : [{title: "Erste Mission", info: "Willkommen im Flex-O-Mat!", completed: false}];
-    }
-}
-
-window.onload = init;
 </script>
 </body>
 </html>
