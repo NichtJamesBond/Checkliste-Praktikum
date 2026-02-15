@@ -1,390 +1,308 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flex-O-Mat</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <style>
-        :root {
-            --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
-            --bg: #f4f7f6; --text: #2d3436; --mail-color: #0984e3;
-            --info-bg: #fff3bf; --info-border: #fcc419;
-            --danger: #ff7675;
-        }
-        
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: var(--bg); 
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-start;
-            padding: 20px; 
-            margin: 0; 
-            min-height: 100vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store" />
+<title>Flex-O-Mat</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 
-        .app-container { 
-            background: white; 
-            padding: 2rem; 
-            border-radius: 30px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-            width: 100%; 
-            max-width: 400px; 
-            min-height: 620px; 
-            display: flex; 
-            flex-direction: column; 
-            position: relative; 
-        }
-        
-        .header { text-align: center; margin-bottom: 45px; cursor: pointer; user-select: none; }
-        .score-board { background: var(--accent); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; color: #000; box-shadow: 0 4px 0 #e1b12c; margin-top: 20px; }
+<style>
+:root {
+    --primary: #6c5ce7;
+    --accent: #fdcb6e;
+    --success: #00b894;
+    --bg: #f4f7f6;
+    --text: #2d3436;
+    --mail-color: #0984e3;
+    --danger: #ff7675;
+}
 
-        .quest-list { list-style: none; padding: 0; flex-grow: 1; }
-        .quest-item { background: white; border: 2px solid #f0f0f0; margin: 10px 0; padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 10px; }
-        .quest-item.done { background: #e8fcf3; border-color: var(--success); }
-        .quest-content { flex-grow: 1; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-        .quest-text { font-size: 1rem; font-weight: 600; color: var(--text); }
-        .done .quest-text { text-decoration: line-through; color: #a0a0a0; }
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    margin: 0;
+    min-height: 100vh;
+}
 
-        .info-btn { background: var(--info-bg); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; border: none; }
-        .check-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; }
-        .done .check-circle { background: var(--success); border-color: var(--success); color: white; }
+.app-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    width: 100%;
+    max-width: 400px;
+    min-height: 620px;
+    display: flex;
+    flex-direction: column;
+}
 
-        /* ADMIN PANEL */
-        #adminPanel { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: white; 
-            z-index: 5000; 
-            padding: 40px; 
-            box-sizing: border-box; 
-            overflow-y: auto; 
-        }
+.header { text-align: center; margin-bottom: 40px; cursor: pointer; user-select: none; }
 
-        .admin-task-item { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; display: flex; gap: 10px; flex-wrap: wrap; }
-        .admin-input.task-title { flex: 1; min-width: 200px; font-weight: bold; }
-        .admin-input.task-info { flex: 2; min-width: 200px; }
-        
-        .central-icon-picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; background: #f0f0f0; padding: 15px; border-radius: 15px; }
-        .icon-choice { cursor: pointer; font-size: 1.5rem; padding: 5px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.score-board {
+    background: var(--accent);
+    display: inline-block;
+    padding: 10px 25px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #000;
+    box-shadow: 0 4px 0 #e1b12c;
+    margin-top: 20px;
+}
 
-        .admin-input { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1rem; }
-        .admin-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; transition: 0.3s; }
-        .admin-btn:disabled { background: #ccc !important; color: #888 !important; cursor: not-allowed; opacity: 0.7; }
-        
-        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; padding-bottom: 40px; }
-        .full-width { grid-column: span 2; }
+.quest-list { list-style: none; padding: 0; flex-grow: 1; }
 
-        #qr-container { display: none; margin-top: 20px; text-align: center; background: #fff; padding: 15px; border-radius: 20px; border: 3px dashed var(--success); }
-        #qr-canvas { margin: 10px auto; display: block; max-width: 100%; border-radius: 10px; }
+.quest-item {
+    background: white;
+    border: 2px solid #f0f0f0;
+    margin: 10px 0;
+    padding: 12px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-        .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
-        .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; color: white; }
-        .btn-mail { background: var(--mail-color); }
+.quest-item.done {
+    background: #e8fcf3;
+    border-color: var(--success);
+}
 
-        #badge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8rem; z-index: 6000; pointer-events: none; transition: transform 0.5s; }
-        #badge.show { transform: translate(-50%, -50%) scale(1.2); }
+.quest-content {
+    flex-grow: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 4000; }
-        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
-    </style>
+.done .quest-text {
+    text-decoration: line-through;
+    color: #999;
+}
+
+.check-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.done .check-circle {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+}
+
+.action-btn {
+    width: 100%;
+    height: 48px;
+    border-radius: 14px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    background: var(--mail-color);
+    margin-top: 20px;
+}
+</style>
 </head>
+
 <body>
 
-<div id="badge"></div>
-
-<div id="adminPanel">
-    <h2 style="color: var(--primary); text-align: center;">Flex-O-Mat Back-End ⚙️</h2>
-    <div id="adminTaskList"></div>
-    <button class="admin-btn" onclick="addAdminTask()" style="background: #eee; width: 100%; margin-bottom: 20px;">+ Neue Aufgabe hinzufügen</button>
-    
-    <div class="central-icon-picker" id="centralPicker"></div>
-    
-    <div class="admin-grid">
-        <button id="saveBtn" class="admin-btn full-width" onclick="saveAdminData()" style="background: var(--primary); color: white; height: 55px;">💾 Speichern & QR erneuern</button>
-        
-        <button id="qrBtn" class="admin-btn" onclick="toggleQRDisplay()" style="background: var(--success); color: white;" disabled>📱 QR Code anzeigen</button>
-        <button id="copyConfigBtn" class="admin-btn" onclick="copyConfigLink()" style="background: #636e72; color: white;" disabled>📋 Link kopieren</button>
-        <button id="mailConfigBtn" class="admin-btn" onclick="sendConfigMail()" style="background: var(--mail-color); color: white;" disabled>📧 Konfig senden</button>
-        <button id="appModeBtn" class="admin-btn" onclick="closeAdmin()" style="background: #b2bec3; color: white;">🏠 App Modus</button>
-    </div>
-
-    <div id="qr-container">
-        <p style="color: var(--success); font-weight: bold;">QR-Code ist aktuell! ✅</p>
-        <canvas id="qr-canvas"></canvas>
-    </div>
-</div>
-
-<div id="infoModal" class="modal-overlay">
-    <div class="modal-content">
-        <h3 id="modalTitle" style="color:var(--primary);"></h3>
-        <p id="modalDescription"></p>
-        <button class="action-btn btn-mail" onclick="document.getElementById('infoModal').style.display='none'">Check ich!</button>
-    </div>
-</div>
-
 <div class="app-container">
-    <div class="header" onclick="handleHeaderClick()">
-        <h1 style="margin:0; color: var(--primary);">Flex-O-Mat 🎯</h1>
-        <div class="score-board"><span id="score">0</span> <span>⭐</span></div>
+    <div class="header" onclick="openAdmin()">
+        <h1 style="margin:0; color:var(--primary);">Flex-O-Mat 🎯</h1>
+        <div class="score-board"><span id="score">0</span> ⭐</div>
     </div>
+
     <div id="quest-list" class="quest-list"></div>
-    <div class="footer-actions">
-        <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail verschicken</a>
-    </div>
+
+    <button class="action-btn" onclick="openAdmin()">⚙️ Admin</button>
 </div>
 
 <script>
-    let questState = [];
-    let clickCount = 0;
-    let hasUnsavedChanges = false;
-    let isProcessing = false;
-    let achievedMilestones = { m50: false, m80: false, m100: false };
 
-    const iconData = [
-        {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
-        {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
-        {i: "📄", t: "Deckblatt"}, {i: "🏠", t: "Einrichtung"}, {i: "📊", t: "Bericht"}, {i: "⚖️", t: "Regeln"}, 
-        {i: "📜", t: "Paragrafen"}, {i: "📁", t: "Doku"}, {i: "📅", t: "Wochenbericht"}, {i: "👋", t: "Vorstellung"}, 
-        {i: "🏢", t: "Betrieb"}, {i: "🛠️", t: "Arbeiten"}, {i: "📐", t: "Zeichnung"}, {i: "✍️", t: "Skizze"}, 
-        {i: "💼", t: "Beruf"}, {i: "📱", t: "Handy"}, {i: "⚡", t: "Blitz"}, {i: "💡", t: "Licht"}, 
-        {i: "❗", t: "Achtung"}, {i: "❓", t: "Frage"}, {i: "🤔", t: "Reflexion"}, {i: "🎓", t: "Zertifikat"}, 
-        {i: "🦆", t: "Ente"}, {i: "📖", t: "Seite"}, {i: "💻", t: "Computer"}, {i: "😂", t: "Lachen"}, 
-        {i: "😴", t: "Schlafen"}, {i: "☀️", t: "Tag"}, {i: "🌙", t: "Nacht"}, {i: "📸", t: "Foto"},
-        {i: "🚗", t: "Auto"}, {i: "🚆", t: "Bahn"}, {i: "🔥", t: "Feuer"}, {i: "☄️", t: "Flamme"},
-        {i: "🐿️", t: "Eichhörnchen"}, {i: "🐘", t: "Elefant"}, {i: "🐱", t: "Katze"}, {i: "🐟", t: "Fisch"}
-    ];
+/* =============================
+   FLEX-O-MAT STATE & STORAGE
+   ============================= */
 
-    function initIconPicker() {
-        const picker = document.getElementById('centralPicker');
-        picker.innerHTML = '';
-        iconData.forEach(item => {
-            const span = document.createElement('span');
-            span.className = 'icon-choice';
-            span.innerText = item.i;
-            span.onclick = () => {
-                const titles = document.querySelectorAll('.task-title');
-                if (titles.length > 0) {
-                    titles[titles.length - 1].value += " " + item.i;
-                    markAsUnsaved();
-                }
-            };
-            picker.appendChild(span);
-        });
-    }
+const SHARE_VERSION = 1;
+const STORAGE_KEY = "flex_config_v1";
 
-    function handleHeaderClick() {
-        clickCount++;
-        if (clickCount >= 5) {
-            document.getElementById('adminPanel').style.display = 'block';
-            renderAdmin();
-            clickCount = 0;
-        }
-        setTimeout(() => clickCount = 0, 3000);
-    }
+let questState = [];
+let clickCount = 0;
 
-    function renderAdmin() {
-        const list = document.getElementById('adminTaskList');
-        list.innerHTML = '';
-        questState.forEach((task, i) => {
-            const div = document.createElement('div');
-            div.className = 'admin-task-item';
-            div.innerHTML = `
-                <input type="text" class="admin-input task-title" value="${task.title}" placeholder="Aufgabe..." oninput="markAsUnsaved()">
-                <textarea class="admin-input task-info" placeholder="Infos..." oninput="markAsUnsaved()" rows="1">${task.info}</textarea>
-                <button onclick="removeAdminTask(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:bold; font-size:1.2rem;">🗑</button>
-            `;
-            list.appendChild(div);
-        });
-        updateButtonStates();
-    }
+/* =============================
+   SHARE ENGINE
+   ============================= */
 
-    function markAsUnsaved() {
-        hasUnsavedChanges = true;
-        updateButtonStates();
-        document.getElementById('qr-container').style.display = 'none';
-    }
+function encodeConfig(obj) {
+    const json = JSON.stringify(obj);
+    const utf8 = new TextEncoder().encode(json);
+    let binary = "";
+    utf8.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary)
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+}
 
-    function updateButtonStates() {
-        const actionBtns = [
-            document.getElementById('qrBtn'), 
-            document.getElementById('mailConfigBtn'), 
-            document.getElementById('copyConfigBtn')
-        ];
-        
-        const saveBtn = document.getElementById('saveBtn');
+function decodeConfig(str) {
+    str = str.replace(/-/g, "+").replace(/_/g, "/");
+    const binary = atob(str);
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+}
 
-        if (isProcessing) {
-            saveBtn.disabled = true;
-            saveBtn.innerText = "⏳ Generiere Codes...";
-            actionBtns.forEach(btn => btn.disabled = true);
-        } else if (hasUnsavedChanges) {
-            saveBtn.disabled = false;
-            saveBtn.innerText = "💾 Speichern & QR erneuern";
-            saveBtn.style.background = "var(--primary)";
-            actionBtns.forEach(btn => btn.disabled = true);
-        } else {
-            saveBtn.disabled = false;
-            saveBtn.innerText = "✔ Alles aktuell";
-            saveBtn.style.background = "var(--success)";
-            actionBtns.forEach(btn => btn.disabled = false);
-        }
-    }
-
-    function syncCurrentInputs() {
-        const titles = document.querySelectorAll('.task-title');
-        const infos = document.querySelectorAll('.task-info');
-        return Array.from(titles).map((t, i) => ({
-            title: t.value,
-            info: infos[i].value,
-            completed: false
-        })).filter(t => t.title.trim() !== "");
-    }
-
-    function saveAdminData() {
-        isProcessing = true;
-        updateButtonStates();
-
-        // 1. Daten synchronisieren & LocalStorage
-        questState = syncCurrentInputs();
-        localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
-        hasUnsavedChanges = false;
-
-        // 2. Künstliche Pause für visuelles Feedback & Verarbeitungszeit
-        setTimeout(() => {
-            generateQRInternal();
-            isProcessing = false;
-            updateButtonStates();
-            render();
-            console.log("Atomic Update abgeschlossen.");
-        }, 500); // 500ms Pause, damit der Nutzer sieht, dass gearbeitet wird
-    }
-
-    function getShareLink() {
-        const cleanData = questState.map(t => ({ title: t.title, info: t.info }));
-        const dataStr = JSON.stringify(cleanData);
-        // UTF-8 Base64 Support
-        const base64 = btoa(encodeURIComponent(dataStr).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(parseInt(p1, 16))));
-        return window.location.origin + window.location.pathname + "?q=" + base64;
-    }
-
-    function generateQRInternal() {
-        const canvas = document.getElementById('qr-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Hartes Löschen
-        
-        new QRious({
-            element: canvas,
-            value: getShareLink(),
-            size: 450,
-            level: 'L'
-        });
-    }
-
-    function toggleQRDisplay() {
-        const container = document.getElementById('qr-container');
-        container.style.display = (container.style.display === 'block') ? 'none' : 'block';
-        if(container.style.display === 'block') container.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function copyConfigLink() {
-        const link = getShareLink();
-        navigator.clipboard.writeText(link).then(() => alert("Aktueller Link kopiert! 📋"));
-    }
-
-    function sendConfigMail() {
-        window.location.href = `mailto:?subject=Flex-O-Mat Konfiguration&body=${encodeURIComponent(getShareLink())}`;
-    }
-
-    function addAdminTask() {
-        questState = syncCurrentInputs();
-        questState.push({ title: "", info: "", completed: false });
-        renderAdmin();
-        markAsUnsaved();
-    }
-
-    function removeAdminTask(i) {
-        questState = syncCurrentInputs();
-        questState.splice(i, 1);
-        renderAdmin();
-        markAsUnsaved();
-    }
-
-    function closeAdmin() {
-        if (hasUnsavedChanges && !confirm("Nicht gespeichert! Schließen?")) return;
-        document.getElementById('adminPanel').style.display = 'none';
-    }
-
-    // ORIGINALER WYLDER MAIL-TEXT
-    function render() {
-        const list = document.getElementById('quest-list');
-        const completedCount = questState.filter(t => t.completed).length;
-        document.getElementById('score').innerText = completedCount * 10;
-        list.innerHTML = '';
-        questState.forEach((quest, i) => {
-            const item = document.createElement('div');
-            item.className = `quest-item ${quest.completed ? 'done' : ''}`;
-            item.innerHTML = `
-                <button class="info-btn" onclick="showInfo(${i})">💡</button>
-                <div class="quest-content" onclick="toggleQuest(${i})">
-                    <span class="quest-text">${quest.title}</span>
-                    <div class="check-circle">${quest.completed ? '✔' : ''}</div>
-                </div>`;
-            list.appendChild(item);
-        });
-        
-        const mailSubject = encodeURIComponent("Krankes Level-Up! Mein Score im Flex-O-Mat ist am Beamen 🚀");
-        const mailBody = encodeURIComponent(`Hey!\n\nYo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. Mein Grind war heute richtig krass und ich hab die Aufgaben einfach weggemeddelt. ⚡️\n\nIch hab heute richtig krass ge-GLIMPFT und die Aufgaben ganz entspannt weg-GESCHLONZT. Schau dir meinen Score an, ich bin heute der absolute FLEX-O-MAT! 🔥\n\nHab jetzt legit ${completedCount * 10} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥\n\nBeste Grüße und bis bald!`);
-        document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
-    }
-
-    function toggleQuest(i) {
-        questState[i].completed = !questState[i].completed;
-        localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
-        render();
-        checkMilestones();
-    }
-
-    function showInfo(i) {
-        document.getElementById('modalTitle').innerText = questState[i].title;
-        document.getElementById('modalDescription').innerText = questState[i].info;
-        document.getElementById('infoModal').style.display = 'flex';
-    }
-
-    function checkMilestones() {
-        const badge = document.getElementById('badge');
-        if (questState.length === 0) return;
-        const progress = questState.filter(t => t.completed).length / questState.length;
-        let emoji = "";
-        if (progress === 1 && !achievedMilestones.m100) { emoji = "🏆"; achievedMilestones.m100 = true; } 
-        else if (progress >= 0.8 && !achievedMilestones.m80) { emoji = "🚀"; achievedMilestones.m80 = true; }
-        else if (progress >= 0.5 && !achievedMilestones.m50) { emoji = "👍"; achievedMilestones.m50 = true; }
-        if (emoji) {
-            badge.innerText = emoji; badge.classList.add('show');
-            setTimeout(() => badge.classList.remove('show'), 1200);
-        }
-    }
-
-    window.onload = () => {
-        const params = new URLSearchParams(window.location.search);
-        const data = params.get('q');
-        if (data) {
-            try {
-                const decoded = decodeURIComponent(atob(data).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-                questState = JSON.parse(decoded).map(t => ({ ...t, completed: false }));
-                localStorage.setItem('flex_tasks_v5', JSON.stringify(questState));
-                window.history.replaceState({}, "", window.location.pathname);
-            } catch (e) { console.error("Import Error", e); }
-        } else {
-            const saved = localStorage.getItem('flex_tasks_v5');
-            questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg!", completed: false}];
-        }
-        initIconPicker();
-        render();
+function buildConfig() {
+    return {
+        version: SHARE_VERSION,
+        createdAt: Date.now(),
+        tasks: questState.map(t => ({
+            title: t.title,
+            info: t.info
+        }))
     };
+}
+
+function persistConfig() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(buildConfig()));
+}
+
+function loadFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const configStr = params.get("config");
+    if (!configStr) return false;
+
+    try {
+        const config = decodeConfig(configStr);
+        questState = config.tasks.map(t => ({
+            title: t.title,
+            info: t.info,
+            completed: false
+        }));
+        persistConfig();
+        return true;
+    } catch (e) {
+        alert("Fehler beim Laden der Konfiguration.");
+        return false;
+    }
+}
+
+function loadFromStorage() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return false;
+    const config = JSON.parse(saved);
+    questState = config.tasks.map(t => ({
+        title: t.title,
+        info: t.info,
+        completed: false
+    }));
+    return true;
+}
+
+function getShareLink() {
+    const encoded = encodeConfig(buildConfig());
+    return window.location.origin + window.location.pathname + "?config=" + encoded;
+}
+
+function generateQR() {
+    const qr = new QRious({
+        value: getShareLink(),
+        size: 300
+    });
+    const win = window.open("");
+    win.document.write("<h3>QR-Code</h3>");
+    win.document.body.appendChild(qr.image);
+}
+
+/* =============================
+   UI LOGIC
+   ============================= */
+
+function render() {
+    const list = document.getElementById("quest-list");
+    list.innerHTML = "";
+
+    let completed = 0;
+
+    questState.forEach((task, i) => {
+        if (task.completed) completed++;
+
+        const div = document.createElement("div");
+        div.className = "quest-item " + (task.completed ? "done" : "");
+
+        div.innerHTML = `
+            <div class="quest-content" onclick="toggleTask(${i})">
+                <span class="quest-text">${task.title}</span>
+                <div class="check-circle">${task.completed ? "✔" : ""}</div>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+
+    document.getElementById("score").innerText = completed * 10;
+}
+
+function toggleTask(i) {
+    questState[i].completed = !questState[i].completed;
+    persistConfig();
+    render();
+}
+
+/* =============================
+   ADMIN PANEL (Prompt-Basiert)
+   ============================= */
+
+function openAdmin() {
+    const input = prompt("Neue Aufgaben eingeben (durch Komma getrennt):");
+    if (!input) return;
+
+    questState = input.split(",").map(t => ({
+        title: t.trim(),
+        info: "",
+        completed: false
+    }));
+
+    persistConfig();
+    render();
+
+    if (confirm("QR-Code erzeugen?")) {
+        generateQR();
+    }
+}
+
+/* =============================
+   INIT
+   ============================= */
+
+window.onload = () => {
+
+    const fromURL = loadFromURL();
+
+    if (!fromURL) {
+        const fromStorage = loadFromStorage();
+        if (!fromStorage) {
+            questState = [{
+                title: "Level 1 starten!",
+                info: "Viel Erfolg!",
+                completed: false
+            }];
+        }
+    }
+
+    render();
+};
+
 </script>
 </body>
 </html>
