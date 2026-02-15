@@ -1,404 +1,330 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-store" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Flex-O-Mat</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <style>
-:root {
-    --primary:#6c5ce7;
-    --accent:#fdcb6e;
-    --success:#00b894;
-    --bg:#f4f7f6;
-    --text:#2d3436;
-    --danger:#ff7675;
+:root{
+    --primary:#4f46e5;
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --success:#10b981;
+    --danger:#ef4444;
+    --text:#1f2937;
+    --muted:#6b7280;
 }
 
 body{
-    font-family:'Segoe UI',sans-serif;
-    background:var(--bg);
-    display:flex;
-    justify-content:center;
-    padding:20px;
     margin:0;
+    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto;
+    background:var(--bg);
+    color:var(--text);
 }
 
-.app-container{
-    background:white;
-    padding:2rem;
-    border-radius:30px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.08);
-    width:100%;
-    max-width:420px;
-    min-height:620px;
-    display:flex;
-    flex-direction:column;
-}
-
-.header{
+header{
     text-align:center;
-    margin-bottom:40px;
+    padding:25px;
+    font-size:1.8rem;
+    font-weight:600;
     cursor:pointer;
-    user-select:none;
 }
 
-.score-board{
-    background:var(--accent);
-    display:inline-block;
-    padding:10px 25px;
+.container{
+    max-width:800px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:var(--card);
     border-radius:20px;
-    font-weight:bold;
-    margin-top:20px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.05);
+    transition:.2s;
 }
 
-.quest-item{
-    border:2px solid #eee;
-    padding:12px;
-    border-radius:16px;
-    margin-bottom:10px;
+.card:hover{
+    transform:translateY(-3px);
+}
+
+.task-title{
     display:flex;
     align-items:center;
     gap:10px;
+    font-weight:600;
+    font-size:1.1rem;
+    margin-bottom:10px;
 }
 
-.quest-item.done{
-    background:#e8fcf3;
-    border-color:var(--success);
-}
-
-.quest-content{
-    flex-grow:1;
-    display:flex;
-    justify-content:space-between;
+.help-icon{
+    margin-left:auto;
     cursor:pointer;
+    font-size:1.2rem;
 }
 
-.done .quest-text{
-    text-decoration:line-through;
-    color:#999;
-}
-
-.info-btn{
-    border:none;
-    background:#f1f1f1;
-    border-radius:50%;
-    width:34px;
-    height:34px;
-    cursor:pointer;
-}
-
-.check-circle{
-    width:26px;
-    height:26px;
-    border-radius:50%;
-    border:2px solid #ccc;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.done .check-circle{
-    background:var(--success);
-    border-color:var(--success);
-    color:white;
-}
-
-/* ADMIN */
-
-#adminPanel{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:white;
-    padding:30px;
-    overflow:auto;
-    z-index:999;
-}
-
-.admin-task{
-    margin-bottom:15px;
-}
-
-.admin-task input,
-.admin-task textarea{
-    width:100%;
-    margin-bottom:5px;
-    padding:8px;
-}
-
-.icon-picker{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    margin:20px 0;
-}
-
-.icon-choice{
-    cursor:pointer;
-    font-size:1.4rem;
+.ican{
+    margin-left:20px;
+    color:var(--muted);
 }
 
 button{
+    border:none;
+    border-radius:12px;
+    padding:10px 15px;
+    cursor:pointer;
+    font-weight:500;
+}
+
+.primary{
+    background:var(--primary);
+    color:white;
+}
+
+.success{
+    background:var(--success);
+    color:white;
+}
+
+.danger{
+    background:var(--danger);
+    color:white;
+}
+
+input, textarea{
+    width:100%;
     padding:10px;
     border-radius:10px;
-    border:none;
-    cursor:pointer;
-    font-weight:bold;
+    border:1px solid #ddd;
+    margin-bottom:10px;
+    font-size:.95rem;
 }
 
-#qr-container{
+textarea{resize:vertical;}
+
+.icon-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(40px,1fr));
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.icon-choice{
+    text-align:center;
+    padding:8px;
+    border-radius:10px;
+    cursor:pointer;
+    border:1px solid #eee;
+    transition:.2s;
+}
+
+.icon-choice:hover{
+    background:var(--primary);
+    color:white;
+    transform:scale(1.1);
+}
+
+.admin{
+    display:none;
+}
+
+.admin-footer{
+    position:sticky;
+    bottom:0;
+    background:white;
+    padding:15px;
+    border-top:1px solid #eee;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
     margin-top:20px;
+}
+
+.share-box{
+    margin-top:20px;
+    padding:20px;
+    border-radius:20px;
+    border:2px dashed var(--success);
+    background:#f0fff8;
     text-align:center;
 }
+
+.small-btn{
+    font-size:.8rem;
+    padding:5px 10px;
+}
+
 </style>
 </head>
-
 <body>
 
-<div id="adminPanel">
-    <h2>Admin-Bereich ⚙️</h2>
-    <div id="adminTasks"></div>
-    <button onclick="addTask()">+ Aufgabe</button>
+<header id="title">Flex-O-Mat</header>
 
-    <div class="icon-picker" id="iconPicker"></div>
+<div class="container">
 
-    <button onclick="saveAdmin()">💾 Speichern & QR erzeugen</button>
-    <button onclick="closeAdmin()">Schließen</button>
+<div id="app"></div>
 
-    <div id="qr-container">
-        <p><strong>Share-Link:</strong></p>
-        <input id="shareLink" style="width:100%;" readonly>
-        <canvas id="qrCanvas"></canvas>
+<div id="admin" class="admin">
+    <h2>⚙️ Admin</h2>
+
+    <div id="taskList"></div>
+
+    <button class="primary" onclick="addTask()">+ Aufgabe hinzufügen</button>
+
+    <h3>🎨 Icon auswählen</h3>
+    <div id="iconGrid" class="icon-grid"></div>
+
+    <div id="shareBox" class="share-box" style="display:none;">
+        <strong>🔗 Teilen</strong>
+        <input id="shareLink" readonly />
+        <canvas id="qr"></canvas>
+    </div>
+
+    <div class="admin-footer">
+        <span id="status">Nicht gespeichert</span>
+        <button class="success" onclick="saveState()">💾 Speichern</button>
     </div>
 </div>
 
-<div class="app-container">
-    <div class="header" onclick="handleHeaderClick()">
-        <h1>Flex-O-Mat 🎯</h1>
-        <div class="score-board"><span id="score">0</span> ⭐</div>
-    </div>
-    <div id="questList"></div>
 </div>
 
 <script>
+let state={tasks:[]};
+let clickCount=0;
+let selectedIcon="⭐";
 
-/* ===============================
-   STATE + SHARE ENGINE
-================================= */
+const icons=[
+"⭐","➕","➖",
+"0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣",
+"🚗","🚌","🚢",
+"🐘","🐿️",
+"⚡","🌩️","🌧️","☀️","🌙",
+"😭","😂","😴","😢",
+"🔥","🚀","💨",
+"📝","💻","📊","✏️"
+];
 
-const STORAGE_KEY = "flex_config_v1";
-const VERSION = 1;
-
-let questState = [];
-let clickCount = 0;
-
-/* ---------- Encoding ---------- */
-
-function encodeConfig(obj){
-    const json = JSON.stringify(obj);
-    const bytes = new TextEncoder().encode(json);
-    let binary="";
-    bytes.forEach(b=>binary+=String.fromCharCode(b));
-    return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
-}
-
-function decodeConfig(str){
-    str=str.replace(/-/g,"+").replace(/_/g,"/");
-    const binary=atob(str);
-    const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
-    return JSON.parse(new TextDecoder().decode(bytes));
-}
-
-/* ---------- Persistence ---------- */
-
-function buildConfig(){
-    return {
-        version:VERSION,
-        tasks:questState.map(t=>({
-            title:t.title,
-            info:t.info
-        }))
-    };
-}
-
-function persist(){
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(buildConfig()));
-}
-
-function loadFromURL(){
-    const params=new URLSearchParams(location.search);
-    const cfg=params.get("config");
-    if(!cfg) return false;
-
-    try{
-        const data=decodeConfig(cfg);
-        questState=data.tasks.map(t=>({...t,completed:false}));
-        persist();
-        return true;
-    }catch{
-        alert("Fehler beim Laden der Konfiguration.");
-        return false;
-    }
-}
-
-function loadFromStorage(){
-    const saved=localStorage.getItem(STORAGE_KEY);
-    if(!saved) return false;
-    const data=JSON.parse(saved);
-    questState=data.tasks.map(t=>({...t,completed:false}));
-    return true;
-}
-
-function getShareLink(){
-    return location.origin+location.pathname+"?config="+encodeConfig(buildConfig());
-}
-
-function generateQR(){
-    const canvas=document.getElementById("qrCanvas");
-    canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height);
-    new QRious({
-        element:canvas,
-        value:getShareLink(),
-        size:250
-    });
-}
-
-/* ===============================
-   UI
-================================= */
-
-function render(){
-    const list=document.getElementById("questList");
-    list.innerHTML="";
-    let score=0;
-
-    questState.forEach((task,i)=>{
-        if(task.completed) score++;
-
+function renderIcons(){
+    const grid=document.getElementById("iconGrid");
+    grid.innerHTML="";
+    icons.forEach(icon=>{
         const div=document.createElement("div");
-        div.className="quest-item "+(task.completed?"done":"");
-
-        div.innerHTML=`
-            <button class="info-btn" onclick="showInfo(${i})">💡</button>
-            <div class="quest-content" onclick="toggleTask(${i})">
-                <span class="quest-text">${task.title}</span>
-                <div class="check-circle">${task.completed?"✔":""}</div>
-            </div>
-        `;
-        list.appendChild(div);
+        div.className="icon-choice";
+        div.innerText=icon;
+        div.onclick=()=>selectedIcon=icon;
+        grid.appendChild(div);
     });
-
-    document.getElementById("score").innerText=score*10;
 }
 
-function toggleTask(i){
-    questState[i].completed=!questState[i].completed;
-    persist();
-    render();
-}
+function renderApp(){
+    const app=document.getElementById("app");
+    app.innerHTML="";
+    state.tasks.forEach((t,i)=>{
+        const card=document.createElement("div");
+        card.className="card";
+        const title=document.createElement("div");
+        title.className="task-title";
+        title.innerHTML=`${t.icon} ${t.title}`;
+        const help=document.createElement("span");
+        help.className="help-icon";
+        help.innerText="❓";
+        help.onclick=()=>alert(t.info||"Keine Info");
+        title.appendChild(help);
+        card.appendChild(title);
 
-function showInfo(i){
-    alert(questState[i].info || "Keine Zusatzinfo");
-}
+        t.icans.forEach(ic=>{
+            const p=document.createElement("div");
+            p.className="ican";
+            p.innerText="• "+ic;
+            card.appendChild(p);
+        });
 
-/* ===============================
-   ADMIN
-================================= */
-
-function handleHeaderClick(){
-    clickCount++;
-    if(clickCount>=5){
-        openAdmin();
-        clickCount=0;
-    }
-    setTimeout(()=>clickCount=0,3000);
-}
-
-function openAdmin(){
-    document.getElementById("adminPanel").style.display="block";
-    renderAdmin();
-}
-
-function closeAdmin(){
-    document.getElementById("adminPanel").style.display="none";
+        app.appendChild(card);
+    });
 }
 
 function renderAdmin(){
-    const container=document.getElementById("adminTasks");
-    container.innerHTML="";
+    const list=document.getElementById("taskList");
+    list.innerHTML="";
+    state.tasks.forEach((t,i)=>{
+        const card=document.createElement("div");
+        card.className="card";
 
-    questState.forEach((t,i)=>{
-        const div=document.createElement("div");
-        div.className="admin-task";
-        div.innerHTML=`
-            <input value="${t.title}" onchange="updateTask(${i},this.value,'title')">
-            <textarea onchange="updateTask(${i},this.value,'info')">${t.info}</textarea>
+        card.innerHTML=`
+        <input value="${t.title}" onchange="state.tasks[${i}].title=this.value">
+        <textarea placeholder="Info" onchange="state.tasks[${i}].info=this.value">${t.info||""}</textarea>
+        <div id="icans${i}"></div>
+        <button class="small-btn primary" onclick="addICan(${i})">+ I Can</button>
+        <button class="small-btn danger" onclick="deleteTask(${i})">Löschen</button>
         `;
-        container.appendChild(div);
+        list.appendChild(card);
+
+        const icanDiv=document.getElementById(`icans${i}`);
+        t.icans.forEach((ic,j)=>{
+            const input=document.createElement("input");
+            input.value=ic;
+            input.onchange=()=>state.tasks[i].icans[j]=input.value;
+            icanDiv.appendChild(input);
+        });
     });
-
-    renderIcons();
-}
-
-function updateTask(i,val,type){
-    questState[i][type]=val;
 }
 
 function addTask(){
-    questState.push({title:"",info:"",completed:false});
+    state.tasks.push({title:"Neue Aufgabe",info:"",icon:selectedIcon,icans:[]});
     renderAdmin();
 }
 
-function renderIcons(){
-    const picker=document.getElementById("iconPicker");
-    picker.innerHTML="";
-    const icons=["📄","📊","📚","💡","🔥","🚀","⭐","🎯","📘","✍️"];
-
-    icons.forEach(icon=>{
-        const span=document.createElement("span");
-        span.className="icon-choice";
-        span.innerText=icon;
-        span.onclick=()=>{
-            const inputs=document.querySelectorAll("#adminTasks input");
-            if(inputs.length>0){
-                inputs[inputs.length-1].value+=" "+icon;
-                inputs[inputs.length-1].dispatchEvent(new Event("change"));
-            }
-        };
-        picker.appendChild(span);
-    });
+function deleteTask(i){
+    state.tasks.splice(i,1);
+    renderAdmin();
 }
 
-function saveAdmin(){
-    persist();
-    render();
-    const link=getShareLink();
+function addICan(i){
+    state.tasks[i].icans.push("Neuer Punkt");
+    renderAdmin();
+}
+
+function saveState(){
+    localStorage.setItem("flexomat",JSON.stringify(state));
+    const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(state))))
+        .replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+    const link=location.origin+location.pathname+"?data="+encoded;
     document.getElementById("shareLink").value=link;
-    generateQR();
+    document.getElementById("shareBox").style.display="block";
+    QRCode.toCanvas(document.getElementById("qr"),link);
+    document.getElementById("status").innerText="Gespeichert ✓";
+    renderApp();
 }
 
-/* ===============================
-   INIT
-================================= */
-
-window.onload=()=>{
-    const fromURL=loadFromURL();
-    if(!fromURL){
-        const fromStorage=loadFromStorage();
-        if(!fromStorage){
-            questState=[{
-                title:"Level 1 starten!",
-                info:"Viel Erfolg!",
-                completed:false
-            }];
-        }
+function loadState(){
+    const params=new URLSearchParams(location.search);
+    if(params.get("data")){
+        const decoded=decodeURIComponent(escape(atob(
+            params.get("data").replace(/-/g,"+").replace(/_/g,"/")
+        )));
+        state=JSON.parse(decoded);
+    }else{
+        const saved=localStorage.getItem("flexomat");
+        if(saved) state=JSON.parse(saved);
     }
-    render();
+}
+
+document.getElementById("title").onclick=()=>{
+    clickCount++;
+    if(clickCount>=5){
+        document.getElementById("admin").style.display="block";
+        renderAdmin();
+    }
 };
 
+loadState();
+renderIcons();
+renderApp();
 </script>
+
 </body>
 </html>
