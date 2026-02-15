@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flex-O-Mat</title>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
@@ -20,7 +20,7 @@
 
 body{
     margin:0;
-    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto;
+    font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto;
     background:var(--bg);
     color:var(--text);
 }
@@ -45,11 +45,6 @@ header{
     padding:20px;
     margin-bottom:20px;
     box-shadow:0 10px 25px rgba(0,0,0,0.05);
-    transition:.2s;
-}
-
-.card:hover{
-    transform:translateY(-3px);
 }
 
 .task-title{
@@ -57,14 +52,12 @@ header{
     align-items:center;
     gap:10px;
     font-weight:600;
-    font-size:1.1rem;
     margin-bottom:10px;
 }
 
 .help-icon{
     margin-left:auto;
     cursor:pointer;
-    font-size:1.2rem;
 }
 
 .ican{
@@ -75,57 +68,41 @@ header{
 button{
     border:none;
     border-radius:12px;
-    padding:10px 15px;
+    padding:8px 14px;
     cursor:pointer;
     font-weight:500;
 }
 
-.primary{
-    background:var(--primary);
-    color:white;
-}
-
-.success{
-    background:var(--success);
-    color:white;
-}
-
-.danger{
-    background:var(--danger);
-    color:white;
-}
+.primary{ background:var(--primary); color:white; }
+.success{ background:var(--success); color:white; }
+.danger{ background:var(--danger); color:white; }
 
 input, textarea{
     width:100%;
-    padding:10px;
+    padding:8px;
     border-radius:10px;
     border:1px solid #ddd;
-    margin-bottom:10px;
-    font-size:.95rem;
+    margin-bottom:8px;
 }
-
-textarea{resize:vertical;}
 
 .icon-grid{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(40px,1fr));
-    gap:10px;
+    gap:8px;
     margin-bottom:15px;
 }
 
 .icon-choice{
     text-align:center;
-    padding:8px;
+    padding:6px;
     border-radius:10px;
     cursor:pointer;
     border:1px solid #eee;
-    transition:.2s;
 }
 
 .icon-choice:hover{
     background:var(--primary);
     color:white;
-    transform:scale(1.1);
 }
 
 .admin{
@@ -141,23 +118,16 @@ textarea{resize:vertical;}
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-top:20px;
 }
 
 .share-box{
     margin-top:20px;
-    padding:20px;
-    border-radius:20px;
+    padding:15px;
+    border-radius:15px;
     border:2px dashed var(--success);
     background:#f0fff8;
     text-align:center;
 }
-
-.small-btn{
-    font-size:.8rem;
-    padding:5px 10px;
-}
-
 </style>
 </head>
 <body>
@@ -165,39 +135,41 @@ textarea{resize:vertical;}
 <header id="title">Flex-O-Mat</header>
 
 <div class="container">
+    <div id="app"></div>
 
-<div id="app"></div>
+    <div id="admin" class="admin">
+        <h2>Admin</h2>
 
-<div id="admin" class="admin">
-    <h2>⚙️ Admin</h2>
+        <div id="taskList"></div>
+        <button class="primary" onclick="addTask()">+ Aufgabe</button>
 
-    <div id="taskList"></div>
+        <h3>Icons</h3>
+        <div id="iconGrid" class="icon-grid"></div>
 
-    <button class="primary" onclick="addTask()">+ Aufgabe hinzufügen</button>
+        <div id="shareBox" class="share-box" style="display:none;">
+            <input id="shareLink" readonly>
+            <canvas id="qr"></canvas>
+        </div>
 
-    <h3>🎨 Icon auswählen</h3>
-    <div id="iconGrid" class="icon-grid"></div>
-
-    <div id="shareBox" class="share-box" style="display:none;">
-        <strong>🔗 Teilen</strong>
-        <input id="shareLink" readonly />
-        <canvas id="qr"></canvas>
+        <div class="admin-footer">
+            <span id="status">Nicht gespeichert</span>
+            <button class="success" onclick="saveState()">Speichern</button>
+        </div>
     </div>
-
-    <div class="admin-footer">
-        <span id="status">Nicht gespeichert</span>
-        <button class="success" onclick="saveState()">💾 Speichern</button>
-    </div>
-</div>
-
 </div>
 
 <script>
-let state={tasks:[]};
-let clickCount=0;
-let selectedIcon="⭐";
+/* ===============================
+   Stabiler Core
+================================ */
 
-const icons=[
+let state = { tasks: [] };
+let clickCount = 0;
+let selectedIcon = "⭐";
+
+/* ---------- Icons ---------- */
+
+const icons = [
 "⭐","➕","➖",
 "0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣",
 "🚗","🚌","🚢",
@@ -208,32 +180,57 @@ const icons=[
 "📝","💻","📊","✏️"
 ];
 
-function renderIcons(){
-    const grid=document.getElementById("iconGrid");
-    grid.innerHTML="";
-    icons.forEach(icon=>{
-        const div=document.createElement("div");
-        div.className="icon-choice";
-        div.innerText=icon;
-        div.onclick=()=>selectedIcon=icon;
-        grid.appendChild(div);
-    });
+/* ---------- Base64URL Engine ---------- */
+
+function encodeBase64Url(obj){
+    const json = JSON.stringify(obj);
+    const bytes = new TextEncoder().encode(json);
+    let binary = "";
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary)
+        .replace(/\+/g,"-")
+        .replace(/\//g,"_")
+        .replace(/=+$/,"");
 }
 
+function decodeBase64Url(str){
+    try{
+        str = str.replace(/-/g,"+").replace(/_/g,"/");
+        const binary = atob(str);
+        const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+        const json = new TextDecoder().decode(bytes);
+        return JSON.parse(json);
+    }catch(e){
+        console.error("Decode Fehler:", e);
+        return null;
+    }
+}
+
+/* ---------- Rendering ---------- */
+
 function renderApp(){
-    const app=document.getElementById("app");
-    app.innerHTML="";
-    state.tasks.forEach((t,i)=>{
-        const card=document.createElement("div");
+    const app = document.getElementById("app");
+    app.innerHTML = "";
+
+    if(state.tasks.length === 0){
+        app.innerHTML = "<div class='card'>Keine Aufgaben vorhanden.</div>";
+        return;
+    }
+
+    state.tasks.forEach(t=>{
+        const card = document.createElement("div");
         card.className="card";
-        const title=document.createElement("div");
+
+        const title = document.createElement("div");
         title.className="task-title";
-        title.innerHTML=`${t.icon} ${t.title}`;
-        const help=document.createElement("span");
+        title.innerHTML = t.icon + " " + t.title;
+
+        const help = document.createElement("span");
         help.className="help-icon";
         help.innerText="❓";
-        help.onclick=()=>alert(t.info||"Keine Info");
+        help.onclick=()=>alert(t.info || "Keine Info");
         title.appendChild(help);
+
         card.appendChild(title);
 
         t.icans.forEach(ic=>{
@@ -248,22 +245,24 @@ function renderApp(){
 }
 
 function renderAdmin(){
-    const list=document.getElementById("taskList");
+    const list = document.getElementById("taskList");
     list.innerHTML="";
+
     state.tasks.forEach((t,i)=>{
         const card=document.createElement("div");
         card.className="card";
 
         card.innerHTML=`
-        <input value="${t.title}" onchange="state.tasks[${i}].title=this.value">
-        <textarea placeholder="Info" onchange="state.tasks[${i}].info=this.value">${t.info||""}</textarea>
-        <div id="icans${i}"></div>
-        <button class="small-btn primary" onclick="addICan(${i})">+ I Can</button>
-        <button class="small-btn danger" onclick="deleteTask(${i})">Löschen</button>
+            <input value="${t.title}" onchange="state.tasks[${i}].title=this.value">
+            <textarea onchange="state.tasks[${i}].info=this.value">${t.info||""}</textarea>
+            <div id="icans${i}"></div>
+            <button onclick="addICan(${i})">+ ICan</button>
+            <button class="danger" onclick="deleteTask(${i})">Löschen</button>
         `;
+
         list.appendChild(card);
 
-        const icanDiv=document.getElementById(`icans${i}`);
+        const icanDiv=document.getElementById("icans"+i);
         t.icans.forEach((ic,j)=>{
             const input=document.createElement("input");
             input.value=ic;
@@ -272,6 +271,20 @@ function renderAdmin(){
         });
     });
 }
+
+function renderIcons(){
+    const grid=document.getElementById("iconGrid");
+    grid.innerHTML="";
+    icons.forEach(icon=>{
+        const div=document.createElement("div");
+        div.className="icon-choice";
+        div.innerText=icon;
+        div.onclick=()=>selectedIcon=icon;
+        grid.appendChild(div);
+    });
+}
+
+/* ---------- CRUD ---------- */
 
 function addTask(){
     state.tasks.push({title:"Neue Aufgabe",info:"",icon:selectedIcon,icans:[]});
@@ -288,30 +301,45 @@ function addICan(i){
     renderAdmin();
 }
 
+/* ---------- Save ---------- */
+
 function saveState(){
-    localStorage.setItem("flexomat",JSON.stringify(state));
-    const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(state))))
-        .replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
-    const link=location.origin+location.pathname+"?data="+encoded;
-    document.getElementById("shareLink").value=link;
+    localStorage.setItem("flexomat", JSON.stringify(state));
+
+    const encoded = encodeBase64Url(state);
+    const link = location.origin + location.pathname + "?data=" + encoded;
+
+    document.getElementById("shareLink").value = link;
     document.getElementById("shareBox").style.display="block";
-    QRCode.toCanvas(document.getElementById("qr"),link);
+
+    if(window.QRCode){
+        QRCode.toCanvas(document.getElementById("qr"), link);
+    }
+
     document.getElementById("status").innerText="Gespeichert ✓";
     renderApp();
 }
 
+/* ---------- Load ---------- */
+
 function loadState(){
     const params=new URLSearchParams(location.search);
-    if(params.get("data")){
-        const decoded=decodeURIComponent(escape(atob(
-            params.get("data").replace(/-/g,"+").replace(/_/g,"/")
-        )));
-        state=JSON.parse(decoded);
-    }else{
-        const saved=localStorage.getItem("flexomat");
-        if(saved) state=JSON.parse(saved);
+    const shared=params.get("data");
+
+    if(shared){
+        const decoded=decodeBase64Url(shared);
+        if(decoded) state=decoded;
+        return;
+    }
+
+    const saved=localStorage.getItem("flexomat");
+    if(saved){
+        try{ state=JSON.parse(saved); }
+        catch(e){ console.error(e); }
     }
 }
+
+/* ---------- Admin Unlock ---------- */
 
 document.getElementById("title").onclick=()=>{
     clickCount++;
@@ -321,10 +349,12 @@ document.getElementById("title").onclick=()=>{
     }
 };
 
+/* ---------- Init ---------- */
+
 loadState();
 renderIcons();
 renderApp();
-</script>
 
+</script>
 </body>
 </html>
