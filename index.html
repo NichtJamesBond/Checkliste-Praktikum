@@ -33,7 +33,19 @@
         #adminPanel { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; border-radius: 30px; overflow-y: auto; border: 3px solid var(--primary); }
         .admin-task-item { background: #f9f9f9; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; }
         
-        .central-icon-picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; background: #f0f0f0; padding: 12px; border-radius: 15px; border: 1px solid #ccc; }
+       .central-icon-picker { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            margin: 15px 0; 
+            background: #f0f0f0; 
+            padding: 12px; 
+            border-radius: 15px; 
+            border: 1px solid #ccc;
+            /* NEU: Begrenzte Höhe und Scrollbalken */
+            max-height: 200px; 
+            overflow-y: auto; 
+        }
         .icon-choice { cursor: pointer; font-size: 1.4rem; padding: 5px; transition: transform 0.1s; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .icon-choice:hover { transform: scale(1.2); background: var(--accent); }
 
@@ -402,6 +414,7 @@ Beste Grüße und bis bald!`);
 </script>
 </body>
 </html>
+
 
 
 
