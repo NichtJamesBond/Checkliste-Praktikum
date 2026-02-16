@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flex-O-Mat</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <style>
         :root {
             --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
@@ -235,7 +236,7 @@
             new QRious({
         element: document.getElementById('qr-canvas'),
         value: getShareLink(),
-        size: 300, // Von 280 auf 300 oder 350 erhöhen für bessere Lesbarkeit
+        size: 400, // Von 280 auf 300 oder 350 erhöhen für bessere Lesbarkeit
         level: 'L', // 'L' (Low) Fehlerkorrektur macht den QR-Code weniger dicht als 'H', was bei langen URLs oft besser scanbar ist
         // ... Rest bleibt gleich
     });
@@ -385,4 +386,5 @@ Beste Grüße und bis bald!`);
 </script>
 </body>
 </html>
+
 
