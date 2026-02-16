@@ -220,7 +220,8 @@
     }
 
     function getShareLink() {
-        const dataToEncode = questState.map(t => ({ title: t.title, info: t.info }));
+        // ÄNDERUNG: Wir mappen auf 't' (title) und 'i' (info) um Platz zu sparen
+        const dataToEncode = questState.map(t => ({ t: t.title, i: t.info }));
         const jsonStr = JSON.stringify(dataToEncode);
         const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
         return window.location.origin + window.location.pathname + "?q=" + base64;
@@ -232,13 +233,12 @@
         qrContainer.style.display = 'block';
         setTimeout(() => {
             new QRious({
-                element: document.getElementById('qr-canvas'),
-                value: getShareLink(),
-                size: 280,
-                level: 'H',
-                background: 'white',
-                foreground: 'black'
-            });
+        element: document.getElementById('qr-canvas'),
+        value: getShareLink(),
+        size: 300, // Von 280 auf 300 oder 350 erhöhen für bessere Lesbarkeit
+        level: 'L', // 'L' (Low) Fehlerkorrektur macht den QR-Code weniger dicht als 'H', was bei langen URLs oft besser scanbar ist
+        // ... Rest bleibt gleich
+    });
             qrContainer.scrollIntoView({ behavior: 'smooth' });
         }, 50);
     }
@@ -347,15 +347,33 @@ Beste Grüße und bis bald!`);
         }
     }
 
-    window.onload = () => {
+   window.onload = () => {
         const params = new URLSearchParams(window.location.search);
         const data = params.get('q');
+        
         if (data) {
             try {
-                questState = JSON.parse(decodeURIComponent(escape(atob(data)))).map(t => ({ ...t, completed: false }));
+                // ÄNDERUNG: Rückwärts-Mapping von t->title und i->info
+                const decodedData = JSON.parse(decodeURIComponent(escape(atob(data))));
+                
+                // Prüfen ob das alte oder neue Format genutzt wurde (Abwärtskompatibilität)
+                questState = decodedData.map(item => ({ 
+                    title: item.t || item.title || "Unbekannt", 
+                    info: item.i || item.info || "", 
+                    completed: false 
+                }));
+
                 saveToLocalStorage();
+                // URL bereinigen
                 window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (e) { console.error("URL-Data Error"); }
+                
+                // Feedback für den User
+                alert("Daten erfolgreich importiert! 🚀");
+
+            } catch (e) { 
+                console.error("URL-Data Error", e); 
+                alert("Fehler beim Laden der Daten!\nDer QR-Code war vermutlich zu komplex oder beschädigt.");
+            }
         } else {
             const saved = localStorage.getItem('flex_tasks_v5');
             questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg!", completed: false}];
@@ -367,3 +385,4 @@ Beste Grüße und bis bald!`);
 </script>
 </body>
 </html>
+
