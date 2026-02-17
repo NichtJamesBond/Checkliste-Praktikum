@@ -11,6 +11,7 @@
         :root {
             --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
             --bg: #f4f7f6; --text: #2d3436; --mail-color: #0984e3;
+            --share-color: #a29bfe; /* Neue Farbe für Teilen */
             --info-bg: #fff3bf; --info-border: #fcc419;
             --danger: #ff7675;
         }
@@ -59,9 +60,11 @@
         #qr-container { display: none; margin-top: 20px; text-align: center; background: #fff; padding: 15px; border-radius: 15px; border: 2px dashed var(--success); }
         #qr-canvas { margin: 10px auto; display: block; max-width: 100%; }
 
-        .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
-        .action-btn { width: 100%; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; cursor: pointer; color: white; }
+        /* Footer Actions Update: Nebeneinander */
+        .footer-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; display: flex; flex-direction: row; gap: 10px; }
+        .action-btn { flex: 1; height: 48px; border-radius: 14px; border: none; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; cursor: pointer; color: white; font-size: 0.9rem;}
         .btn-mail { background: var(--mail-color); }
+        .btn-share { background: var(--primary); }
 
         #badge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 8rem; z-index: 4000; pointer-events: none; transition: transform 0.5s; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         #badge.show { transform: translate(-50%, -50%) scale(1.2); }
@@ -112,8 +115,10 @@
         <div class="score-board"><span id="score">0</span> <span>⭐</span></div>
     </div>
     <div id="quest-list" class="quest-list"></div>
+    
     <div class="footer-actions">
-        <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail verschicken</a>
+        <button class="action-btn btn-share" onclick="shareScore()">📤 Teilen</button>
+        <a id="mailLink" href="#" class="action-btn btn-mail">📧 Mail</a>
     </div>
 </div>
 
@@ -124,14 +129,14 @@
     let hasUnsavedChanges = false;
     let achievedMilestones = { m50: false, m80: false, m100: false };
 
-    // ICON DATENBANK
+    // ICON DATENBANK - Update: Hallo (👋) zu Stift (✏️) geändert
     const iconData = [
         {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
         {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
         {i: "📄", t: "Deckblatt"}, {i: "🏠", t: "Einrichtung"}, {i: "📊", t: "Bericht"}, {i: "⚖️", t: "Regeln"}, 
         {i: "📜", t: "Paragrafen"}, {i: "📁", t: "Doku"}, {i: "📅", t: "Wochenbericht"}, {i: "👋", t: "Vorstellung"}, 
         {i: "🏢", t: "Betrieb"}, {i: "🛠️", t: "Arbeiten"}, {i: "📐", t: "Zeichnung"}, {i: "✍️", t: "Skizze"}, 
-        {i: "👍", t: "Super"}, {i: "👎", t: "Nicht gut"}, {i: "👋", t: "Hallo"}, {i: "🏁", t: "Ziel"},
+        {i: "👍", t: "Super"}, {i: "👎", t: "Nicht gut"}, {i: "✏️", t: "Stift"}, {i: "🏁", t: "Ziel"},
         {i: "💼", t: "Beruf"}, {i: "📱", t: "Handy"}, {i: "⚡", t: "Blitz"}, {i: "💡", t: "Licht"}, 
         {i: "❗", t: "Achtung"}, {i: "❓", t: "Frage"}, {i: "😎", t: "Cool"}, {i: "🎓", t: "Zertifikat"}, 
         {i: "🦆", t: "Ente"}, {i: "📖", t: "Seite"}, {i: "💻", t: "Computer"}, {i: "😂", t: "Lachen"}, 
@@ -287,6 +292,24 @@
         localStorage.setItem('flex_score_v5', score.toString());
     }
 
+    // NEUE TEILEN FUNKTION
+    async function shareScore() {
+        const text = `Yooo, ich hab jetzt fr fr eif ${score} Sterne auf dem Konto. Das Crazy, dass diese Goofy ahh Liste so schnell ging.`;
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'Flex-O-Mat Score',
+                    text: text
+                });
+            } catch (err) {
+                console.log('Teilen abgebrochen');
+            }
+        } else {
+            // Fallback für PC
+            alert("Dein Browser unterstützt Teilen nicht direkt. Hier ist der Text:\n\n" + text);
+        }
+    }
+
     function render() {
         const list = document.getElementById('quest-list');
         document.getElementById('score').innerText = score;
@@ -311,7 +334,8 @@ Yo! No Front, aber ich hab heute im Flex-O-Mat mal wieder komplett abgeliefert. 
 Hab jetzt legit ${score} Sterne auf dem Konto – absolut wyld, wie ich das gechurcht hab! 🌟✨ Sheesh, einfach Main Character Energy heute! 📈🔥
 
 Beste Grüße und bis bald!`);
-        document.getElementById('mailLink').href = `mailto:koenigstiger70@web.de?subject=${mailSubject}&body=${mailBody}`;
+        // MAIL ADRESSE ENTFERNT
+        document.getElementById('mailLink').href = `mailto:?subject=${mailSubject}&body=${mailBody}`;
     }
 
     function toggleQuest(i) {
