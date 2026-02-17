@@ -124,7 +124,7 @@
     let hasUnsavedChanges = false;
     let achievedMilestones = { m50: false, m80: false, m100: false };
 
-    // HIER WAR DER FEHLER: Das Array ist jetzt repariert
+    // ICON DATENBANK
     const iconData = [
         {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
         {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
@@ -147,6 +147,7 @@
 
     function initIconPicker() {
         const picker = document.getElementById('centralPicker');
+        if(!picker) return;
         picker.innerHTML = '';
         iconData.forEach(item => {
             const span = document.createElement('span');
@@ -362,40 +363,45 @@ Beste Grüße und bis bald!`);
     }
 
     window.onload = () => {
-        const params = new URLSearchParams(window.location.search);
-        const compressedData = params.get('d');
-        const oldData = params.get('q');
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const compressedData = params.get('d');
+            const oldData = params.get('q');
 
-        if (compressedData) {
-            try {
-                const decompressed = LZString.decompressFromEncodedURIComponent(compressedData);
-                const parsed = JSON.parse(decompressed);
-                questState = parsed.map(item => ({ 
-                    title: item.t || item.title || "Unbekannt", 
-                    info: item.i || item.info || "", 
-                    completed: false 
-                }));
-                saveToLocalStorage();
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (e) {
-                console.error(e);
-                alert("Fehler: QR-Daten defekt.");
+            if (compressedData) {
+                try {
+                    const decompressed = LZString.decompressFromEncodedURIComponent(compressedData);
+                    const parsed = JSON.parse(decompressed);
+                    questState = parsed.map(item => ({ 
+                        title: item.t || item.title || "Unbekannt", 
+                        info: item.i || item.info || "", 
+                        completed: false 
+                    }));
+                    saveToLocalStorage();
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } catch (e) {
+                    console.error(e);
+                    alert("Fehler: QR-Daten defekt.");
+                }
+            } 
+            else if (oldData) {
+                try {
+                    questState = JSON.parse(decodeURIComponent(escape(atob(oldData)))).map(t => ({ ...t, completed: false }));
+                    saveToLocalStorage();
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } catch (e) { console.error("URL-Data Error"); }
+            } 
+            else {
+                const saved = localStorage.getItem('flex_tasks_v5');
+                questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg!", completed: false}];
+                score = parseInt(localStorage.getItem('flex_score_v5')) || 0;
             }
-        } 
-        else if (oldData) {
-            try {
-                questState = JSON.parse(decodeURIComponent(escape(atob(oldData)))).map(t => ({ ...t, completed: false }));
-                saveToLocalStorage();
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (e) { console.error("URL-Data Error"); }
-        } 
-        else {
-            const saved = localStorage.getItem('flex_tasks_v5');
-            questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg!", completed: false}];
-            score = parseInt(localStorage.getItem('flex_score_v5')) || 0;
+            initIconPicker();
+            render();
+        } catch(error) {
+            console.error("Kritischer Fehler beim Start:", error);
+            alert("App konnte nicht laden. Fehler: " + error.message);
         }
-        initIconPicker();
-        render();
     };
 </script>
 </body>
