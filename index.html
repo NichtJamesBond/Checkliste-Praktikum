@@ -6,6 +6,7 @@
     <title>Flex-O-Mat</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+    
     <style>
         :root {
             --primary: #6c5ce7; --accent: #fdcb6e; --success: #00b894;
@@ -33,7 +34,7 @@
         #adminPanel { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; border-radius: 30px; overflow-y: auto; border: 3px solid var(--primary); }
         .admin-task-item { background: #f9f9f9; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; }
         
-       .central-icon-picker { 
+        .central-icon-picker { 
             display: flex; 
             flex-wrap: wrap; 
             gap: 8px; 
@@ -42,7 +43,6 @@
             padding: 12px; 
             border-radius: 15px; 
             border: 1px solid #ccc;
-            /* NEU: Begrenzte Höhe und Scrollbalken */
             max-height: 200px; 
             overflow-y: auto; 
         }
@@ -122,9 +122,9 @@
     let score = 0;
     let clickCount = 0;
     let hasUnsavedChanges = false;
-    // Gedächtnis für Meilensteine
     let achievedMilestones = { m50: false, m80: false, m100: false };
 
+    // HIER WAR DER FEHLER: Das Array ist jetzt repariert
     const iconData = [
         {i: "0️⃣", t: "0"}, {i: "1️⃣", t: "1"}, {i: "2️⃣", t: "2"}, {i: "3️⃣", t: "3"}, {i: "4️⃣", t: "4"},
         {i: "5️⃣", t: "5"}, {i: "6️⃣", t: "6"}, {i: "7️⃣", t: "7"}, {i: "8️⃣", t: "8"}, {i: "9️⃣", t: "9"},
@@ -238,11 +238,9 @@
         render(); 
     }
 
-  function getShareLink() {
-        // Wir nutzen "t" für Titel und "i" für Info um Platz zu sparen
+    function getShareLink() {
         const dataToEncode = questState.map(t => ({ t: t.title, i: t.info }));
         const jsonStr = JSON.stringify(dataToEncode);
-        // Hier wird komprimiert:
         const compressed = LZString.compressToEncodedURIComponent(jsonStr);
         return window.location.origin + window.location.pathname + "?d=" + compressed;
     }
@@ -253,12 +251,11 @@
         qrContainer.style.display = 'block';
         setTimeout(() => {
             new QRious({
-        element: document.getElementById('qr-canvas'),
-        value: getShareLink(),
-        size: 400, // Von 280 auf 300 oder 350 erhöhen für bessere Lesbarkeit
-        level: 'L', // 'L' (Low) Fehlerkorrektur macht den QR-Code weniger dicht als 'H', was bei langen URLs oft besser scanbar ist
-        // ... Rest bleibt gleich
-    });
+                element: document.getElementById('qr-canvas'),
+                value: getShareLink(),
+                size: 350,
+                level: 'L'
+            });
             qrContainer.scrollIntoView({ behavior: 'smooth' });
         }, 50);
     }
@@ -329,7 +326,6 @@ Beste Grüße und bis bald!`);
         document.getElementById('infoModal').style.display = 'flex';
     }
 
-    // Die verbesserte Meilenstein-Funktion
     function checkMilestones() {
         const badge = document.getElementById('badge');
         const count = questState.filter(t => t.completed).length;
@@ -339,7 +335,6 @@ Beste Grüße und bis bald!`);
         let currentProgress = count / total;
         let emoji = "";
 
-        // Triggert nur beim ÜBERSCHREITEN der Schwelle und wenn noch nicht gefeiert
         if (currentProgress === 1 && !achievedMilestones.m100) {
             emoji = "🏆";
             achievedMilestones.m100 = true;
@@ -353,7 +348,6 @@ Beste Grüße und bis bald!`);
             achievedMilestones.m50 = true;
         }
 
-        // Reset der Schwellen, falls Aufgaben wieder abgewählt werden
         if (currentProgress < 1) achievedMilestones.m100 = false;
         if (currentProgress < 0.8) achievedMilestones.m80 = false;
         if (currentProgress < 0.5) achievedMilestones.m50 = false;
@@ -361,41 +355,34 @@ Beste Grüße und bis bald!`);
         if (emoji !== "") {
             badge.innerText = emoji;
             badge.classList.remove('show');
-            void badge.offsetWidth; // Force Reflow für Animation
+            void badge.offsetWidth; 
             badge.classList.add('show');
             setTimeout(() => badge.classList.remove('show'), 2500);
         }
     }
 
-   window.onload = () => {
+    window.onload = () => {
         const params = new URLSearchParams(window.location.search);
-        const compressedData = params.get('d'); // Neuer Parameter für komprimierte Daten
-        const oldData = params.get('q'); // Alter Parameter (Fallback)
+        const compressedData = params.get('d');
+        const oldData = params.get('q');
 
         if (compressedData) {
             try {
-                // Daten dekomprimieren
                 const decompressed = LZString.decompressFromEncodedURIComponent(compressedData);
                 const parsed = JSON.parse(decompressed);
-                
-                // Mappen von Kurzform (t, i) auf Langform (title, info)
                 questState = parsed.map(item => ({ 
                     title: item.t || item.title || "Unbekannt", 
                     info: item.i || item.info || "", 
                     completed: false 
                 }));
-                
                 saveToLocalStorage();
-                // URL in der Adresszeile säubern
                 window.history.replaceState({}, document.title, window.location.pathname);
-                console.log("Daten erfolgreich geladen (komprimiert).");
             } catch (e) {
                 console.error(e);
-                alert("Fehler: Der QR-Code konnte nicht gelesen werden (Daten beschädigt).");
+                alert("Fehler: QR-Daten defekt.");
             }
         } 
         else if (oldData) {
-            // Fallback für deine alten QR-Codes (damit die noch funktionieren)
             try {
                 questState = JSON.parse(decodeURIComponent(escape(atob(oldData)))).map(t => ({ ...t, completed: false }));
                 saveToLocalStorage();
@@ -403,7 +390,6 @@ Beste Grüße und bis bald!`);
             } catch (e) { console.error("URL-Data Error"); }
         } 
         else {
-            // Standard laden
             const saved = localStorage.getItem('flex_tasks_v5');
             questState = saved ? JSON.parse(saved) : [{title: "Level 1 starten!", info: "Viel Erfolg!", completed: false}];
             score = parseInt(localStorage.getItem('flex_score_v5')) || 0;
